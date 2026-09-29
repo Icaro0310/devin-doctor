@@ -3,8 +3,8 @@
 Checks are ordered the way they appear in the report.
 """
 
-from devin_doctor.checks import health, schema, stores
+from devin_doctor.checks import config, health, schema, stores
 
-CHECKS = [stores, schema, health]
+CHECKS = [stores, schema, health, config]
 
-__all__ = ["CHECKS", "health", "schema", "stores"]
+__all__ = ["CHECKS", "config", "health", "schema", "stores"]
