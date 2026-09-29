@@ -5,8 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-09-29
 
 ### Added
 
 - Initial scaffold from `devin-repo-template`.
+- `devin-search index` — builds a local SQLite FTS5 index (`search.db`)
+  from `sessions.db` (`message_nodes`, `prompt_history`, `tool_call_state`)
+  and `User/acp-messages/*.db`; incremental via per-source watermarks,
+  `--rebuild`, `--json`. Source stores are opened read-only through
+  `devin-internals-spec` v0.2.0 and unknown schema versions fail loudly.
+- `devin-search query <term>` — BM25-ranked hits with highlighted
+  snippets, role/project/since/limit filters and `--json`; each hit links
+  back to its source row via `ref`.
