@@ -5,8 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-09-29
 
 ### Added
 
-- Initial scaffold from `devin-repo-template`.
+- `devin-history` CLI with three subcommands, `--json` on all:
+  - `export` — one Markdown note or JSON file per session + `index.<fmt>`;
+    idempotent via the `last_activity` marker; `--all` / `--dry-run`.
+  - `audit` — groupings by status / task type / project / month, anomaly
+    detection (empty, orphan, long-running sessions), optional `--csv`.
+  - `list` — quick session table, `--limit`.
+- `src/devin_history/` library: `export.py`, `audit.py`, `format.py`,
+  `messages.py`, `times.py`, `paths.py`; `cli.py` is a thin wrapper.
+- Store access via `devin-internals-spec` v0.2.0 — schema detection with
+  fail-loud behavior on unknown versions; all reads are `mode=ro`.
+- Platform auto-detection of `sessions.db` (Windows `%APPDATA%`, macOS,
+  Linux XDG).
+- Tolerant `chat_message` decoding (`role`/`content`, `role`/`text`,
+  block lists; `agent`→`assistant`) for the unstable payload format.
+- Fixture-based test suite (44 tests) using
+  `devin_internals.fixtures.create_sessions_db` — no binary fixtures.
+- `docs/SPEC.md` (canonical spec), real READMEs (EN/PT-BR), STATUS.md.
+
+### Notes
+
+- Ported from the orchestrator workspace scripts in `legacy/`
+  (`devin-history-export.py`, `audit_sessions.py`); GUI `acp-messages`
+  export is deferred to M2.
