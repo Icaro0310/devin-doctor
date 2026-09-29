@@ -5,47 +5,91 @@
 
 **[Português (BR)](README.pt-BR.md)** · English
 
-One-line description of what this tool does.
+A knowledge graph over Devin sessions: sessions, projects, files and tools
+become nodes — queryable ("which sessions touched file X?", "which tools does
+project Y depend on?") and exportable for visualization.
 
 ## The problem
 
-<!-- Real pain point, with evidence. Who suffers, when, how often. -->
+After dozens of Devin sessions you lose the thread: which sessions touched
+that config file, which tools a project relies on, which projects share the
+same files. The data exists in `sessions.db` (`tool_call_state` records every
+call the agent made) but there is no way to query across sessions — only
+per-session scrolling in the UI.
 
 ## Prior art
 
-<!-- What already exists for other agents/tools. Be honest and link it.
-     This project adapts <X>; it does not reinvent it. -->
+- Code-knowledge graphs (Sourcegraph, Glean-style indexes) map *code*, not
+  *agent activity*; they don't know what your AI sessions touched.
+- `devin-internals-spec` provides the schema + typed read-only parsers this
+  tool builds on; `devin-history` exports the same store to notes but has no
+  cross-session structure.
+- You could hand-write SQL — but the `tool_call_json` payload format is
+  undocumented and changes; here it's extracted defensively in one place.
 
 ## What makes it Devin-native
 
-<!-- The differentiator. Must pass three tests:
-     1. Side-by-side: does it do something the base tool *cannot* do at all?
-     2. No-Devin: does the extra disappear if Devin is removed?
-     3. One sentence: can you explain it without jargon? -->
+Edges come from **ground truth, not prose**: `file_touched` edges are
+extracted from `tool_call_state` payloads (file paths in fs/terminal tool
+calls) and anchored to the session's `working_directory`. That data simply
+doesn't exist outside Devin's store — remove Devin and there is no graph to
+build. Schema drift is gated by `devin-internals-spec`'s version detector.
 
 ## Install
 
 ```bash
-pipx install devin-graph
+pipx install "devin-graph @ git+https://github.com/Icaro0310/devin-graph.git"
 ```
+
+(PyPI release is on the M2 roadmap; Python ≥ 3.10 required.)
 
 ## Usage
 
 ```bash
-devin-graph --help
+# build the graph (auto-detects %APPDATA%/devin/cli/sessions.db) — safe to
+# re-run: unchanged sessions are skipped
+devin-graph build --graph graph.db
+
+# canned queries
+devin-graph query file "src/app.py"        --graph graph.db
+devin-graph query tool "execute"           --graph graph.db
+devin-graph query project "my-repo"        --graph graph.db
+devin-graph query projects-graph           --graph graph.db --json
+
+# D3-friendly dump: {"meta", "nodes", "edges"}
+devin-graph export --format json --graph graph.db --out graph.json
 ```
+
+Matching is forgiving (`src/app.py` finds `/repo/alpha/src/app.py`);
+everything has `--json`. The source DB is opened `mode=ro` and never
+written — tests assert its hash is unchanged.
 
 ## Limitations
 
-<!-- Be explicit: private/volatile internals, version-specific behavior,
-     what it does NOT do. -->
+- **Schema-gated.** Only `sessions.db` schema v15–v17; newer fails loudly
+  (update `devin-internals-spec` first).
+- **Heuristic path extraction.** `tool_call_*_json` is an unstable, opaque
+  format: paths are collected from path-ish keys plus path-looking tokens in
+  command strings — best-effort, not contractual. A brand-new tool payload
+  shape may yield partial edges.
+- **CLI sessions only (M1).** GUI sessions (`acp-messages/*.db`) and
+  `state.vscdb` are planned for M2.
+- **Not a code index.** Nodes are files *the agent touched*, not repo
+  contents; no symbol/AST knowledge.
+- **Read-only by design** on Devin stores; `graph.db` is the only thing it
+  writes.
 
 ## Development
 
 ```bash
 pip install -e ".[dev]"
-pytest
+python -m pytest
 ```
+
+Fixtures are generated at test time by `devin_internals.fixtures` (real v17
+DDL, synthetic rows) — no binary fixtures are committed. See
+[docs/SPEC.md](docs/SPEC.md) for the graph model and
+[STATUS.md](STATUS.md) for the roadmap.
 
 ## License
 

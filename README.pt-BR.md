@@ -5,47 +5,94 @@
 
 **[English](README.md)** · Português (BR)
 
-Descrição numa linha do que esta ferramenta faz.
+Um grafo de conhecimento sobre as sessões do Devin: sessões, projetos,
+ficheiros e ferramentas viram nós — consultável ("que sessões tocaram o
+ficheiro X?", "de que ferramentas o projeto Y depende?") e exportável para
+visualização.
 
 ## O problema
 
-<!-- Dor real, com evidência. Quem sofre, quando, com que frequência. -->
+Depois de dezenas de sessões do Devin perde-se o fio: que sessões tocaram
+aquele ficheiro de configuração, de que ferramentas um projeto depende, que
+projetos partilham os mesmos ficheiros. Os dados existem no `sessions.db`
+(`tool_call_state` regista cada chamada do agente) mas não há como consultar
+entre sessões — só o scroll sessão a sessão na UI.
 
 ## Trabalho anterior (prior art)
 
-<!-- O que já existe para outros agentes/ferramentas. Sê honesto e linka.
-     Este projeto adapta <X>; não reinventa a roda. -->
+- Grafos de conhecimento de código (Sourcegraph, índices estilo Glean) mapeiam
+  *código*, não *atividade do agente*; não sabem o que as tuas sessões de IA
+  tocaram.
+- `devin-internals-spec` fornece o schema + parsers read-only tipados em que
+  esta ferramenta se apoia; `devin-history` exporta a mesma store para notas
+  mas sem estrutura entre sessões.
+- Dava para escrever SQL à mão — mas o formato de `tool_call_json` não é
+  documentado e muda; aqui é extraído defensivamente num único sítio.
 
 ## O que o torna Devin-native
 
-<!-- O diferencial. Tem de passar 3 testes:
-     1. Lado a lado: faz algo que a base NÃO consegue de todo?
-     2. Sem Devin: o extra desaparece se o Devin sair da equação?
-     3. Uma frase: consegues explicá-lo sem jargão? -->
+As arestas vêm de **ground truth, não de prosa**: arestas `file_touched` são
+extraídas dos payloads de `tool_call_state` (paths de ficheiros em chamadas de
+ferramentas fs/terminal) e ancoradas no `working_directory` da sessão. Esses
+dados simplesmente não existem fora da store do Devin — sem Devin, não há
+grafo para construir. Mudanças de schema são travadas pelo detector de versão
+do `devin-internals-spec`.
 
 ## Instalação
 
 ```bash
-pipx install devin-graph
+pipx install "devin-graph @ git+https://github.com/Icaro0310/devin-graph.git"
 ```
+
+(Release PyPI está no roadmap M2; Python ≥ 3.10 necessário.)
 
 ## Uso
 
 ```bash
-devin-graph --help
+# constrói o grafo (auto-deteta %APPDATA%/devin/cli/sessions.db) — seguro
+# re-executar: sessões sem alterações são saltadas
+devin-graph build --graph graph.db
+
+# consultas prontas
+devin-graph query file "src/app.py"        --graph graph.db
+devin-graph query tool "execute"           --graph graph.db
+devin-graph query project "my-repo"        --graph graph.db
+devin-graph query projects-graph           --graph graph.db --json
+
+# dump compatível com D3: {"meta", "nodes", "edges"}
+devin-graph export --format json --graph graph.db --out graph.json
 ```
+
+A correspondência é tolerante (`src/app.py` encontra
+`/repo/alpha/src/app.py`); tudo tem `--json`. A DB de origem é aberta em
+`mode=ro` e nunca é escrita — os testes garantem que o hash não muda.
 
 ## Limitações
 
-<!-- Sê explícito: internals privados/voláteis, comportamento por versão,
-     o que NÃO faz. -->
+- **Dependente do schema.** Apenas `sessions.db` schema v15–v17; mais recente
+  falha em voz alta (atualiza `devin-internals-spec` primeiro).
+- **Extração de paths heurística.** `tool_call_*_json` é um formato instável e
+  opaco: paths são recolhidos de chaves de path e de tokens tipo-path em
+  comandos — best-effort, não contratual. Um formato de payload novo pode gerar
+  arestas parciais.
+- **Só sessões CLI (M1).** Sessões GUI (`acp-messages/*.db`) e `state.vscdb`
+  estão planeados para M2.
+- **Não é um índice de código.** Nós são ficheiros *que o agente tocou*, não o
+  conteúdo do repo; sem conhecimento de símbolos/AST.
+- **Read-only por design** nas stores do Devin; `graph.db` é a única coisa
+  que escreve.
 
 ## Desenvolvimento
 
 ```bash
 pip install -e ".[dev]"
-pytest
+python -m pytest
 ```
+
+Fixtures são gerados em tempo de teste por `devin_internals.fixtures` (DDL v17
+real, linhas sintéticas) — nenhum fixture binário é commitado. Vê
+[docs/SPEC.md](docs/SPEC.md) para o modelo do grafo e
+[STATUS.md](STATUS.md) para o roadmap.
 
 ## Licença
 
