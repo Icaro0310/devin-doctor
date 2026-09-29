@@ -5,40 +5,108 @@
 
 **[English](README.md)** · Português (BR)
 
-Descrição numa linha do que esta ferramenta faz.
+Um gestor de projetos sobre as tuas sessões do Devin — lê o `sessions.db`,
+agrupa o trabalho por repositório/projeto e gera relatórios de status,
+milestones e um registo de projetos em formato legível por máquina.
 
 ## O problema
 
-<!-- Dor real, com evidência. Quem sofre, quando, com que frequência. -->
+Cada sessão da CLI do Devin fica gravada num `sessions.db` local, mas a
+aplicação não te dá uma visão por projeto. Ao fim de algumas semanas a base
+de dados tem uma centena de sessões e não consegues responder às perguntas
+básicas: *em que repos trabalhei realmente? qual é o estado do projeto X?
+que milestones estão em aberto?* O histórico está todo lá — mas preso numa
+lista plana de sessões, sem agrupamento, sem rollups, sem nada que possas
+entregar num relatório ou a outra ferramenta.
 
 ## Trabalho anterior (prior art)
 
-<!-- O que já existe para outros agentes/ferramentas. Sê honesto e linka.
-     Este projeto adapta <X>; não reinventa a roda. -->
+O workspace do orquestrador provou a ideia com um script de auditoria
+pontual (`audit_sessions.py` → `sessions_report.md` /
+`sessions_summary.csv`): uma auditoria lifetime de 100+ sessões agrupadas
+por `working_directory`. Este projeto transforma esse script numa
+ferramenta mantida sobre o parser `SessionsStore` do
+[`devin-internals-spec`](https://github.com/Icaro0310/devin-internals-spec)
+— não reimplementa a leitura da DB nem reinventa o agrupamento.
 
 ## O que o torna Devin-native
 
-<!-- O diferencial. Tem de passar 3 testes:
-     1. Lado a lado: faz algo que a base NÃO consegue de todo?
-     2. Sem Devin: o extra desaparece se o Devin sair da equação?
-     3. Uma frase: consegues explicá-lo sem jargão? -->
+*É um gestor de projetos sobre as tuas sessões do Devin — lê o
+`sessions.db` e dá-te status por repo, milestones e um registo.*
+
+1. **Lado a lado:** o Devin lista sessões mas não consegue agrupá-las por
+   repositório, marcar uma como milestone, nem emitir um registo de
+   projetos — o `devin-pm` faz o que a base não consegue de todo.
+2. **Sem Devin:** sem Devin não há `sessions.db` — o extra desaparece
+   completamente.
+3. **Seguro por construção:** o parsing passa pelo gate de versão de schema
+   do `devin-internals-spec`, por isso uma nova migração do Devin falha
+   ruidosamente em vez de corromper o teu rollup em silêncio.
 
 ## Instalação
 
 ```bash
-pipx install devin-pm
+pipx install devin-pm   # quando publicado no PyPI
+```
+
+Para desenvolvimento:
+
+```bash
+pip install -e ".[dev]"
+pytest
 ```
 
 ## Uso
 
 ```bash
-devin-pm --help
+devin-pm status                          # tabela rollup por projeto
+devin-pm status --json                   # o mesmo, legível por máquina
+devin-pm report --project my-repo        # relatório de status em markdown
+devin-pm report                          # relatório global, todos os projetos
+devin-pm report --project x --out x.md   # escreve para ficheiro
+devin-pm milestones --project my-repo    # lista de milestones + % feito
+devin-pm registry --out registry.json    # registo legível por máquina
 ```
+
+`--sessions-db PATH` sobrepõe a localização da base de dados em todos os
+subcomandos; caso contrário o `devin-pm` auto-detecta
+`%APPDATA%/devin/cli/sessions.db` (a variável `DEVIN_PM_SESSIONS_DB` também
+funciona). Todas as leituras são read-only.
+
+### Milestones
+
+Marca uma sessão dando ao título `milestone: <nome>` — isso marca um
+milestone no projeto dessa sessão; arquivar (esconder) a sessão marca-o
+como feito. Ou lista-os manualmente num `milestones.json` na raiz do
+projeto:
+
+```json
+{"milestones": [{"name": "M1 — core", "done": true}, "M2 — polish"]}
+```
+
+Entradas do ficheiro ganham das detetadas por sessão em caso de colisão
+de nome.
+
+### Códigos de saída
+
+`0` ok · `1` erro de leitura/parse · `2` db em falta / projeto desconhecido.
 
 ## Limitações
 
-<!-- Sê explícito: internals privados/voláteis, comportamento por versão,
-     o que NÃO faz. -->
+- **Internals privados e voláteis.** O `sessions.db` é detalhe de
+  implementação do Devin; o parsing está gated nas versões de schema
+  conhecidas (15–17) e recusa qualquer versão nova em vez de adivinhar.
+- **Custo é best-effort.** A DB não regista billing num campo documentado;
+  `cogs_json` é instável. Quando não existe campo de custo reconhecível,
+  os relatórios mostram `-` e o registo emite `null` — desconhecido, não
+  zero.
+- **Só sessões CLI.** Sessões da GUI/Desktop (`acp-messages/*.db`) não
+  estão cobertas no M1.
+- **Read-only.** Este projeto nunca escreve nas bases de dados do Devin;
+  os únicos ficheiros que escreve são os que pedes (`--out`,
+  `milestones.json` é teu para criar).
+- **Agrupamento é por string.** Dois caminhos que diferem só em maiúsculas
+  são projetos diferentes (correto em POSIX; edge documentado no Windows).
 
 ## Desenvolvimento
 
@@ -46,6 +114,9 @@ devin-pm --help
 pip install -e ".[dev]"
 pytest
 ```
+
+TDD fixtures-first — vê [docs/SPEC.md](docs/SPEC.md) para os contratos de
+dados e [CONTRIBUTING.md](CONTRIBUTING.md) para as regras base.
 
 ## Licença
 
