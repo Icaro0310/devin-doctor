@@ -1,0 +1,327 @@
+"""Markdown / JSON / CSV emitters — pure functions, no I/O beyond ``write_csv``.
+
+Everything here is deterministic: no timestamps of "now" are embedded, so
+re-exporting an unchanged database produces byte-identical output.
+"""
+
+from __future__ import annotations
+
+import csv
+import json
+from collections import Counter
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Iterable
+
+from devin_history.messages import ChatMessage
+from devin_history.times import duration_minutes, fmt_ts
+
+if TYPE_CHECKING:
+    from devin_history.audit import AuditReport, SessionAudit
+    from devin_history.export import IndexEntry
+    from devin_internals.parsers import Session, ToolCallState
+
+USER_CAP = 4000
+ASSISTANT_CAP = 1500
+
+
+def clip(text: str, cap: int) -> str:
+    text = text.strip()
+    if len(text) > cap:
+        return text[:cap] + f"\n\n*… ({len(text) - cap} chars truncated)*"
+    return text
+
+
+def project_name(working_directory: str | None) -> str:
+    return Path(working_directory).name if working_directory else "?"
+
+
+def _conversation_parts(messages: Iterable[ChatMessage]) -> list[str]:
+    parts: list[str] = []
+    last_block = None
+    for m in messages:
+        if m.role not in ("user", "assistant"):
+            continue
+        content = m.text.strip()
+        if not content or content == last_block:
+            continue
+        last_block = content
+        label = "🧑 User" if m.role == "user" else "🤖 Devin"
+        parts.append(f"#### {label}\n\n{clip(content, USER_CAP if m.role == 'user' else ASSISTANT_CAP)}")
+    return parts
+
+
+def render_session_md(session: "Session", messages: list[ChatMessage]) -> str:
+    """One Obsidian-ready note for a CLI session."""
+    counts = Counter(m.role for m in messages)
+    parts = _conversation_parts(messages)
+    project = project_name(session.working_directory)
+    title = (session.title or "Untitled").strip()
+    created = fmt_ts(session.created_at)
+    body = "\n\n".join(parts) if parts else "_No user/assistant messages — tool calls only._"
+    return f"""---
+session_id: {session.id}
+project: {project}
+started: {created}
+last_activity: {session.last_activity_at}
+user_msgs: {counts['user']}
+assistant_msgs: {counts['assistant']}
+tool_msgs: {counts['tool']}
+tags: [session, devin, history]
+---
+
+# {title}
+
+> Session `{session.id}` · project **{project}** · started {created}
+> {counts['user']} user messages · {counts['assistant']} replies · {counts['tool']} tool calls
+
+`{session.working_directory}`
+
+---
+
+## Conversation
+
+{body}
+
+---
+"""
+
+
+def session_to_dict(
+    session: "Session",
+    messages: list[ChatMessage],
+    tool_calls: list["ToolCallState"],
+) -> dict[str, Any]:
+    """Searchable JSON shape for one session (full text, no clipping)."""
+    return {
+        "session_id": session.id,
+        "title": (session.title or "Untitled").strip(),
+        "project": project_name(session.working_directory),
+        "working_directory": session.working_directory,
+        "backend_type": session.backend_type,
+        "model": session.model,
+        "agent_mode": session.agent_mode,
+        "hidden": session.hidden,
+        "created_at": session.created_at,
+        "created": fmt_ts(session.created_at),
+        "last_activity": session.last_activity_at,
+        "last_activity_iso": fmt_ts(session.last_activity_at),
+        "messages": [
+            {"role": m.role, "thinking": m.thinking, "text": m.text}
+            for m in messages
+        ],
+        "tool_calls": [
+            {
+                "tool_call_id": tc.tool_call_id,
+                "call": _json_or_none(tc.tool_call_json),
+                "update": _json_or_none(tc.tool_call_update_json),
+            }
+            for tc in tool_calls
+        ],
+    }
+
+
+def _json_or_none(raw: str | None) -> Any:
+    if not raw:
+        return None
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+
+
+def render_index_md(entries: list["IndexEntry"]) -> str:
+    """`index.md` — sessions grouped by project, oldest first per group."""
+    by_project: dict[str, list[IndexEntry]] = {}
+    for e in entries:
+        by_project.setdefault(e.project, []).append(e)
+    lines = [
+        "---",
+        "tags: [index, sessions, devin]",
+        "---",
+        "",
+        "# Session index",
+        "",
+        f"Exported from `sessions.db` — {len(entries)} sessions.",
+    ]
+    for project in sorted(by_project):
+        lines.append(f"\n## {project}\n")
+        for e in sorted(by_project[project], key=lambda x: x.date):
+            lines.append(f"- [[{e.filename[:-3]}|{e.date} — {e.title[:70]}]]")
+    return "\n".join(lines) + "\n"
+
+
+def render_index_json(entries: list["IndexEntry"]) -> str:
+    return json.dumps(
+        {"sessions": [
+            {"date": e.date, "file": e.filename, "title": e.title, "project": e.project}
+            for e in entries
+        ]},
+        ensure_ascii=False,
+        indent=2,
+    ) + "\n"
+
+
+def sessions_table(sessions: list["Session"]) -> str:
+    """Fixed-width table for `devin-history list`."""
+    header = f"{'ID':<10} {'CREATED':<17} {'DUR':>7} {'MODEL':<14} {'PROJECT':<20} TITLE"
+    lines = [header, "-" * len(header)]
+    for s in sessions:
+        dur = duration_minutes(s.created_at, s.last_activity_at)
+        dur_s = f"{dur:.0f}m" if dur < 60 else f"{dur / 60:.1f}h"
+        lines.append(
+            f"{s.id[:8]:<10} {fmt_ts(s.created_at):<17} {dur_s:>7} "
+            f"{(s.model or '?')[:14]:<14} {project_name(s.working_directory)[:20]:<20} "
+            f"{(s.title or 'Untitled')[:60]}"
+        )
+    return "\n".join(lines)
+
+
+def sessions_to_dicts(sessions: list["Session"]) -> list[dict[str, Any]]:
+    return [
+        {
+            "id": s.id,
+            "title": (s.title or "Untitled").strip(),
+            "project": project_name(s.working_directory),
+            "working_directory": s.working_directory,
+            "backend_type": s.backend_type,
+            "model": s.model,
+            "agent_mode": s.agent_mode,
+            "hidden": s.hidden,
+            "created_at": s.created_at,
+            "created": fmt_ts(s.created_at),
+            "last_activity": s.last_activity_at,
+            "duration_min": round(duration_minutes(s.created_at, s.last_activity_at), 1),
+        }
+        for s in sessions
+    ]
+
+
+# --------------------------------------------------------------------------
+# Audit emitters
+# --------------------------------------------------------------------------
+
+AUDIT_CSV_FIELDS = [
+    "session_id", "title", "project", "backend", "model", "agent_mode",
+    "created", "last_activity", "duration_min", "hidden", "status",
+    "task_type", "user_msgs", "assistant_msgs", "tool_calls", "failed_calls",
+    "files_touched", "context_tokens_max", "prompt_excerpt",
+]
+
+
+def audit_row_to_dict(r: "SessionAudit") -> dict[str, Any]:
+    return {
+        "session_id": r.id,
+        "title": r.title,
+        "project": r.project,
+        "working_directory": r.working_directory,
+        "backend": r.backend,
+        "model": r.model,
+        "agent_mode": r.agent_mode,
+        "created_at": r.created_at,
+        "created": fmt_ts(r.created_at),
+        "last_activity": r.last_activity_at,
+        "duration_min": r.duration_min,
+        "hidden": r.hidden,
+        "status": r.status,
+        "task_type": r.task_type,
+        "user_msgs": r.user_msgs,
+        "assistant_msgs": r.assistant_msgs,
+        "tool_msgs": r.tool_msgs,
+        "system_msgs": r.system_msgs,
+        "thinking": r.thinking,
+        "tool_calls": r.tool_calls,
+        "failed_calls": r.failed_calls,
+        "tool_kinds": r.tool_kinds,
+        "files_touched": r.files_touched,
+        "context_tokens_max": r.context_tokens_max,
+        "prompt_excerpt": r.prompt_excerpt,
+        "fail_samples": r.fail_samples,
+    }
+
+
+def audit_to_dict(report: "AuditReport") -> dict[str, Any]:
+    return {
+        "schema_version": report.schema_version,
+        "sessions": [audit_row_to_dict(r) for r in report.rows],
+        "anomalies": [
+            {"kind": a.kind, "session_id": a.session_id, "detail": a.detail}
+            for a in report.anomalies
+        ],
+        "summary": {
+            "total": len(report.rows),
+            "by_status": dict(Counter(r.status for r in report.rows)),
+            "by_task_type": dict(Counter(r.task_type for r in report.rows)),
+            "by_project": dict(Counter(r.project for r in report.rows)),
+        },
+    }
+
+
+def write_audit_csv(report: "AuditReport", path: str | Path) -> None:
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(AUDIT_CSV_FIELDS)
+        for r in report.rows:
+            w.writerow([
+                r.id, r.title, r.project, r.backend, r.model, r.agent_mode,
+                fmt_ts(r.created_at, "%Y-%m-%d %H:%M:%S"),
+                fmt_ts(r.last_activity_at, "%Y-%m-%d %H:%M:%S"),
+                r.duration_min, int(r.hidden), r.status, r.task_type,
+                r.user_msgs, r.assistant_msgs, r.tool_calls, r.failed_calls,
+                r.files_touched, r.context_tokens_max, r.prompt_excerpt,
+            ])
+
+
+def _fmt_dur(mins: float) -> str:
+    return f"{mins:.0f}m" if mins < 60 else f"{mins / 60:.1f}h"
+
+
+def audit_to_markdown(report: "AuditReport") -> str:
+    """Compact audit report: summary, grouping tables, anomaly list."""
+    rows = report.rows
+    L: list[str] = []
+    A = L.append
+    A("# Session audit\n")
+    A(f"Schema v{report.schema_version} · {len(rows)} sessions · "
+      "status is **inferred** — `sessions.db` has no final-state column.\n")
+
+    A("## By status\n")
+    A("| Status | N |")
+    A("|---|---|")
+    for k, v in Counter(r.status for r in rows).most_common():
+        A(f"| {k} | {v} |")
+
+    A("\n## By task type\n")
+    A("| Type | N |")
+    A("|---|---|")
+    for k, v in Counter(r.task_type for r in rows).most_common():
+        A(f"| {k} | {v} |")
+
+    A("\n## By project\n")
+    A("| Project | Sessions | Tool calls |")
+    A("|---|---|---|")
+    for k, v in Counter(r.project for r in rows).most_common():
+        A(f"| {k} | {v} | {sum(r.tool_calls for r in rows if r.project == k)} |")
+
+    A("\n## By month\n")
+    A("| Month | Sessions | Tool calls | User msgs |")
+    A("|---|---|---|---|")
+    months = Counter(fmt_ts(r.created_at)[:7] for r in rows)
+    for m in sorted(months):
+        sub = [r for r in rows if fmt_ts(r.created_at)[:7] == m]
+        A(f"| {m} | {len(sub)} | {sum(r.tool_calls for r in sub)} "
+          f"| {sum(r.user_msgs for r in sub)} |")
+
+    A("\n## Anomalies\n")
+    if not report.anomalies:
+        A("_None._")
+    for a in report.anomalies:
+        A(f"- **{a.kind}** `{a.session_id}` — {a.detail}")
+
+    A("\n## Sessions\n")
+    A("| Session | Started | Duration | User msgs | Tool calls | Files | Status | Title |")
+    A("|---|---|---|---|---|---|---|---|")
+    for r in sorted(rows, key=lambda x: x.created_at):
+        A(f"| `{r.id[:8]}` | {fmt_ts(r.created_at)} | {_fmt_dur(r.duration_min)} "
+          f"| {r.user_msgs} | {r.tool_calls} ({r.failed_calls}✗) "
+          f"| {r.files_touched} | {r.status} | {r.title[:60]} |")
+    return "\n".join(L) + "\n"
