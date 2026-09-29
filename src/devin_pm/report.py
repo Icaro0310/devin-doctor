@@ -28,8 +28,8 @@ def ms_to_iso(ts_ms: int | None) -> str:
 
 
 def fmt_cost(cost: float | None) -> str:
-    """``0.75`` → ``"0.75"``; ``None`` (unknown) → ``"—"``."""
-    return f"{cost:.2f}" if cost is not None else "—"
+    """``0.75`` → ``"0.75"``; ``None`` (unknown) → ``"-"``."""
+    return f"{cost:.2f}" if cost is not None else "-"
 
 
 def _fmt_table(headers: list[str], rows: list[list[str]]) -> str:
@@ -67,7 +67,7 @@ def _sessions_table(project: Project) -> list[str]:
         "|---|---|---|---|---|",
     ]
     for s in project.sessions:
-        title = (s.title or "—").replace("|", "\\|")
+        title = (s.title or "-").replace("|", "\\|")
         lines.append(
             f"| `{s.id}` | {title} | {ms_to_date(s.last_activity_at)} "
             f"| {s.status} | {fmt_cost(extract_cost(s.cogs_json))} |"
@@ -90,8 +90,8 @@ def _summary_line(project: Project) -> str:
     counts = project.status_counts
     mix = ", ".join(f"{n} {k}" for k, n in sorted(counts.items()))
     return (
-        f"_{project.session_count} sessions · last activity "
-        f"{ms_to_date(project.last_activity_at)} · {mix} · cost "
+        f"_{project.session_count} sessions, last activity "
+        f"{ms_to_date(project.last_activity_at)}, {mix}, cost "
         f"{fmt_cost(project.cost)}_"
     )
 
@@ -121,8 +121,8 @@ def render_global_report(
     lines = [
         "# devin-pm status report",
         "",
-        f"_{len(projects)} projects · "
-        f"{sum(p.session_count for p in projects)} sessions · generated "
+        f"_{len(projects)} projects, "
+        f"{sum(p.session_count for p in projects)} sessions, generated "
         f"{datetime.now(tz=timezone.utc).strftime('%Y-%m-%d')}_",
     ]
     for project in projects:

@@ -41,7 +41,7 @@ def test_status_table_has_header_and_rows(projects):
     assert _d(7_200_000 + 120_000) in alpha  # a-3 last activity date
     assert "0.75" in alpha
     beta = next(l for l in lines if l.startswith("beta"))
-    assert "—" in beta  # unknown cost
+    assert beta.rstrip().endswith("-")  # unknown cost
 
 
 def test_status_table_empty():
@@ -60,7 +60,7 @@ def test_project_report_sections(projects):
     assert "| `a-1` | alpha: initial setup |" in report
     # status + cost cells
     a3 = next(r for r in rows if "`a-3`" in r)
-    assert "| active | — |" in a3
+    assert "| active | - |" in a3
     a2 = next(r for r in rows if "`a-2`" in r)
     assert "| hidden | 0.50 |" in a2
 
