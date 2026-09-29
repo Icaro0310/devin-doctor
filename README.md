@@ -5,40 +5,85 @@
 
 **[Português (BR)](README.pt-BR.md)** · English
 
-One-line description of what this tool does.
+Full-text search across all your Devin sessions — find that command, that
+error message, that file path or that decision from months ago in under a
+second.
 
 ## The problem
 
-<!-- Real pain point, with evidence. Who suffers, when, how often. -->
+Devin keeps your entire session history in local SQLite stores
+(`sessions.db`, `User/acp-messages/*.db`) — but offers no way to search
+across them. You remember Devin fixed a flaky test or ran a specific
+`kubectl` command three weeks ago, and the only way back is scrolling
+through sessions one by one. Generic `grep` over the raw databases mostly
+hits JSON noise and knows nothing about who said what.
 
 ## Prior art
 
-<!-- What already exists for other agents/tools. Be honest and link it.
-     This project adapts <X>; it does not reinvent it. -->
+- Full-text search over chat/agent history is well-established:
+  everything here leans on SQLite's built-in **FTS5** engine with
+  **BM25** ranking — the same approach used by ripgrep-style tools,
+  mail clients and `sqlite-utils`.
+- **tokmesh** and **UniSessions** document/parse the CLI `sessions.db`;
+  the schema itself is tracked by
+  [`devin-internals-spec`](https://github.com/Icaro0310/devin-internals-spec),
+  which this project uses for versioned, read-only access.
+- **devin-history** (sibling repo) exports sessions to Markdown/JSON;
+  devin-search complements it with instant ranked lookup instead of a
+  static dump.
 
 ## What makes it Devin-native
 
-<!-- The differentiator. Must pass three tests:
-     1. Side-by-side: does it do something the base tool *cannot* do at all?
-     2. No-Devin: does the extra disappear if Devin is removed?
-     3. One sentence: can you explain it without jargon? -->
+Results are **role-tagged and session-linked**, not raw grep hits. The
+indexer understands Devin's real message structure through
+`devin-internals-spec`'s typed parsers: user prompts vs assistant replies
+vs tool calls (including `prompt_history` shell commands and GUI
+`acp-messages` sessions), each stamped with its working directory and a
+`ref` back to the exact source row. And because the store schema has had
+17 migrations already, indexing **fails loudly** on an unknown schema
+version instead of silently misreading it.
 
 ## Install
 
 ```bash
-pipx install devin-search
+pipx install "devin-search @ git+https://github.com/Icaro0310/devin-search.git"
 ```
+
+(PyPI release is on the M2 roadmap; Python ≥ 3.10 required.)
 
 ## Usage
 
 ```bash
-devin-search --help
+# build/update the index (auto-detects Devin's stores; safe to re-run —
+# only new rows are indexed each time)
+devin-search index
+
+# search everything
+devin-search query "kubectl delete pod"
+
+# filters: role, project, date, limit — --json on every command
+devin-search query "TypeError" --role assistant --project myrepo
+devin-search query "migration" --since 2026-09-01 --limit 5 --json
 ```
+
+Hits print as `WHEN · ROLE · PROJECT · SESSION · SNIPPET` with the match
+wrapped in `«»`; each hit carries a `ref` (e.g. `node:1234`,
+`acp:file.db:7`) pointing back to the exact source row.
 
 ## Limitations
 
-<!-- Be explicit: private/volatile internals, version-specific behavior,
-     what it does NOT do. -->
+- **Schema-gated.** Only `sessions.db` schema v15–v17 is accepted; newer
+  versions fail loudly (update `devin-internals-spec` first).
+- **Opaque payloads.** `chat_message`, `tool_call_*_json` and acp
+  `payload` formats are undocumented/unstable — text extraction is
+  best-effort and tolerant, not contractual.
+- **Keyword search only (M1).** BM25 over tokens — no synonyms or
+  embeddings; semantic search is an opt-in M2 candidate.
+- **Deletion lag.** New rows are picked up incrementally, but rows
+  deleted mid-table upstream can stay in the index until `--rebuild`
+  (tail-pruned sources are detected and re-indexed automatically).
+- **Read-only by design** — the tool never writes to Devin's stores; the
+  only file it creates is `search.db`.
 
 ## Development
 
@@ -46,6 +91,9 @@ devin-search --help
 pip install -e ".[dev]"
 pytest
 ```
+
+Fixtures are generated at test time by `devin_internals.fixtures` (real
+v17 DDL, synthetic rows) — no binary fixtures are committed.
 
 ## License
 
