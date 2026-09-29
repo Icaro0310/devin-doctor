@@ -3,10 +3,18 @@
 ## What this tool does with your data
 
 - **No telemetry.** This project sends nothing anywhere.
-- **No network by default.** All processing is local unless a command
-  explicitly says otherwise (and it will say so in `--help`).
-- **Data stays on your machine.** Files it reads and writes are documented
-  in the README.
+- **No network.** All processing is local; there is no network code path.
+- **Read-only.** It opens Devin's stores with SQLite `mode=ro` and never
+  writes to the data dir or to any config file.
+- **What it reads:** the Devin data dir (`%APPDATA%\devin` on Windows,
+  `~/.config/devin` on Linux, `~/Library/Application Support/devin` on
+  macOS) — `cli/sessions.db`, `User/acp-messages/*.db`,
+  `User/globalStorage/state.vscdb`, `credentials.toml`, `config.json`,
+  `mcp_config.json` — plus `.devin/` config files under the working
+  directory.
+- **What it prints:** counts, sizes, schema versions and paths only — never
+  row content. `credentials.toml` is parsed for validity; only section/key
+  counts are reported, values are never shown.
 
 ## Sensitive data handling
 
