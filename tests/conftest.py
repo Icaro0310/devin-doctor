@@ -114,6 +114,22 @@ def add_session(
     con.close()
 
 
+def add_tool_call(db_path, session_id, tool_call_id, call, update=None):
+    con = sqlite3.connect(db_path)
+    with con:
+        con.execute(
+            "INSERT INTO tool_call_state(session_id, tool_call_id,"
+            " tool_call_json, tool_call_update_json) VALUES (?, ?, ?, ?)",
+            (
+                session_id,
+                tool_call_id,
+                json.dumps(call) if call is not None else None,
+                json.dumps(update) if update is not None else None,
+            ),
+        )
+    con.close()
+
+
 def bump_last_activity(db_path, session_id, last_ms):
     con = sqlite3.connect(db_path)
     with con:
@@ -121,6 +137,15 @@ def bump_last_activity(db_path, session_id, last_ms):
             "UPDATE sessions SET last_activity_at = ? WHERE id = ?",
             (last_ms, session_id),
         )
+    con.close()
+
+
+def delete_session(db_path, session_id):
+    con = sqlite3.connect(db_path)
+    with con:
+        con.execute(
+            "DELETE FROM tool_call_state WHERE session_id = ?", (session_id,))
+        con.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
     con.close()
 
 
