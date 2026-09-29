@@ -62,7 +62,7 @@ class Report:
 
     def counts(self) -> dict[str, int]:
         return {
-            s.value: sum(1 for f in self.findings if f.status is s)
+            s.value.lower(): sum(1 for f in self.findings if f.status is s)
             for s in Status
         }
 
