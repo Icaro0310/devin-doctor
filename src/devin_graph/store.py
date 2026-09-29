@@ -67,6 +67,7 @@ class StoredEdge:
     src: str  # "kind:key"
     dst: str
     attrs: dict
+    owner: str | None = None  # session_id that produced the edge
 
 
 @dataclass
@@ -115,13 +116,14 @@ class GraphStore:
         ]
 
     def edges(self, kind: str | None = None) -> list[StoredEdge]:
-        sql = "SELECT kind, src, dst, attrs FROM edges"
+        sql = "SELECT kind, src, dst, owner, attrs FROM edges"
         args: tuple = ()
         if kind is not None:
             sql += " WHERE kind = ?"
             args = (kind,)
         return [
-            StoredEdge(r["kind"], r["src"], r["dst"], json.loads(r["attrs"]))
+            StoredEdge(r["kind"], r["src"], r["dst"],
+                       json.loads(r["attrs"]), r["owner"])
             for r in self._con.execute(sql + " ORDER BY kind, src, dst", args)
         ]
 
@@ -137,9 +139,10 @@ class GraphStore:
 
     def out_edges(self, node_id: str) -> list[StoredEdge]:
         return [
-            StoredEdge(r["kind"], r["src"], r["dst"], json.loads(r["attrs"]))
+            StoredEdge(r["kind"], r["src"], r["dst"],
+                       json.loads(r["attrs"]), r["owner"])
             for r in self._con.execute(
-                "SELECT kind, src, dst, attrs FROM edges WHERE src = ?"
+                "SELECT kind, src, dst, owner, attrs FROM edges WHERE src = ?"
                 " ORDER BY kind, dst",
                 (node_id,),
             )
@@ -147,9 +150,10 @@ class GraphStore:
 
     def in_edges(self, node_id: str) -> list[StoredEdge]:
         return [
-            StoredEdge(r["kind"], r["src"], r["dst"], json.loads(r["attrs"]))
+            StoredEdge(r["kind"], r["src"], r["dst"],
+                       json.loads(r["attrs"]), r["owner"])
             for r in self._con.execute(
-                "SELECT kind, src, dst, attrs FROM edges WHERE dst = ?"
+                "SELECT kind, src, dst, owner, attrs FROM edges WHERE dst = ?"
                 " ORDER BY kind, src",
                 (node_id,),
             )
