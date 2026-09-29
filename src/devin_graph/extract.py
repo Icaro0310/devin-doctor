@@ -239,12 +239,12 @@ def extract_session(session, tool_calls: Iterable) -> Extraction:
         ex.edges.append(
             Edge("made_call", ("session", sid), ("tool_call", call_key)))
 
-        # Merge call + update payloads (call wins); tolerate NULL/junk.
+        # Merge update then call payloads (call wins); tolerate NULL/junk.
         payload = {}
         for raw in (tc.tool_call_update_json, tc.tool_call_json):
             data = parse_payload(raw)
             if data:
-                payload = {**data, **payload}
+                payload = {**payload, **data}
 
         tool = extract_tool_name(payload) if payload else None
         if tool:

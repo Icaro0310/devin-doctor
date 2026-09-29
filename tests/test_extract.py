@@ -162,6 +162,27 @@ def test_extract_session_relative_paths_resolve_to_cwd(sessions_db):
         f"{ALPHA}/docs/README.md", f"{ALPHA}/docs/notes.txt"]
 
 
+def test_call_payload_wins_over_update(sessions_db):
+    """tool_call_json is authoritative over tool_call_update_json."""
+    import sqlite3
+    import json as j
+    con = sqlite3.connect(sessions_db)
+    with con:
+        con.execute(
+            "UPDATE tool_call_state SET tool_call_update_json = ?"
+            " WHERE session_id = 'sess-a' AND tool_call_id = 'sess-a-tc0'",
+            (j.dumps({"kind": "tool_call_update"}),))
+    con.close()
+    with SessionsStore(sessions_db) as store:
+        sess = next(s for s in store.sessions() if s.id == "sess-a")
+        calls = store.tool_call_state("sess-a")
+    ex = extract_session(sess, calls)
+    assert _edge_set(ex, "call_used") == {
+        (("tool_call", "sess-a:sess-a-tc0"), ("tool", "read")),
+        (("tool_call", "sess-a:sess-a-tc1"), ("tool", "execute")),
+    }
+
+
 def test_extract_all_counts(sessions_db):
     with SessionsStore(sessions_db) as store:
         ex = extract_all(store)
