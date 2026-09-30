@@ -65,6 +65,7 @@ def test_default_sessions_db_windows(monkeypatch, tmp_path):
     db = tmp_path / "devin" / "cli" / "sessions.db"
     db.parent.mkdir(parents=True)
     db.write_bytes(b"x")
+    monkeypatch.setattr("devin_history.paths.sys.platform", "win32")
     monkeypatch.setenv("APPDATA", str(tmp_path))
     monkeypatch.setattr("devin_history.paths.Path.home", lambda: tmp_path / "nohome")
     found = default_sessions_db()
