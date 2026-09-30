@@ -391,7 +391,7 @@ def render_report(rows, orphan_locks, mem_sessions, log_info, n_summaries):
       f"{n_summaries} summaries, {len(mem_sessions)} logs de prompts em `.devin/memory/`")
     A("- **Temas dominantes:** pokeemerald-expansion (ROM hack), "
       "personal-agent-system (infra do próprio agente), PetSaas, automação "
-      "Slack/Obsidian/Jevin\n")
+      "Slack/Obsidian/Djævin\n")
 
     A("## 2. Estatísticas Agregadas\n")
     A("### Por status\n")
@@ -540,7 +540,7 @@ def render_report(rows, orphan_locks, mem_sessions, log_info, n_summaries):
       f"{', '.join('`'+r['id']+'`' for r in sorted(fail_sessions, key=lambda r: -r['failed_calls'])[:3])}.")
     A(f"- **Workspace principal:** `personal-agent-system` "
       f"({sum(1 for r in rows if 'personal-agent-system' in r['working_directory'])} "
-      "sessions) — meta-trabalho no próprio agente (hooks, MCPs, Jevin, Slack bridge).")
+      "sessions) — meta-trabalho no próprio agente (hooks, MCPs, Djævin, Slack bridge).")
     A(f"- **GUI sem conteúdo:** {sum(1 for r in gui if r['status']=='vazia')}/"
       f"{len(gui)} DBs ACP não têm mensagens do agente — prováveis sessões "
       "abandonadas no Kanban do Desktop ou janelas abertas sem prompt.")
