@@ -91,6 +91,14 @@ de nome.
 
 `0` ok · `1` erro de leitura/parse · `2` db em falta / projeto desconhecido.
 
+## Suporte de plataformas
+
+Testado em **Windows e Linux** (o CI corre em `windows-latest` +
+`ubuntu-latest`). A `sessions.db` do Devin é auto-detetada por
+plataforma — `%APPDATA%\devin\` no Windows, `~/.local/share/devin/`
+(`XDG_DATA_HOME`) no Linux, `~/Library/Application Support/devin/` no
+macOS. Override com a env var `DEVIN_PM_SESSIONS_DB` (ver Uso).
+
 ## Limitações
 
 - **Internals privados e voláteis.** O `sessions.db` é detalhe de

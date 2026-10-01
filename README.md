@@ -88,6 +88,14 @@ File entries win over session-detected ones on name collision.
 
 `0` ok · `1` read/parse error · `2` missing db / unknown project.
 
+## Platform support
+
+Tested on **Windows and Linux** (`windows-latest` + `ubuntu-latest` in CI).
+Devin's `sessions.db` is auto-detected per platform — `%APPDATA%\devin\` on
+Windows, `~/.local/share/devin/` (`XDG_DATA_HOME`) on Linux,
+`~/Library/Application Support/devin/` on macOS. Override with the
+`DEVIN_PM_SESSIONS_DB` env var (see Usage).
+
 ## Limitations
 
 - **Private, volatile internals.** `sessions.db` is an implementation
