@@ -67,6 +67,13 @@ A correspondência é tolerante (`src/app.py` encontra
 `/repo/alpha/src/app.py`); tudo tem `--json`. A DB de origem é aberta em
 `mode=ro` e nunca é escrita — os testes garantem que o hash não muda.
 
+## Suporte de plataformas
+
+Testado em **Windows e Linux** (o CI corre em `windows-latest` +
+`ubuntu-latest`). As stores locais do Devin são auto-detetadas por
+plataforma — `%APPDATA%` no Windows, `~/.config/devin/` (XDG) no Linux.
+Passa um caminho explícito para override (ver Uso).
+
 ## Limitações
 
 - **Dependente do schema.** Apenas `sessions.db` schema v15–v17; mais recente

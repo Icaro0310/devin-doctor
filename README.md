@@ -64,6 +64,13 @@ Matching is forgiving (`src/app.py` finds `/repo/alpha/src/app.py`);
 everything has `--json`. The source DB is opened `mode=ro` and never
 written — tests assert its hash is unchanged.
 
+## Platform support
+
+Tested on **Windows and Linux** (`windows-latest` + `ubuntu-latest` in CI).
+Devin's local stores are auto-detected per platform — `%APPDATA%` on
+Windows, `~/.config/devin/` (XDG) on Linux. Pass an explicit path to
+override (see Usage).
+
 ## Limitations
 
 - **Schema-gated.** Only `sessions.db` schema v15–v17; newer fails loudly
