@@ -70,6 +70,13 @@ Hits print as `WHEN · ROLE · PROJECT · SESSION · SNIPPET` with the match
 wrapped in `«»`; each hit carries a `ref` (e.g. `node:1234`,
 `acp:file.db:7`) pointing back to the exact source row.
 
+## Platform support
+
+Tested on **Windows and Linux** (`windows-latest` + `ubuntu-latest` in CI).
+Devin's local stores are auto-detected per platform — `%APPDATA%` on
+Windows, `~/.config/devin/` (XDG) on Linux. Pass an explicit path to
+override (see Usage).
+
 ## Limitations
 
 - **Schema-gated.** Only `sessions.db` schema v15–v17 is accepted; newer

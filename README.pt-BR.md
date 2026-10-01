@@ -70,6 +70,13 @@ Os hits aparecem como `WHEN · ROLE · PROJECT · SESSION · SNIPPET` com o matc
 entre `«»`; cada hit traz um `ref` (ex.: `node:1234`, `acp:file.db:7`) que
 aponta para a linha exata da fonte.
 
+## Suporte de plataformas
+
+Testado em **Windows e Linux** (o CI corre em `windows-latest` +
+`ubuntu-latest`). As stores locais do Devin são auto-detetadas por
+plataforma — `%APPDATA%` no Windows, `~/.config/devin/` (XDG) no Linux.
+Passa um caminho explícito para override (ver Uso).
+
 ## Limitações
 
 - **Schema-gated.** Só `sessions.db` schema v15–v17 é aceite; versões mais
