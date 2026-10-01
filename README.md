@@ -69,6 +69,13 @@ Notes are idempotent: each file embeds the session's `last_activity`
 marker, so re-runs skip unchanged sessions (`--all` forces a rewrite,
 `--dry-run` previews).
 
+## Platform support
+
+Tested on **Windows and Linux** (`windows-latest` + `ubuntu-latest` in CI).
+Devin's local stores are auto-detected per platform — `%APPDATA%` on
+Windows, `~/.config/devin/` (XDG) on Linux, `~/Library/Application Support/devin/`
+on macOS. Override with `--sessions-db` (see Usage).
+
 ## Limitations
 
 - **Schema-gated.** Only `sessions.db` schema v15–v17 is accepted; anything
