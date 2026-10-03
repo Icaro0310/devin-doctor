@@ -114,6 +114,43 @@ DDL, synthetic rows) — no binary fixtures are committed. See
 [docs/SPEC.md](docs/SPEC.md) for the graph model and
 [STATUS.md](STATUS.md) for the roadmap.
 
+## When to use this
+
+- You need cross-session questions: which sessions touched file X, which
+  tools project Y depends on, which projects share files.
+- You want edges from ground truth — real `tool_call_state` payloads, not
+  heuristics over chat text.
+- You want a graph export to visualize agent activity
+  (`devin-graph export --format json` produces a D3-ready dump).
+- You want incremental builds — re-running `devin-graph build` skips
+  unchanged sessions.
+
+## When NOT to use this
+
+- You need a code index — nodes are files the agent *touched*, not repo
+  contents; there is no symbol/AST knowledge.
+- You need message-content search (use `devin-search`) or usage/cost metrics
+  (use `devin-metrics`).
+- You need GUI session data — M1 covers CLI `sessions.db` only;
+  `acp-messages` is planned for M2.
+
+## FAQ
+
+**What is devin-graph?** A local tool that turns Devin's session database
+into a knowledge graph: sessions, projects, files, and tools become nodes,
+with edges extracted from real tool-call payloads. You query it with
+`devin-graph query file|tool|project` and export it as JSON for
+visualization.
+
+**How is devin-graph different from devin-search?** devin-search finds text:
+ranked full-text hits inside session content. devin-graph finds structure:
+which sessions touched which files, which tools which projects use, and
+which projects share files — relationships, not text matches.
+
+**Does it write to Devin's databases?** No. The source `sessions.db` is
+opened `mode=ro` and never written — the test suite asserts its hash is
+unchanged. The only file devin-graph creates is its own `graph.db`.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
