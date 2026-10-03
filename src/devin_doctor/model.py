@@ -49,6 +49,7 @@ class Context:
     acp_warn_bytes: int = 512 * 1024**2
     store_warn_bytes: int = 256 * 1024**2
     total_warn_bytes: int = 4 * 1024**3
+    config_dir: Path | None = None
 
     def now(self) -> int:
         if self.now_ms is not None:

@@ -134,7 +134,7 @@ def _state_vscdb_finding(path: Path) -> Finding:
 
 
 def run(ctx: Context) -> list[Finding]:
-    stores = locate_stores(ctx.data_dir)
+    stores = locate_stores(ctx.data_dir, config_dir=ctx.config_dir)
     return [
         _sessions_db_finding(stores.sessions_db),
         _acp_finding(stores.acp_dir, stores.acp_dbs),

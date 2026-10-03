@@ -15,7 +15,7 @@ from typing import Sequence
 
 from devin_doctor import doctor
 from devin_doctor.model import Context
-from devin_doctor.paths import default_data_dir
+from devin_doctor.paths import default_config_dir, default_data_dir
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
@@ -25,6 +25,12 @@ def _add_common(p: argparse.ArgumentParser) -> None:
         default=None,
         help="Devin data dir (default: platform location — "
         "%%APPDATA%%/devin on Windows, ~/.config/devin elsewhere)",
+    )
+    p.add_argument(
+        "--config-dir",
+        type=Path,
+        default=None,
+        help="Devin UI config dir (default: platform location)",
     )
     p.add_argument(
         "--cwd",
@@ -73,6 +79,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         data_dir=args.data_dir or default_data_dir(),
         cwd=args.cwd,
         stale_days=args.stale_days,
+        config_dir=(
+            args.config_dir
+            if args.config_dir is not None
+            else default_config_dir() if args.data_dir is None else None
+        ),
     )
     report = doctor.run_all(ctx)
     if args.json:

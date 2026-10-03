@@ -291,9 +291,10 @@ def _project_config_findings(cwd: Path) -> list[Finding]:
 
 
 def _user_config_findings(ctx: Context) -> list[Finding]:
+    config_root = ctx.config_dir or ctx.data_dir
     files = [
-        (user_config_path(ctx.data_dir), "config"),
-        (user_mcp_config_path(ctx.data_dir), "mcp"),
+        (user_config_path(config_root), "config"),
+        (user_mcp_config_path(config_root), "mcp"),
     ]
     existing = [(p, k) for p, k in files if p.is_file()]
     if not existing:

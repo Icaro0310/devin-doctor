@@ -128,7 +128,7 @@ def run(ctx: Context) -> list[Finding]:
                 fix="Install Devin, or pass --data-dir pointing at it.",
             )
         ]
-    stores = locate_stores(ctx.data_dir)
+    stores = locate_stores(ctx.data_dir, config_dir=ctx.config_dir)
     return [
         _sessions_db_finding(stores.sessions_db),
         _acp_finding(stores.acp_dir, stores.acp_dbs),

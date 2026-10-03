@@ -38,17 +38,21 @@ see. Remove Devin and there is nothing to diagnose.
 
 ## Install
 
+Python ≥ 3.10 and `pipx` are required. **Windows (PowerShell):** install `pipx` with `py -m pip install --user pipx`, run `py -m pipx ensurepath`, then reopen the terminal. **Linux (Debian/Ubuntu):** run `sudo apt install pipx python3-venv` and `pipx ensurepath`; reopen the terminal. Other Linux distributions should install `pipx` using their package manager.
+
 ```bash
-pipx install devin-doctor
+pipx install "devin-doctor @ git+https://github.com/Icaro0310/devin-doctor.git"
 ```
 
-(requires Python ≥ 3.10)
+(Not published on PyPI yet; the GitHub install above is the supported route.)
 
 ## Usage
 
 ```bash
 devin-doctor check                    # diagnose the default data dir
 devin-doctor check --data-dir D:\devin-backup
+# Use a separate Devin UI config root (e.g. Linux)
+devin-doctor check --data-dir ~/.local/share/devin --config-dir ~/.config/Devin
 devin-doctor check --json             # machine-readable output
 devin-doctor report --md              # markdown, for pasting into issues
 ```
@@ -66,6 +70,22 @@ The five checks:
 | `config` | `credentials.toml` presence + validity (**values masked**); `.devin/` hooks/MCP config sanity |
 | `disk` | total data-dir size, largest DBs, `acp-messages` accumulation trend |
 
+## Works with Devin alone (Devin-only mode)
+
+devin-doctor is a pure local diagnostic: it reads Devin's own data
+directories, writes nothing, and never contacts a network service. No VM, no
+Tailscale, no Ollama, no Slack — just Devin Desktop plus Python. On a
+restricted or corporate machine it is the safest first tool: install, run
+`devin-doctor`, read the report.
+
+## Platform support
+
+Tested on Windows and Linux. On Linux, session data defaults to
+`$XDG_DATA_HOME/devin` (normally `~/.local/share/devin`) and UI stores default
+to `$XDG_CONFIG_HOME/Devin` (normally `~/.config/Devin`). Windows stores use
+`%APPDATA%\devin` and `%APPDATA%\Devin`. Use `--data-dir` and `--config-dir`
+when the stores are elsewhere. macOS paths exist but are not verified.
+
 ## Limitations
 
 - **Version-bound.** Store parsing follows `devin-internals-spec` (schema
@@ -75,8 +95,7 @@ The five checks:
   for the safe items is planned (see `STATUS.md`).
 - **Locked stores.** If Devin is running, DBs may report `SQLITE_BUSY` —
   close Devin and re-run.
-- Windows + Linux are the tested targets; macOS paths exist but are
-  unverified.
+- macOS paths are implemented but not verified in CI.
 
 ## Development
 
