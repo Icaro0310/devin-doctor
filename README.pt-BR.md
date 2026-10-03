@@ -120,6 +120,29 @@ pytest
 Fixtures são geradas em tempo de teste por `devin_internals.fixtures` (DDL
 v17 real, linhas sintéticas) — nenhum fixture binário é commitado.
 
+## Quando usar
+
+- Você lembra-se que o Devin correu um comando, bateu num erro, tocou num ficheiro ou tomou uma decisão, e percorrer sessões uma a uma é demasiado lento.
+- Você quer resultados rankeados etiquetados por papel (user / assistant / tool call) com um `ref` de volta à linha de origem exata.
+- O seu histórico de sessões tem de ficar em disco — o índice é totalmente local, sem telemetria, sem chamadas de rede.
+- Você quer indexação incremental: re-executar `devin-search index` só apanha linhas novas.
+
+## Quando NÃO usar
+
+- Você precisa de pesquisa semântica ou com sinónimos — o M1 é BM25 por keywords apenas; embeddings são candidato opt-in no M2.
+- Você precisa de *analítica* de sessões (custo, tokens, atividade) — use `devin-metrics`; ou queries de relações — use `devin-graph`.
+- O schema do seu `sessions.db` está fora de v15–v17 — a indexação recusa ruidosamente em vez de ler mal.
+
+## FAQ
+
+**O que é o devin-search?** Um motor local de pesquisa full-text sobre o seu histórico de sessões Devin. Indexa os stores SQLite do Devin com FTS5/BM25 e responde a queries como `devin-search query "kubectl delete pod"` em menos de um segundo, com resultados etiquetados por papel e ligados à linha de origem.
+
+**O devin-search envia os meus dados de sessão para algum lado?** Não. Tudo corre localmente: lê os stores do Devin em read-only e escreve um único índice `search.db` junto aos seus dados. Não há chamadas de rede nem telemetria.
+
+**Ele escreve ou modifica as bases de dados do Devin?** Não. Os stores do Devin são abertos read-only por design; o único ficheiro que o devin-search cria é o seu próprio índice `search.db`.
+
+**Como é diferente do `devin-history`?** O devin-history exporta sessões para ficheiros Markdown/JSON estáticos. O devin-search complementa-o com pesquisa rankeada instantânea sobre todas as sessões, sem exportar nada.
+
 ## Licença
 
 MIT — vê [LICENSE](LICENSE).
