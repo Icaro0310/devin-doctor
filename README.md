@@ -130,6 +130,48 @@ pytest
 Fixtures are generated at test time by `devin_internals.fixtures` (real v17
 DDL, synthetic rows) — no binary fixtures are committed.
 
+## When to use this
+
+- You want your Devin session history out of the app before sessions scroll
+  away or are pruned — there is no built-in export button.
+- You keep an Obsidian vault (or any Markdown folder) and want one note per
+  session plus an `index.md`, idempotent across re-runs.
+- You need a lifetime audit: groupings by status, task type, project and
+  period, plus anomaly detection (empty, orphan, long-running sessions).
+- You want a deterministic, read-only export you can schedule — nothing is
+  ever written back to Devin's stores.
+
+## When NOT to use this
+
+- You need instant ranked search rather than a static export — use
+  [`devin-search`](https://github.com/Icaro0310/devin-search) on top of the
+  same database.
+- Your sessions live in the GUI/Desktop `acp-messages/*.db` stores — M1
+  covers the CLI `sessions.db` only.
+- Your `sessions.db` schema is newer than v17 — the tool refuses loudly
+  instead of misreading it; update `devin-internals-spec` first.
+
+## FAQ
+
+**What is devin-history?** A CLI that exports Devin's local `sessions.db`
+into Obsidian-ready Markdown notes, a JSON dump, or an audit report. It
+auto-detects the database on Windows, Linux and macOS and never writes to
+Devin's stores.
+
+**Is it safe to re-run the export?** Yes. Each note embeds the session's
+`last_activity` marker, so unchanged sessions are skipped on re-runs.
+`--all` forces a rewrite and `--dry-run` previews without writing.
+
+**Does it send my session data anywhere?** No. Everything happens on your
+machine: it reads the local database and writes files to a folder you
+choose. Note that exports contain raw prompts and paths — keep the output
+folder private or run `devin-redact` before sharing.
+
+**Why does it refuse to read my database?** Because the schema version is
+outside the supported v15–v17 range. The store has had 17 migrations
+already; devin-history fails loudly on unknown versions rather than
+silently misparsing your history.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
