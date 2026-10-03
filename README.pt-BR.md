@@ -11,8 +11,10 @@ pesquisável e num relatório de auditoria.
 
 ## O problema
 
-O Devin Desktop guarda todo o histórico de sessões numa base SQLite local
-(`%APPDATA%/devin/cli/sessions.db`) — e em mais lado nenhum. Não há botão de
+O Devin Desktop guarda o histórico de sessões numa base SQLite local
+(`%APPDATA%/devin/cli/sessions.db` no Windows ou
+`$XDG_DATA_HOME/devin/cli/sessions.db` no Linux; por omissão
+`~/.local/share/devin/cli/sessions.db`) — e em mais lado nenhum. Não há botão de
 export: quando uma sessão sai da UI (ou é limpa pela app), os prompts, as
 respostas e os tool calls ficam efetivamente perdidos. Não dá para pesquisar
 sessões antigas, responder "o que pedi ao Devin no mês passado" nem auditar
@@ -40,6 +42,8 @@ interrompidas (último nó = user), falhas em `tool_call_state` e timestamps
 epoch-milissegundos — detalhes que um dump SQLite genérico perde.
 
 ## Instalação
+
+Requer Python ≥ 3.10 e `pipx`. **Windows (PowerShell):** instale `pipx` com `py -m pip install --user pipx`, execute `py -m pipx ensurepath` e reabra o terminal. **Linux (Debian/Ubuntu):** execute `sudo apt install pipx python3-venv` e `pipx ensurepath`; reabra o terminal. Noutras distribuições Linux, instale `pipx` pelo gestor de pacotes.
 
 ```bash
 pipx install "devin-history @ git+https://github.com/Icaro0310/devin-history.git"
@@ -70,13 +74,27 @@ As notas são idempotentes: cada ficheiro embute o marcador `last_activity`
 da sessão, por isso re-runs saltam sessões inalteradas (`--all` força
 re-escrita, `--dry-run` pré-visualiza).
 
+## Funciona só com o Devin (modo Devin-only)
+
+Tudo o que o devin-history faz acontece na tua máquina: lê o `sessions.db` e
+grava exports em Markdown/JSON numa pasta à tua escolha. Sem rede, sem
+serviço externo — o layout estilo Obsidian é só um formato; o Obsidian em si
+não é necessário.
+
+Um cuidado em máquinas restritas: os exports contêm prompts, caminhos e
+comandos em bruto, que podem incluir segredos. Mantém a pasta de export
+privada, define uma retenção e corre o
+[`devin-redact`](https://github.com/Icaro0310/devin-redact) antes de partilhar
+um export.
+
 ## Suporte de plataformas
 
 Testado em **Windows e Linux** (o CI corre em `windows-latest` +
-`ubuntu-latest`). As stores locais do Devin são auto-detetadas por
-plataforma — `%APPDATA%` no Windows, `~/.config/devin/` (XDG) no Linux,
-`~/Library/Application Support/devin/` no macOS. Override com
-`--sessions-db` (ver Uso).
+`ubuntu-latest`). A base CLI é auto-detetada: `%APPDATA%/devin/cli/sessions.db`
+no Windows e `$XDG_DATA_HOME/devin/cli/sessions.db` no Linux (por omissão
+`~/.local/share/devin/cli/sessions.db`). A localização antiga `~/.config/devin`
+também é verificada. macOS usa `~/Library/Application Support/devin/`.
+Override com `--sessions-db` (ver Uso).
 
 ## Limitações
 

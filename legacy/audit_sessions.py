@@ -30,7 +30,7 @@ GUI_DB_DIR = HOME / "AppData/Roaming/devin/User/acp-messages"
 LOCKS_DIR = HOME / "AppData/Roaming/devin/cli/session_locks"
 LOGS_DIR = HOME / "AppData/Roaming/devin/cli/logs"
 SUMMARIES_DIR = HOME / "AppData/Roaming/devin/cli/summaries"
-WS = Path(r"C:\Users\Utilizador\Desktop\feat\personal-agent-system")
+WS = Path(os.environ.get("AUDIT_WORKSPACE", Path(__file__).resolve().parent.parent))
 MEM_DIR = WS / ".devin" / "memory"
 
 SECRET_PAT = re.compile(
@@ -56,7 +56,7 @@ def classify_task(title: str, prompt: str) -> str:
         ("Testes", r"\b(test|teste|pytest|coverage|cobertura|e2e|spec)\b"),
         ("Documentação", r"\b(doc|readme|documenta|codemap|diagram)\b"),
         ("Migração", r"\b(migrat|upgrade|migrar)\b"),
-        ("Setup / infra", r"\b(setup|install|instal|config|deploy|infra|hook|mcp\b|schedul|watchdog|startup|tunnel|túnel|vm\b|ollama|gateway|slack|notifica|pipeline)\b"),
+        ("Setup / infra", r"\b(setup|install|instal|config|deploy|infra|hook|mcp\b|schedul|watchdog|startup|tunnel|túnel|vm\b|gateway|slack|notifica|pipeline)\b"),
         ("Investigação / debugging", r"\b(investig|debug|audit|auditoria|analis|analise|porque|porquê|why|explor|entende|understand|list|lista|review|revis|verific|check|diagnost|mapeia|inventár)\b"),
         ("Feature / implementação", r"\b(add|implement|creat|cria|faz|build|desenvolv|feat|novo|nova|gera|export|relat|automat|adiciona|melhora|implementa)\b"),
     ]
@@ -471,7 +471,7 @@ def render_report(rows, orphan_locks, mem_sessions, log_info, n_summaries):
         A("")
 
     A("### 3.4 Por Usuário / Workspace\n")
-    A("**Usuário único:** `Utilizador` (máquina local Windows — sem multi-tenant). "
+    A("**Usuário único:** máquina local Windows — sem multi-tenant. "
       "Workspaces = `working_directory`:\n")
     A("| Workspace | Sessions |")
     A("|---|---|")
