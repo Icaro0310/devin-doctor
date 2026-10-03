@@ -40,6 +40,8 @@ do `devin-internals-spec`.
 
 ## Instalação
 
+Requer Python ≥ 3.10 e `pipx`. **Windows (PowerShell):** instale `pipx` com `py -m pip install --user pipx`, execute `py -m pipx ensurepath` e reabra o terminal. **Linux (Debian/Ubuntu):** execute `sudo apt install pipx python3-venv` e `pipx ensurepath`; reabra o terminal. Noutras distribuições Linux, instale `pipx` pelo gestor de pacotes.
+
 ```bash
 pipx install "devin-graph @ git+https://github.com/Icaro0310/devin-graph.git"
 ```
@@ -49,8 +51,8 @@ pipx install "devin-graph @ git+https://github.com/Icaro0310/devin-graph.git"
 ## Uso
 
 ```bash
-# constrói o grafo (auto-deteta %APPDATA%/devin/cli/sessions.db) — seguro
-# re-executar: sessões sem alterações são saltadas
+# constrói o grafo (auto-deteta sessions.db por SO) — seguro re-executar:
+# sessões sem alterações são saltadas
 devin-graph build --graph graph.db
 
 # consultas prontas
@@ -67,12 +69,20 @@ A correspondência é tolerante (`src/app.py` encontra
 `/repo/alpha/src/app.py`); tudo tem `--json`. A DB de origem é aberta em
 `mode=ro` e nunca é escrita — os testes garantem que o hash não muda.
 
+## Funciona só com o Devin (modo Devin-only)
+
+O devin-graph constrói o `graph.db` localmente a partir das stores de sessão
+do Devin — o pipeline inteiro é offline. Nota que a base de dados derivada
+contém o mesmo conteúdo sensível das sessões (prompts, caminhos, comandos):
+mantém-na privada como os originais.
+
 ## Suporte de plataformas
 
 Testado em **Windows e Linux** (o CI corre em `windows-latest` +
-`ubuntu-latest`). As stores locais do Devin são auto-detetadas por
-plataforma — `%APPDATA%` no Windows, `~/.config/devin/` (XDG) no Linux.
-Passa um caminho explícito para override (ver Uso).
+`ubuntu-latest`). A base CLI é auto-detetada: `%APPDATA%/devin/cli/sessions.db`
+no Windows e `$XDG_DATA_HOME/devin/cli/sessions.db` no Linux (por omissão
+`~/.local/share/devin/cli/sessions.db`). A localização antiga `~/.config/devin`
+também é verificada. Usa `--sessions-db` para sobrepor.
 
 ## Limitações
 

@@ -37,6 +37,8 @@ build. Schema drift is gated by `devin-internals-spec`'s version detector.
 
 ## Install
 
+Python ≥ 3.10 and `pipx` are required. **Windows (PowerShell):** install `pipx` with `py -m pip install --user pipx`, run `py -m pipx ensurepath`, then reopen the terminal. **Linux (Debian/Ubuntu):** run `sudo apt install pipx python3-venv` and `pipx ensurepath`; reopen the terminal. Other Linux distributions should install `pipx` using their package manager.
+
 ```bash
 pipx install "devin-graph @ git+https://github.com/Icaro0310/devin-graph.git"
 ```
@@ -46,7 +48,7 @@ pipx install "devin-graph @ git+https://github.com/Icaro0310/devin-graph.git"
 ## Usage
 
 ```bash
-# build the graph (auto-detects %APPDATA%/devin/cli/sessions.db) — safe to
+# build the graph (auto-detects the Devin sessions.db for your OS) — safe to
 # re-run: unchanged sessions are skipped
 devin-graph build --graph graph.db
 
@@ -64,12 +66,20 @@ Matching is forgiving (`src/app.py` finds `/repo/alpha/src/app.py`);
 everything has `--json`. The source DB is opened `mode=ro` and never
 written — tests assert its hash is unchanged.
 
+## Works with Devin alone (Devin-only mode)
+
+devin-graph builds `graph.db` locally from Devin's session stores — the whole
+pipeline is offline. Note that the derived database contains the same
+sensitive content as the sessions themselves (prompts, paths, commands):
+keep it private like the originals.
+
 ## Platform support
 
 Tested on **Windows and Linux** (`windows-latest` + `ubuntu-latest` in CI).
-Devin's local stores are auto-detected per platform — `%APPDATA%` on
-Windows, `~/.config/devin/` (XDG) on Linux. Pass an explicit path to
-override (see Usage).
+The CLI session DB is auto-detected: `%APPDATA%/devin/cli/sessions.db` on
+Windows and `$XDG_DATA_HOME/devin/cli/sessions.db` on Linux (default
+`~/.local/share/devin/cli/sessions.db`). A legacy `~/.config/devin` location
+is also checked. Pass `--sessions-db` to override.
 
 ## Limitations
 
