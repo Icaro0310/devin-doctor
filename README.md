@@ -138,6 +138,51 @@ pytest
 Fixtures-first TDD — see [docs/SPEC.md](docs/SPEC.md) for the data
 contracts and [CONTRIBUTING.md](CONTRIBUTING.md) for ground rules.
 
+## When to use this
+
+- You have weeks of Devin sessions and want a per-repo rollup — which
+  projects exist, their session counts, latest activity, status — without
+  scrolling the app's flat session list.
+- You want Markdown status reports or a JSON registry to feed docs,
+  dashboards or other tools (`devin-pm registry --out registry.json`).
+- You track milestones and want them detected automatically from
+  `milestone: <name>` session titles, or curated in a `milestones.json`
+  file at the project root.
+- You want strictly read-only rollups that fail loudly on unknown
+  `sessions.db` schema versions instead of silently misreading them.
+
+## When NOT to use this
+
+- Your sessions live in the GUI/Desktop `acp-messages/*.db` stores — M1
+  covers CLI sessions only.
+- You need reliable cost or billing rollups — the DB has no documented cost
+  field; reports show `-`/`null` where it is unknown, never an estimate.
+- You need live session state — devin-pm reports on the `sessions.db`
+  snapshot at read time; for live activity see
+  [`devin-office`](https://github.com/Icaro0310/devin-office).
+
+## FAQ
+
+**What is devin-pm?** A CLI that turns Devin's flat `sessions.db` into a
+project-management view: per-repository status tables, Markdown reports,
+milestone tracking and a machine-readable registry. It is read-only — the
+only files it writes are the reports you ask for.
+
+**How are sessions grouped into projects?** By working directory: each
+session records where it ran, and sessions sharing that path become one
+project. Grouping is string-based, so paths differing only by case are
+distinct projects (correct on POSIX, a documented edge on Windows).
+
+**How do I mark a milestone?** Name a session's title `milestone: <name>` —
+that marks it in the session's project, and archiving (hiding) the session
+marks it done. Alternatively, list milestones in `milestones.json` at the
+project root; file entries win on name collision.
+
+**Why does my report show `-` for cost?** Because `sessions.db` does not
+record billing in a documented field. Where no recognizable cost exists,
+devin-pm reports `null`/`-` — unknown — rather than printing a misleading
+zero.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
