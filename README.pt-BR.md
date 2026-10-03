@@ -120,6 +120,27 @@ Os testes correm inteiramente sobre fixtures sintéticas geradas por
 `scripts/make_fixture.py <dir>` cria um data dir de fixture para corridas
 manuais.
 
+## Quando usar
+
+- O Devin está a comportar-se mal — histórico em falta, erros de auth, pressão de disco — e você quer um comando para localizar a causa.
+- Você quer um health check antes de depurar: cinco checks (stores, schema, saúde dos dados, config, disco), cada um com uma sugestão `fix:`.
+- Você precisa de um relatório pronto a colar num bug report: `devin-doctor report --md`.
+- Você está numa máquina restrita: é read-only e nunca contacta a rede.
+
+## Quando NÃO usar
+
+- Você quer que ele repare coisas — é read-only; `--fix` para itens seguros está planeado.
+- O seu schema do Devin é mais recente que v17 — ele reporta FAIL "unknown version" em vez de ler mal.
+- O Devin está a correr e as DBs estão bloqueadas — feche o Devin e re-execute para limpar `SQLITE_BUSY`.
+
+## FAQ
+
+**Como verifico se os dados locais da minha instalação do Devin estão saudáveis?** Execute `devin-doctor check`. Ele inspeciona `sessions.db`, `acp-messages/*.db`, `state.vscdb`, `credentials.toml` e o uso de disco, imprimindo `PASS`/`WARN`/`FAIL` por check com uma sugestão `fix:`. O exit code é `0` a menos que algo falhe com FAIL.
+
+**O devin-doctor é seguro? Vai modificar os meus dados?** É estritamente read-only — abre os stores do Devin para leitura, não escreve nada no diretório de dados e nunca contacta um serviço de rede. O check de config mascara valores de credenciais no output. Correções são sugeridas como texto, nunca aplicadas.
+
+**O que significa "unknown schema version"?** O schema do `sessions.db` do Devin é versionado; o devin-doctor entende v15–v17 via devin-internals-spec. Uma versão mais recente produz um FAIL deliberado em vez de uma leitura silenciosa errada — atualize a ferramenta ou o devin-internals-spec.
+
 ## Licença
 
 MIT — vê [LICENSE](LICENSE).
