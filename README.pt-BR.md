@@ -131,6 +131,29 @@ pytest
 Fixtures são geradas em tempo de teste pelo `devin_internals.fixtures`
 (DDL v17 real, linhas sintéticas) — sem fixtures binárias commitadas.
 
+## Quando usar
+
+- Você quer o seu histórico de sessões Devin fora da app antes que as sessões desapareçam ou sejam podadas — não há botão de export embutido.
+- Você mantém um vault Obsidian (ou qualquer pasta Markdown) e quer uma nota por sessão mais um `index.md`, idempotente entre re-execuções.
+- Você precisa de uma auditoria de vida inteira: agrupamentos por status, tipo de tarefa, projeto e período, mais deteção de anomalias (sessões vazias, órfãs, de longa duração).
+- Você quer um export determinístico e read-only que possa agendar — nada é alguma vez escrito de volta nos stores do Devin.
+
+## Quando NÃO usar
+
+- Você precisa de pesquisa rankeada instantânea em vez de um export estático — use o [`devin-search`](https://github.com/Icaro0310/devin-search) sobre a mesma base de dados.
+- As suas sessões vivem nos stores `acp-messages/*.db` do GUI/Desktop — o M1 cobre apenas o `sessions.db` do CLI.
+- O schema do seu `sessions.db` é mais recente que v17 — a ferramenta recusa ruidosamente em vez de ler mal; atualize o `devin-internals-spec` primeiro.
+
+## FAQ
+
+**O que é o devin-history?** Um CLI que exporta o `sessions.db` local do Devin para notas Markdown prontas para Obsidian, um dump JSON ou um relatório de auditoria. Deteta a base automaticamente no Windows, Linux e macOS e nunca escreve nos stores do Devin.
+
+**É seguro re-executar o export?** Sim. Cada nota embute o marcador `last_activity` da sessão, por isso sessões inalteradas são saltadas nas re-execuções. `--all` força reescrita e `--dry-run` faz preview sem escrever.
+
+**Ele envia os meus dados de sessão para algum lado?** Não. Tudo acontece na sua máquina: lê a base local e escreve ficheiros numa pasta à sua escolha. Note que os exports contêm prompts e caminhos crus — mantenha a pasta de output privada ou corra `devin-redact` antes de partilhar.
+
+**Porque é que ele se recusa a ler a minha base de dados?** Porque a versão do schema está fora do intervalo suportado v15–v17. O store já teve 17 migrações; o devin-history falha ruidosamente em versões desconhecidas em vez de interpretar mal o seu histórico em silêncio.
+
 ## Licença
 
 MIT — vê [LICENSE](LICENSE).
