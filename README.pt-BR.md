@@ -117,6 +117,27 @@ real, linhas sintéticas) — nenhum fixture binário é commitado. Vê
 [docs/SPEC.md](docs/SPEC.md) para o modelo do grafo e
 [STATUS.md](STATUS.md) para o roadmap.
 
+## Quando usar
+
+- Você precisa de perguntas entre sessões: que sessões tocaram o ficheiro X, de que ferramentas o projeto Y depende, que projetos partilham ficheiros.
+- Você quer arestas da verdade terrestre — payloads reais de `tool_call_state`, não heurísticas sobre texto de chat.
+- Você quer um export de grafo para visualizar atividade do agente (`devin-graph export --format json` produz um dump pronto para D3).
+- Você quer builds incrementais — re-executar `devin-graph build` salta sessões inalteradas.
+
+## Quando NÃO usar
+
+- Você precisa de um índice de código — os nós são ficheiros que o agente *tocou*, não conteúdo do repo; não há conhecimento de símbolos/AST.
+- Você precisa de pesquisa de conteúdo de mensagens (use `devin-search`) ou métricas de uso/custo (use `devin-metrics`).
+- Você precisa de dados de sessões GUI — o M1 cobre apenas o `sessions.db` do CLI; `acp-messages` está planeado para o M2.
+
+## FAQ
+
+**O que é o devin-graph?** Uma ferramenta local que transforma a base de sessões do Devin num grafo de conhecimento: sessões, projetos, ficheiros e ferramentas tornam-se nós, com arestas extraídas de payloads reais de tool calls. Consulta-o com `devin-graph query file|tool|project` e exporta-o como JSON para visualização.
+
+**Como o devin-graph é diferente do devin-search?** O devin-search encontra texto: hits full-text rankeados dentro do conteúdo das sessões. O devin-graph encontra estrutura: que sessões tocaram que ficheiros, que ferramentas cada projeto usa, e que projetos partilham ficheiros — relações, não correspondências de texto.
+
+**Ele escreve nas bases de dados do Devin?** Não. O `sessions.db` de origem é aberto `mode=ro` e nunca escrito — a suite de testes garante que o seu hash fica inalterado. O único ficheiro que o devin-graph cria é o seu próprio `graph.db`.
+
 ## Licença
 
 MIT — vê [LICENSE](LICENSE).
