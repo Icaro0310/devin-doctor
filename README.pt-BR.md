@@ -45,8 +45,10 @@ ferramenta mantida sobre o parser `SessionsStore` do
 
 ## Instalação
 
+Requer Python ≥ 3.10 e `pipx`. **Windows (PowerShell):** instale `pipx` com `py -m pip install --user pipx`, execute `py -m pipx ensurepath` e reabra o terminal. **Linux (Debian/Ubuntu):** execute `sudo apt install pipx python3-venv` e `pipx ensurepath`; reabra o terminal. Noutras distribuições Linux, instale `pipx` pelo gestor de pacotes.
+
 ```bash
-pipx install devin-pm   # quando publicado no PyPI
+pipx install "devin-pm @ git+https://github.com/Icaro0310/devin-pm.git"
 ```
 
 Para desenvolvimento:
@@ -90,6 +92,14 @@ de nome.
 ### Códigos de saída
 
 `0` ok · `1` erro de leitura/parse · `2` db em falta / projeto desconhecido.
+
+## Funciona só com o Devin (modo Devin-only)
+
+O devin-pm calcula os relatórios diretamente do `sessions.db` local
+(`%APPDATA%\devin\cli\sessions.db` no Windows,
+`~/.local/share/devin/cli/sessions.db` no Linux). A saída vai para o terminal
+ou para um ficheiro local — nada externo é contactado, e não há VM, fila de
+mensagens ou servidor de modelos envolvido.
 
 ## Suporte de plataformas
 

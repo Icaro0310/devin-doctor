@@ -45,8 +45,10 @@ and gives you per-repo status, milestones and a registry.*
 
 ## Install
 
+Python ≥ 3.10 and `pipx` are required. **Windows (PowerShell):** install `pipx` with `py -m pip install --user pipx`, run `py -m pipx ensurepath`, then reopen the terminal. **Linux (Debian/Ubuntu):** run `sudo apt install pipx python3-venv` and `pipx ensurepath`; reopen the terminal. Other Linux distributions should install `pipx` using their package manager.
+
 ```bash
-pipx install devin-pm   # once published to PyPI
+pipx install "devin-pm @ git+https://github.com/Icaro0310/devin-pm.git"
 ```
 
 For development:
@@ -87,6 +89,14 @@ File entries win over session-detected ones on name collision.
 ### Exit codes
 
 `0` ok · `1` read/parse error · `2` missing db / unknown project.
+
+## Works with Devin alone (Devin-only mode)
+
+devin-pm computes its reports straight from the local `sessions.db`
+(`%APPDATA%\devin\cli\sessions.db` on Windows,
+`~/.local/share/devin/cli/sessions.db` on Linux). Output goes to your
+terminal or a local file — nothing external is contacted, and no VM, message
+queue or model server is involved.
 
 ## Platform support
 
