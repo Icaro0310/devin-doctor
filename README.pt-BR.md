@@ -142,6 +142,29 @@ pytest
 TDD fixtures-first — vê [docs/SPEC.md](docs/SPEC.md) para os contratos de
 dados e [CONTRIBUTING.md](CONTRIBUTING.md) para as regras base.
 
+## Quando usar
+
+- Você tem semanas de sessões Devin e quer um rollup por repo — que projetos existem, contagens de sessões, atividade mais recente, status — sem percorrer a lista plana de sessões da app.
+- Você quer relatórios de status em Markdown ou um registry JSON para alimentar docs, dashboards ou outras ferramentas (`devin-pm registry --out registry.json`).
+- Você acompanha milestones e quer que sejam detetados automaticamente de títulos de sessão `milestone: <name>`, ou curados num ficheiro `milestones.json` na raiz do projeto.
+- Você quer rollups estritamente read-only que falham ruidosamente em versões de schema `sessions.db` desconhecidas em vez de as lerem mal em silêncio.
+
+## Quando NÃO usar
+
+- As suas sessões vivem nos stores `acp-messages/*.db` do GUI/Desktop — o M1 cobre apenas sessões CLI.
+- Você precisa de rollups fiáveis de custo ou billing — a DB não tem campo de custo documentado; os relatórios mostram `-`/`null` onde é desconhecido, nunca uma estimativa.
+- Você precisa de estado de sessões ao vivo — o devin-pm reporta sobre o snapshot do `sessions.db` no momento da leitura; para atividade ao vivo veja o [`devin-office`](https://github.com/Icaro0310/devin-office).
+
+## FAQ
+
+**O que é o devin-pm?** Um CLI que transforma o `sessions.db` plano do Devin numa vista de gestão de projetos: tabelas de status por repositório, relatórios Markdown, tracking de milestones e um registry legível por máquina. É read-only — os únicos ficheiros que escreve são os relatórios que pede.
+
+**Como as sessões são agrupadas em projetos?** Por diretório de trabalho: cada sessão regista onde correu, e sessões que partilham esse caminho tornam-se um projeto. O agrupamento é por string, por isso caminhos que diferem só em maiúsculas são projetos distintos (correto em POSIX, um edge documentado no Windows).
+
+**Como marco um milestone?** Dê a um título de sessão o nome `milestone: <name>` — isso marca-o no projeto da sessão, e arquivar (esconder) a sessão marca-o como feito. Em alternativa, liste milestones em `milestones.json` na raiz do projeto; entradas do ficheiro vencem em colisão de nomes.
+
+**Porque o meu relatório mostra `-` para custo?** Porque o `sessions.db` não regista billing num campo documentado. Onde não existe custo reconhecível, o devin-pm reporta `null`/`-` — desconhecido — em vez de imprimir um zero enganador.
+
 ## Licença
 
 MIT — vê [LICENSE](LICENSE).
