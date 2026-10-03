@@ -119,6 +119,45 @@ pytest
 Fixtures are generated at test time by `devin_internals.fixtures` (real
 v17 DDL, synthetic rows) — no binary fixtures are committed.
 
+## When to use this
+
+- You remember Devin ran a command, hit an error, touched a file, or made a
+  decision, and scrolling sessions one by one is too slow.
+- You want ranked results tagged by role (user / assistant / tool call) with
+  a `ref` back to the exact source row.
+- Your session history must stay on disk — the index is fully local, no
+  telemetry, no network calls.
+- You want incremental indexing: re-running `devin-search index` only picks
+  up new rows.
+
+## When NOT to use this
+
+- You need semantic or synonym-aware search — M1 is keyword BM25 only;
+  embeddings are an opt-in M2 candidate.
+- You need session *analytics* (cost, tokens, activity) — use `devin-metrics`;
+  or relationship queries — use `devin-graph`.
+- Your `sessions.db` schema is outside v15–v17 — indexing refuses loudly
+  rather than misreading it.
+
+## FAQ
+
+**What is devin-search?** A local full-text search engine over your Devin
+session history. It indexes Devin's SQLite stores with FTS5/BM25 and answers
+queries like `devin-search query "kubectl delete pod"` in under a second,
+with results tagged by role and linked back to the source row.
+
+**Does devin-search send my session data anywhere?** No. Everything runs
+locally: it reads Devin's stores read-only and writes a single `search.db`
+index next to your data. There are no network calls and no telemetry.
+
+**Does it write to or modify Devin's databases?** No. Devin's stores are
+opened read-only by design; the only file devin-search creates is its own
+`search.db` index.
+
+**How is this different from `devin-history`?** devin-history exports
+sessions to static Markdown/JSON files. devin-search complements it with
+instant ranked lookup across all sessions, without exporting anything.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

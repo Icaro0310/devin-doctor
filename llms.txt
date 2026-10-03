@@ -1,0 +1,29 @@
+# devin-search
+
+> Full-text search across all Devin session history: find a command, error message, file path, or decision from months ago in under a second.
+
+devin-search solves the problem that Devin stores your entire session history in local SQLite stores (`sessions.db`, `acp-messages/*.db`) but offers no way to search across them. It builds a local FTS5/BM25 index over those stores so you can run ranked, role-tagged queries (user prompts vs assistant replies vs tool calls) with a `ref` back to the exact source row. It is for Devin CLI/Desktop users who need instant recall over their own session history. Fully local and read-only: nothing is sent anywhere, and the index is the only file it writes. Unofficial community tooling, not affiliated with Cognition AI.
+
+## Docs
+
+- [README](https://github.com/Icaro0310/devin-search/blob/main/README.md): full documentation
+
+## Key commands
+
+- `pipx install "devin-search @ git+https://github.com/Icaro0310/devin-search.git"`: install (Python >= 3.10)
+- `devin-search index`: build or incrementally update the search index (auto-detects Devin's stores)
+- `devin-search query "kubectl delete pod"`: full-text search across all indexed sessions
+- `devin-search query "TypeError" --role assistant --project myrepo`: filter by role, project, date (`--since`), `--limit`, `--json`
+- `devin-search index --rebuild`: drop and rebuild the index from scratch
+- `pytest`: test suite (fixtures generated at test time)
+
+## When to use / when not
+
+- Use when: you remember Devin ran a command, hit an error, or made a decision and want to find it fast; you need ranked search over all sessions rather than per-session scrolling; you want results tagged by role and linked back to the source row; your history must stay fully local.
+- Not when: you need semantic/synonym search (M1 is keyword BM25 only; embeddings are an M2 candidate); your `sessions.db` schema is outside v15-v17 (indexing fails loudly); you need session analytics or cost data (use devin-metrics) or a relationship graph (use devin-graph); you want to search anything other than Devin's own stores.
+
+## Related
+
+- [devin-ecosystem](https://icaro0310.github.io/): the 20+ tool ecosystem this belongs to
+- [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the schema/parsers this builds on
+- [devin-history](https://github.com/Icaro0310/devin-history): exports sessions to Markdown/JSON (static dump vs ranked search)
