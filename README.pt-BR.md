@@ -45,6 +45,8 @@ de ler errado em silêncio.
 
 ## Instalação
 
+Requer Python ≥ 3.10 e `pipx`. **Windows (PowerShell):** instale `pipx` com `py -m pip install --user pipx`, execute `py -m pipx ensurepath` e reabra o terminal. **Linux (Debian/Ubuntu):** execute `sudo apt install pipx python3-venv` e `pipx ensurepath`; reabra o terminal. Noutras distribuições Linux, instale `pipx` pelo gestor de pacotes.
+
 ```bash
 pipx install "devin-search @ git+https://github.com/Icaro0310/devin-search.git"
 ```
@@ -70,12 +72,22 @@ Os hits aparecem como `WHEN · ROLE · PROJECT · SESSION · SNIPPET` com o matc
 entre `«»`; cada hit traz um `ref` (ex.: `node:1234`, `acp:file.db:7`) que
 aponta para a linha exata da fonte.
 
+## Funciona só com o Devin (modo Devin-only)
+
+O devin-search constrói e consulta um índice totalmente local sobre as stores
+de sessão do Devin. Nada é enviado para lado nenhum; o índice vive no teu
+disco junto dos dados que cobre.
+
 ## Suporte de plataformas
 
 Testado em **Windows e Linux** (o CI corre em `windows-latest` +
-`ubuntu-latest`). As stores locais do Devin são auto-detetadas por
-plataforma — `%APPDATA%` no Windows, `~/.config/devin/` (XDG) no Linux.
-Passa um caminho explícito para override (ver Uso).
+`ubuntu-latest`). A base CLI é auto-detetada a partir de
+`%APPDATA%/devin/cli/sessions.db` no Windows e
+`$XDG_DATA_HOME/devin/cli/sessions.db` no Linux (por omissão
+`~/.local/share/devin/cli/sessions.db`). Os logs ACP são procurados em
+`$XDG_CONFIG_HOME/Devin/User/acp-messages` (por omissão
+`~/.config/Devin/User/acp-messages`). A estrutura antiga `~/.config/devin`
+também é verificada. Usa `--sessions-db` ou `--acp-dir` para sobrepor.
 
 ## Limitações
 
