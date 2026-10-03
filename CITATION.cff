@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: devin-doctor
+authors:
+  - family-names: Galvao
+    given-names: Icaro
+url: "https://github.com/Icaro0310/devin-doctor"
+repository-code: "https://github.com/Icaro0310/devin-doctor"
+license: MIT
+abstract: "Read-only diagnostics CLI for a Devin Desktop installation: checks stores, schema versions, config and disk usage, with fix suggestions."
+keywords:
+  - ai-agents
+  - devin
+  - diagnostics
+  - health-check
+  - sqlite
+  - cli

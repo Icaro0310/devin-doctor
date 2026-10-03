@@ -1,0 +1,24 @@
+# devin-doctor
+
+> Diagnostics CLI for a Devin Desktop installation — one command that checks local stores, schema versions, config files and disk usage, then prints a health report with concrete fix suggestions. `brew doctor` for Devin.
+
+Devin keeps local state — a versioned `sessions.db`, one `acp-messages/*.db` per GUI session, a `state.vscdb` KV store, `credentials.toml`, JSONC config — and nothing warns you when it breaks or bloats. devin-doctor runs five read-only checks (stores, schema, health-of-data, config, disk), each printing `PASS`/`WARN`/`FAIL`, a one-line finding and a `fix:` suggestion. Built on devin-internals-spec, so it understands the `refinery_schema_history` ledger, per-session stores and `.devin/` hooks/MCP format.
+
+## Docs
+- [README](https://github.com/Icaro0310/devin-doctor/blob/main/README.md): full documentation
+- [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the store schema/parsers this builds on
+
+## Key commands
+- `devin-doctor check`: diagnose the default Devin data dir
+- `devin-doctor check --data-dir <path> --config-dir <path>`: diagnose stores in non-default locations
+- `devin-doctor check --json`: machine-readable output
+- `devin-doctor report --md`: markdown report, for pasting into issues
+- `pipx install "devin-doctor @ git+https://github.com/Icaro0310/devin-doctor.git"`: install the CLI
+- `python -m pytest`: run the test suite (synthetic fixtures only)
+
+## When to use / when not
+- Use when: missing history, auth errors or disk pressure hint at broken Devin local state; you want a first-pass health check before debugging; you need a paste-able report for an issue.
+- Not when: you want it to fix things (read-only; `--fix` is planned); the Devin schema is newer than v17 (reports "unknown version" FAIL by design); Devin is running and stores are locked (`SQLITE_BUSY` — close Devin and re-run).
+
+## Related
+- [devin-ecosystem](https://icaro0310.github.io/): the 20+ tool ecosystem this belongs to
