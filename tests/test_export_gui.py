@@ -215,6 +215,9 @@ def test_cli_export_gui_auto_detects_default(monkeypatch, tmp_path, capsys):
     path = cfg / "devin" / "User" / "globalStorage" / "state.vscdb"
     create_vscdb(path, gui_items())
     monkeypatch.setenv("XDG_CONFIG_HOME", str(cfg))
+    # Windows auto-detect reads %APPDATA% (XDG is ignored there); point both
+    # at the synthetic config root so the lookup succeeds on either platform
+    monkeypatch.setenv("APPDATA", str(cfg))
     monkeypatch.setattr(
         "devin_history.paths.Path.home", lambda: tmp_path / "nohome")
 
