@@ -14,9 +14,11 @@ from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from devin_history import identity
+from devin_history import identity, vscdb
 from devin_history.format import (
     project_name,
+    render_gui_index_json,
+    render_gui_session_md,
     render_index_json,
     render_index_md,
     render_session_md,
@@ -29,6 +31,7 @@ MIN_USEFUL_NODES = 2
 FORMATS = ("md", "json")
 
 _MARKER_MD = re.compile(r"^last_activity:\s*(\d+)", re.M)
+_UNSAFE_NAME = re.compile(r"[^A-Za-z0-9._-]+")
 
 
 @dataclass(frozen=True)
@@ -50,6 +53,27 @@ class ExportResult:
     skipped_unchanged: list[str] = field(default_factory=list)
     skipped_empty: list[str] = field(default_factory=list)
     index_entries: list[IndexEntry] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class GuiIndexEntry:
+    date: str
+    filename: str
+    slug: str
+    title: str
+    backend: str
+    project: str
+    workspace_id: str | None
+    last_updated: int | float | None
+    last_accessed: int | float | None
+
+
+@dataclass
+class GuiExportResult:
+    out_dir: Path
+    written: list[str] = field(default_factory=list)
+    skipped_unchanged: list[str] = field(default_factory=list)
+    index_entries: list[GuiIndexEntry] = field(default_factory=list)
 
 
 def _exported_marker(path: Path, fmt: str) -> int | None:
@@ -146,5 +170,77 @@ def export_sessions(
             else render_index_json(result.index_entries, prov)
         )
         _write_if_changed(out_dir / f"index.{fmt}", index)
+
+    return result
+
+
+def _safe_name(slug: str) -> str:
+    return _UNSAFE_NAME.sub("-", slug).strip("-.") or "session"
+
+
+def export_gui_sessions(
+    store,
+    out_dir: str | Path,
+    *,
+    force: bool = False,
+    dry_run: bool = False,
+) -> GuiExportResult:
+    """Export GUI session metadata from ``state.vscdb`` to ``out_dir``.
+
+    One Markdown note per ``windsurfSpace.sessionWorkspace/*`` binding plus a
+    root ``index.json``. Idempotent via the ``last_activity`` frontmatter
+    marker (= the binding's ``lastUpdated``); ``--all``/``--dry-run`` mirror
+    :func:`export_sessions`. Never writes to the source database — the caller
+    hands in a read-only ``StateVscdbStore``.
+    """
+    out_dir = Path(out_dir)
+    result = GuiExportResult(out_dir=out_dir)
+    if not dry_run:
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+    prov = identity.provenance()
+    sessions = sorted(
+        vscdb.gui_sessions(store),
+        key=lambda g: (g.last_updated or g.last_accessed or 0, g.slug),
+    )
+    used_names: set[str] = set()
+    for gs in sessions:
+        marker = int(gs.last_updated or gs.last_accessed or 0)
+        date = (
+            fmt_ts(gs.last_updated or gs.last_accessed, "%Y-%m-%d")
+            or "undated"
+        )
+        filename = f"{date}_{_safe_name(gs.slug)}.md"
+        if filename in used_names:  # same slug under another backend
+            filename = f"{date}_{_safe_name(gs.backend)}-{_safe_name(gs.slug)}.md"
+        used_names.add(filename)
+        fpath = out_dir / filename
+
+        if not force and _exported_marker(fpath, "md") == marker:
+            result.skipped_unchanged.append(gs.slug)
+        else:
+            if not dry_run:
+                _write_if_changed(fpath, render_gui_session_md(gs, prov))
+            result.written.append(filename)
+
+        result.index_entries.append(
+            GuiIndexEntry(
+                date=date,
+                filename=filename,
+                slug=gs.slug,
+                title=(gs.label or gs.slug).strip(),
+                backend=gs.backend,
+                project=project_name(gs.workspace_id),
+                workspace_id=gs.workspace_id,
+                last_updated=gs.last_updated,
+                last_accessed=gs.last_accessed,
+            )
+        )
+
+    if not dry_run:
+        _write_if_changed(
+            out_dir / "index.json",
+            render_gui_index_json(result.index_entries, prov),
+        )
 
     return result

@@ -1,11 +1,16 @@
 import json
 import sqlite3
+from pathlib import Path
 
 import pytest
 from devin_internals.fixtures import create_sessions_db
 from devin_internals.parsers import SessionsStore
 
 BASE_MS = 1_780_000_000_000
+
+ITEMTABLE_DDL = (
+    "CREATE TABLE ItemTable (key TEXT UNIQUE ON CONFLICT REPLACE, value BLOB)"
+)
 
 
 @pytest.fixture
@@ -16,6 +21,65 @@ def db_path(tmp_path):
 @pytest.fixture
 def store(db_path):
     with SessionsStore(db_path) as s:
+        yield s
+
+
+def create_vscdb(path, items):
+    """Synthetic ``state.vscdb``: an ``ItemTable`` with ``items`` key/values."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    con = sqlite3.connect(path)
+    with con:
+        con.execute(ITEMTABLE_DDL)
+        con.executemany(
+            "INSERT INTO ItemTable(key, value) VALUES (?, ?)",
+            list(items.items()),
+        )
+    con.close()
+    return path
+
+
+def gui_items(**overrides):
+    """Realistic ``windsurfSpace.*`` ItemTable contents for two GUI sessions."""
+    items = {
+        "windsurfSpace.sessionWorkspace/acp/canyon-newspaper": json.dumps({
+            "workspaceId": "/work/alpha",
+            "label": "Fix flaky test",
+            "folders": ["/work/alpha", "/work/shared"],
+            "lastUpdated": BASE_MS,
+        }),
+        "windsurfSpace.sessionWorkspace/ssh-remote/river-otter": json.dumps({
+            "workspaceId": "/srv/beta",
+            "label": "Deploy runbook",
+            "folders": ["/srv/beta"],
+            "lastUpdated": BASE_MS + 86_400_000,
+        }),
+        "windsurfSpace.sessionWorkspace/malformed": "{}",  # no slug → skip
+        "windsurfSpace.sessionWorkspace/acp/broken-json": "not json{",
+        "windsurfSpace.resourceToSpace": json.dumps({
+            "space-1": [
+                "vscode-cascade-editor:///cascade-acp/acp/canyon-newspaper"
+            ],
+        }),
+        "windsurfSpace.metadata": json.dumps({
+            "space-1": {"lastAccessed": BASE_MS + 5_000},
+        }),
+        "unrelated.key": json.dumps({"ignored": True}),
+    }
+    items.update(overrides)
+    return items
+
+
+@pytest.fixture
+def vscdb_path(tmp_path):
+    return create_vscdb(tmp_path / "state.vscdb", gui_items())
+
+
+@pytest.fixture
+def vstore(vscdb_path):
+    from devin_internals.parsers import StateVscdbStore
+
+    with StateVscdbStore(vscdb_path) as s:
         yield s
 
 

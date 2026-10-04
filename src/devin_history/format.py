@@ -17,7 +17,8 @@ from devin_history.times import duration_minutes, fmt_ts
 
 if TYPE_CHECKING:
     from devin_history.audit import AuditReport, SessionAudit
-    from devin_history.export import IndexEntry
+    from devin_history.export import GuiIndexEntry, IndexEntry
+    from devin_history.vscdb import GuiSession
     from devin_internals.parsers import Session, ToolCallState
 
 USER_CAP = 4000
@@ -220,6 +221,103 @@ def render_index_json(
              "tool_msgs": e.tool_msgs}
             for e in entries
         ]},
+        ensure_ascii=False,
+        indent=2,
+    ) + "\n"
+
+
+def render_gui_session_md(
+    session: "GuiSession",
+    prov: dict[str, str] | None = None,
+) -> str:
+    """One Obsidian-ready note for a GUI session (metadata only).
+
+    GUI sessions have no local transcript — the note carries the
+    session↔workspace binding stored in ``state.vscdb``.
+    """
+    prov_fm = "" if prov is None else (
+        f"\nmachine_id: {prov['machine_id']}\nprofile: {prov['profile']}"
+    )
+    accessed_fm = "" if session.last_accessed is None else (
+        f"\nlast_accessed: {int(session.last_accessed)}"
+    )
+    project = project_name(session.workspace_id)
+    title = (session.label or session.slug).strip()
+    updated = fmt_ts(session.last_updated)
+    accessed = fmt_ts(session.last_accessed)
+    folders = (
+        "\n".join(f"  - `{f}`" for f in session.folders)
+        if session.folders
+        else "  - _none recorded_"
+    )
+    return f"""---
+session_id: {session.slug}
+source: gui
+backend: {session.backend}
+project: {project}
+last_activity: {int(session.last_updated or 0)}{accessed_fm}
+tags: [session, devin, history, gui]{prov_fm}
+---
+
+# {title}
+
+> GUI session `{session.slug}` · backend **{session.backend}** · workspace `{session.workspace_id or '—'}`
+> lastUpdated {updated or '—'} · lastAccessed {accessed or '—'}
+
+## Workspace
+
+- **Workspace ID:** `{session.workspace_id or '—'}`
+- **Folders:**
+{folders}
+
+## Metadata
+
+| Field | Value |
+|---|---|
+| Slug | `{session.slug}` |
+| Label | {session.label or '—'} |
+| Backend | `{session.backend}` |
+| lastUpdated | {session.last_updated if session.last_updated is not None else '—'}{f" ({updated})" if updated else ""} |
+| lastAccessed | {session.last_accessed if session.last_accessed is not None else '—'}{f" ({accessed})" if accessed else ""} |
+| Space | `{session.space_id or '—'}` |
+
+---
+
+_GUI session metadata from `state.vscdb` — the GUI keeps no local transcript,
+so only the session/workspace binding is exportable._
+"""
+
+
+def gui_index_stats(entries: list["GuiIndexEntry"]) -> dict[str, Any]:
+    """Aggregate totals for the GUI ``index.json`` stats block."""
+    projects = Counter(e.project for e in entries)
+    backends = Counter(e.backend for e in entries)
+    dates = sorted(e.date for e in entries if e.date != "undated")
+    return {
+        "total": len(entries),
+        "date_first": dates[0] if dates else None,
+        "date_last": dates[-1] if dates else None,
+        "projects": dict(sorted(projects.items())),
+        "backends": dict(sorted(backends.items())),
+    }
+
+
+def render_gui_index_json(
+    entries: list["GuiIndexEntry"], prov: dict[str, str] | None = None
+) -> str:
+    """``index.json`` for the GUI export — provenance + stats + entries."""
+    return json.dumps(
+        {**({"provenance": prov} if prov else {}),
+         "source": "state.vscdb",
+         "stats": gui_index_stats(entries),
+         "sessions": [
+             {"date": e.date, "file": e.filename, "slug": e.slug,
+              "title": e.title, "backend": e.backend, "project": e.project,
+              "workspace_id": e.workspace_id,
+              "last_updated": e.last_updated,
+              "last_accessed": e.last_accessed}
+             for e in entries
+         ]},
         ensure_ascii=False,
         indent=2,
     ) + "\n"

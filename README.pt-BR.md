@@ -16,7 +16,8 @@
 
 Exporta e audita o histórico de sessões do Devin Desktop — transforma a
 `sessions.db` local em notas Markdown prontas para Obsidian, num dump JSON
-pesquisável e num relatório de auditoria.
+pesquisável e num relatório de auditoria. Os metadados das sessões GUI
+(`state.vscdb`) também são exportados como notas.
 
 ## O problema
 
@@ -75,8 +76,13 @@ devin-history export --out dump/ --format json
 # auditoria: agrupamentos por status/tipo/projeto/período + anomalias, CSV opcional
 devin-history audit --csv audit.csv
 
-# tudo tem --json; aponta para uma DB específica com --sessions-db
+# sessões GUI: notas de metadados (slug, workspace, folders, lastUpdated) +
+# index.json — o GUI não guarda transcript local, só os metadados existem
+devin-history export-gui --out ~/ObsidianVault/Sessions/gui
+
+# tudo tem --json; aponta para uma DB específica com --sessions-db/--vscdb
 devin-history audit --sessions-db caminho/para/sessions.db --json
+devin-history export-gui --vscdb caminho/para/state.vscdb --out gui-notes/
 ```
 
 As notas são idempotentes: cada ficheiro embute o marcador `last_activity`
@@ -85,6 +91,14 @@ re-escrita, `--dry-run` pré-visualiza). O `index.md`/`index.json` na raiz
 traz um bloco de estatísticas — total de sessões, intervalo de datas e
 totais por projeto e por tipo de mensagem (user/assistant/tool) — junto dos
 links agrupados.
+
+O `export-gui` lê o store Electron `state.vscdb` (auto-detetado em
+`User/globalStorage/` do diretório de config do Devin, override com
+`--vscdb`) e grava uma nota por binding `windsurfSpace.sessionWorkspace/*`:
+slug, label, backend, workspaceId, folders, `lastUpdated` e `lastAccessed`
+quando derivável via `windsurfSpace.resourceToSpace` +
+`windsurfSpace.metadata`. É read-only no `state.vscdb`, embute a mesma
+proveniência (`machine_id`/`profile`) e grava um `index.json`.
 
 ## Funciona só com o Devin (modo Devin-only)
 
@@ -106,7 +120,9 @@ Testado em **Windows e Linux** (o CI corre em `windows-latest` +
 no Windows e `$XDG_DATA_HOME/devin/cli/sessions.db` no Linux (por omissão
 `~/.local/share/devin/cli/sessions.db`). A localização antiga `~/.config/devin`
 também é verificada. macOS usa `~/Library/Application Support/devin/`.
-Override com `--sessions-db` (ver Uso).
+Override com `--sessions-db` (ver Uso). O `state.vscdb` do GUI é
+auto-detetado em `<config>/User/globalStorage/state.vscdb` (diretórios
+`Devin`/`devin`); override com `--vscdb`.
 
 ## Limitações
 
@@ -120,8 +136,11 @@ Override com `--sessions-db` (ver Uso).
   "interrompida" / "abandonada" são heurísticas (ver `docs/SPEC.md` §4).
 - **Sem billing.** Dados de tokens/custo não são guardados localmente; só
   existe `num_tokens_preceding` (tamanho de contexto).
-- **Só sessões CLI (M1).** Sessões GUI em `User/acp-messages/*.db`, session
-  locks e correlação de logs ficam para M2.
+- **Sessões GUI são só metadados.** O `export-gui` exporta os bindings
+  sessão↔workspace guardados no `state.vscdb` (slug, label, folders,
+  timestamps) — o GUI não guarda transcript local. Transcripts GUI em
+  `User/acp-messages/*.db`, session locks e correlação de logs ficam
+  para M2.
 - **Read-only por design** — a ferramenta nunca escreve nos stores do Devin.
 
 ## Desenvolvimento
@@ -144,7 +163,7 @@ Fixtures são geradas em tempo de teste pelo `devin_internals.fixtures`
 ## Quando NÃO usar
 
 - Você precisa de pesquisa rankeada instantânea em vez de um export estático — use o [`devin-search`](https://github.com/Icaro0310/devin-search) sobre a mesma base de dados.
-- As suas sessões vivem nos stores `acp-messages/*.db` do GUI/Desktop — o M1 cobre apenas o `sessions.db` do CLI.
+- Você precisa dos *transcripts* das sessões GUI — o `export-gui` exporta os metadados do `state.vscdb`; os stores de transcript `acp-messages/*.db` ficam para o M2.
 - O schema do seu `sessions.db` é mais recente que v17 — a ferramenta recusa ruidosamente em vez de ler mal; atualize o `devin-internals-spec` primeiro.
 
 ## FAQ

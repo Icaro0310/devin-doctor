@@ -4,15 +4,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import sys
 from pathlib import Path
 
 from devin_internals import SchemaError
-from devin_internals.parsers import SessionsStore
+from devin_internals.parsers import SessionsStore, StateVscdbStore
 
 from devin_history import __version__
 from devin_history.audit import audit_store
-from devin_history.export import FORMATS, export_sessions
+from devin_history.export import FORMATS, export_gui_sessions, export_sessions
 from devin_history.format import (
     audit_to_dict,
     audit_to_markdown,
@@ -20,7 +21,7 @@ from devin_history.format import (
     sessions_to_dicts,
     write_audit_csv,
 )
-from devin_history.paths import default_sessions_db
+from devin_history.paths import default_sessions_db, default_state_vscdb
 
 
 def _open_store(db_arg: str | None) -> SessionsStore:
@@ -38,6 +39,25 @@ def _open_store(db_arg: str | None) -> SessionsStore:
     try:
         return SessionsStore(path)
     except SchemaError as exc:
+        print(f"devin-history: {exc}", file=sys.stderr)
+        raise SystemExit(2)
+
+
+def _open_vscdb(vscdb_arg: str | None) -> StateVscdbStore:
+    path = Path(vscdb_arg).expanduser() if vscdb_arg else default_state_vscdb()
+    if path is None:
+        print(
+            "devin-history: no state.vscdb found in the default locations; "
+            "pass --vscdb",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+    if not path.exists():
+        print(f"devin-history: {path}: no such file", file=sys.stderr)
+        raise SystemExit(2)
+    try:
+        return StateVscdbStore(path)
+    except (SchemaError, sqlite3.Error) as exc:
         print(f"devin-history: {exc}", file=sys.stderr)
         raise SystemExit(2)
 
@@ -87,6 +107,25 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common(l)
     l.add_argument("--limit", type=int, default=None)
     l.set_defaults(func=_cmd_list)
+
+    g = sub.add_parser(
+        "export-gui",
+        help="GUI session metadata (state.vscdb) → md notes + index.json")
+    g.add_argument(
+        "--vscdb",
+        help="path to the GUI state.vscdb (default: auto-detect under "
+        "User/globalStorage of the Devin config dir)",
+    )
+    g.add_argument("--out", required=True, help="output directory")
+    g.add_argument(
+        "--all", action="store_true",
+        help="re-export even unchanged sessions")
+    g.add_argument(
+        "--dry-run", action="store_true",
+        help="list what would be written, write nothing")
+    g.add_argument(
+        "--json", action="store_true", help="machine-readable JSON output")
+    g.set_defaults(func=_cmd_export_gui)
     return p
 
 
@@ -110,6 +149,27 @@ def _cmd_export(args: argparse.Namespace) -> int:
             f"{verb}: {len(res.written)} · unchanged: "
             f"{len(res.skipped_unchanged)} · empty: {len(res.skipped_empty)} "
             f"· index: {len(res.index_entries)} sessions → {res.out_dir}"
+        )
+    return 0
+
+
+def _cmd_export_gui(args: argparse.Namespace) -> int:
+    with _open_vscdb(args.vscdb) as store:
+        res = export_gui_sessions(
+            store, args.out, force=args.all, dry_run=args.dry_run)
+    if args.json:
+        print(json.dumps({
+            "out_dir": str(res.out_dir),
+            "written": res.written,
+            "skipped_unchanged": res.skipped_unchanged,
+            "indexed": len(res.index_entries),
+        }, indent=2))
+    else:
+        verb = "would write" if args.dry_run else "written"
+        print(
+            f"{verb}: {len(res.written)} · unchanged: "
+            f"{len(res.skipped_unchanged)} · index: "
+            f"{len(res.index_entries)} sessions → {res.out_dir}"
         )
     return 0
 
