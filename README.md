@@ -74,11 +74,42 @@ devin-pm report                          # global report, all projects
 devin-pm report --project x --out x.md   # write to file
 devin-pm milestones --project my-repo    # milestone list + done %
 devin-pm registry --out registry.json    # machine-readable registry
+devin-pm verify                          # diff tracked projects vs hub registry
+devin-pm verify --json                   # same, machine-readable
 ```
 
 `--sessions-db PATH` overrides the database location on every subcommand;
 otherwise `devin-pm` auto-detects `%APPDATA%/devin/cli/sessions.db`
 (`DEVIN_PM_SESSIONS_DB` env var also works). All reads are read-only.
+
+### Verify against the ecosystem registry
+
+`devin-pm verify` cross-checks the projects pm tracks against the
+authoritative ecosystem catalog in `devin-powerups/registry.json`:
+
+```bash
+devin-pm verify --registry ../devin-powerups/registry.json
+```
+
+`--registry` defaults to `../devin-powerups/registry.json` relative to the
+current directory (then the checkout sibling of this package). The report
+has three sections:
+
+- **in registry but unknown to pm** — cataloged repos with no sessions on
+  this machine (informational, never counts as drift);
+- **tracked by pm but missing from registry** — projects with sessions that
+  the registry does not list. Entries count as drift only when they look
+  ecosystem-shaped (`devin-*` name or a checkout under the hub's parent
+  directory); others are tagged `[non-ecosystem]`;
+- **field drift** — for matched repos, `name`/`description` read from the
+  checkout's `pyproject.toml` and `url` from the git `origin` remote vs the
+  registry values. Unobservable fields (no pyproject, no remote) are
+  skipped, never guessed.
+
+`--pm-registry FILE` verifies a saved `devin-pm registry --out` document
+instead of opening `sessions.db`. Exit code: `1` on drift, `0` when clean —
+usable as a maintenance gate. Everything is local and read-only
+(`sessions.db`, `registry.json`, `pyproject.toml`, `.git/config`).
 
 ### Milestones
 
@@ -94,7 +125,8 @@ File entries win over session-detected ones on name collision.
 
 ### Exit codes
 
-`0` ok · `1` read/parse error · `2` missing db / unknown project.
+`0` ok · `1` read/parse error (`verify`: also drift found) · `2` missing
+db / unknown project / missing inputs.
 
 ## Works with Devin alone (Devin-only mode)
 

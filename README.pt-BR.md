@@ -74,12 +74,44 @@ devin-pm report                          # relatório global, todos os projetos
 devin-pm report --project x --out x.md   # escreve para ficheiro
 devin-pm milestones --project my-repo    # lista de milestones + % feito
 devin-pm registry --out registry.json    # registo legível por máquina
+devin-pm verify                          # diff projetos vs registry do hub
+devin-pm verify --json                   # o mesmo, legível por máquina
 ```
 
 `--sessions-db PATH` sobrepõe a localização da base de dados em todos os
 subcomandos; caso contrário o `devin-pm` auto-detecta
 `%APPDATA%/devin/cli/sessions.db` (a variável `DEVIN_PM_SESSIONS_DB` também
 funciona). Todas as leituras são read-only.
+
+### Verificar contra o registry do ecossistema
+
+`devin-pm verify` cruza os projetos que o pm segue com o catálogo
+autoritativo do ecossistema em `devin-powerups/registry.json`:
+
+```bash
+devin-pm verify --registry ../devin-powerups/registry.json
+```
+
+`--registry` usa por defeito `../devin-powerups/registry.json` relativo ao
+diretório atual (depois o checkout irmão deste pacote). O relatório tem
+três secções:
+
+- **in registry but unknown to pm** — repos catalogados sem sessões nesta
+  máquina (informativo, nunca conta como drift);
+- **tracked by pm but missing from registry** — projetos com sessões que o
+  registry não lista. Contam como drift apenas quando parecem do
+  ecossistema (nome `devin-*` ou checkout debaixo do diretório pai do hub);
+  os restantes são marcados `[non-ecosystem]`;
+- **field drift** — para repos em comum, `name`/`description` lidos do
+  `pyproject.toml` do checkout e `url` do remote git `origin` contra os
+  valores do registry. Campos não observáveis (sem pyproject, sem remote)
+  são ignorados, nunca adivinhados.
+
+`--pm-registry FILE` verifica um documento guardado de
+`devin-pm registry --out` em vez de abrir o `sessions.db`. Código de saída:
+`1` em drift, `0` quando limpo — serve como gate de manutenção. Tudo é
+local e read-only (`sessions.db`, `registry.json`, `pyproject.toml`,
+`.git/config`).
 
 ### Milestones
 
@@ -97,7 +129,8 @@ de nome.
 
 ### Códigos de saída
 
-`0` ok · `1` erro de leitura/parse · `2` db em falta / projeto desconhecido.
+`0` ok · `1` erro de leitura/parse (`verify`: também drift encontrado) ·
+`2` db em falta / projeto desconhecido / inputs em falta.
 
 ## Funciona só com o Devin (modo Devin-only)
 

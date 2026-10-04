@@ -41,7 +41,13 @@ the base tool.
   `milestones.json` per project root; done/pending accounting.
 - `registry.py` — emit `registry.json` (same spirit as the ecosystem hub
   registry in devin-powerups).
-- `cli.py` — thin wrapper: `status`, `report`, `milestones`, `registry`.
+- `cli.py` — thin wrapper: `status`, `report`, `milestones`, `registry`,
+  `verify`.
+- `verify.py` — cross-check tracked projects against the ecosystem hub
+  registry (`devin-powerups/registry.json`): entries unknown to pm,
+  pm-tracked projects missing from the registry (ecosystem-shaped ones
+  count as drift), and name/description/url drift read from the checkout's
+  `pyproject.toml` and git `origin`. Exit 1 on drift.
 
 ### Non-scope (M1)
 
@@ -106,6 +112,8 @@ devin-pm status     [--sessions-db PATH] [--json]
 devin-pm report     [--sessions-db PATH] [--project NAME] [--out FILE]
 devin-pm milestones [--sessions-db PATH] --project NAME [--json]
 devin-pm registry   [--sessions-db PATH] [--out FILE]
+devin-pm verify     [--sessions-db PATH] [--registry PATH]
+                    [--pm-registry FILE] [--json]
 ```
 
 - `--sessions-db` default: `DEVIN_PM_SESSIONS_DB` env var, else platform
@@ -114,8 +122,8 @@ devin-pm registry   [--sessions-db PATH] [--out FILE]
 - `report` without `--project` emits a global report over all projects.
 - `registry` writes to stdout unless `--out` is given.
 - Exit codes: `0` ok · `1` read/parse error (bad db, malformed
-  milestones.json, schema errors) · `2` usage-level (db missing, unknown
-  project).
+  milestones.json, schema errors; `verify` also returns `1` on drift) ·
+  `2` usage-level (db missing, unknown project, missing inputs).
 
 ## 6. Fixtures and tests
 

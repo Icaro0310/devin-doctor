@@ -1,6 +1,20 @@
 # STATUS — devin-pm
 
-Updated: 2026-09-29 · Milestone: **M1 (done)** · Version: 0.1.0
+Updated: 2026-10-05 · Milestone: **M1 (done)** · Version: 0.1.0
+
+## Post-M1 updates
+
+- `src/devin_pm/verify.py` + `verify` subcommand (PM-2): cross-checks
+  pm-tracked projects against `devin-powerups/registry.json`
+  (`--registry`, default `../devin-powerups/registry.json` from cwd, then
+  this package's sibling checkout). Reports registry entries unknown to
+  pm (informational), pm-tracked projects missing from the registry
+  (drift only when ecosystem-shaped — `devin-*` name or under the hub's
+  parent dir), and `name`/`description`/`url` field drift read from the
+  checkout's `pyproject.toml` + git `origin`. `--pm-registry` verifies a
+  saved export; `--json` supported. Exit 1 on drift, 0 when clean.
+  Foreign-platform `working_directory` values (e.g. `C:/...` rows on
+  Linux) never count as path-relevant. 25 tests, all green.
 
 ## Done in M1
 

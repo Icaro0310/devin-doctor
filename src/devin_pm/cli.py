@@ -6,8 +6,11 @@ Subcommands (all read-only against ``sessions.db``):
 - ``report``      markdown report for ``--project`` or every project
 - ``milestones``  milestone list + done % for ``--project``
 - ``registry``    emit machine-readable ``registry.json``
+- ``verify``      cross-check tracked projects against the ecosystem
+  hub registry (``devin-powerups/registry.json``)
 
-Exit codes: 0 ok · 1 read/parse error · 2 missing db / unknown project.
+Exit codes: 0 ok · 1 read/parse error (``verify``: drift found) ·
+2 missing db / unknown project / missing inputs.
 """
 
 from __future__ import annotations
@@ -34,6 +37,13 @@ from devin_pm.projects import (
     group_sessions,
 )
 from devin_pm.registry import build_registry, write_registry
+from devin_pm.verify import (
+    RegistryError,
+    default_registry,
+    projects_from_pm_registry,
+    render_text as render_verify_text,
+    verify,
+)
 from devin_pm.report import (
     ms_to_iso,
     render_global_report,
@@ -189,6 +199,41 @@ def cmd_registry(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_verify(args: argparse.Namespace) -> int:
+    if args.registry:
+        registry_path = Path(args.registry).expanduser()
+    else:
+        found = default_registry()
+        if found is None:
+            raise _CliError(
+                "hub registry.json not found — pass --registry PATH "
+                "(looked for ../devin-powerups/registry.json)",
+                exit_code=2,
+            )
+        registry_path = found
+    try:
+        if args.pm_registry:
+            projects = projects_from_pm_registry(
+                Path(args.pm_registry).expanduser()
+            )
+        else:
+            projects, _ = _projects(_resolve_db(args))
+        report = verify(projects, registry_path)
+    except FileNotFoundError as exc:
+        raise _CliError(
+            f"{exc.filename or exc}: no such file — pass --registry/"
+            "--pm-registry/--sessions-db",
+            exit_code=2,
+        ) from exc
+    except RegistryError as exc:
+        raise _CliError(str(exc), exit_code=1) from exc
+    if args.json:
+        _print_json(report)
+    else:
+        print(render_verify_text(report))
+    return 1 if report["drift"] else 0
+
+
 # ---------------------------------------------------------------------------
 # entry point
 # ---------------------------------------------------------------------------
@@ -244,6 +289,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="write registry.json to FILE (default: stdout)",
     )
     p.set_defaults(func=cmd_registry)
+
+    p = with_db(
+        sub.add_parser(
+            "verify",
+            help="cross-check tracked projects against the "
+            "devin-powerups hub registry",
+        )
+    )
+    p.add_argument(
+        "--registry",
+        metavar="PATH",
+        help="hub registry.json (default: "
+        "../devin-powerups/registry.json relative to cwd, then the "
+        "checkout sibling of this package)",
+    )
+    p.add_argument(
+        "--pm-registry",
+        metavar="FILE",
+        help="verify a saved `devin-pm registry --out` document instead "
+        "of reading sessions.db",
+    )
+    p.add_argument("--json", action="store_true", help="JSON output")
+    p.set_defaults(func=cmd_verify)
 
     return parser
 
