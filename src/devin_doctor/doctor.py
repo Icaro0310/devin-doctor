@@ -98,3 +98,46 @@ def render_markdown(report: Report, ctx: Context) -> str:
         lines += ["", "## Suggested fixes", ""]
         lines += [f"- **{f.check}**: {f.fix}" for f in fixes]
     return "\n".join(lines)
+
+
+def render_plan(report: Report) -> str:
+    """DR-1: a remediation plan — suggestions only, nothing is executed.
+
+    The original ``--fix`` idea became ``plan`` so devin-doctor stays
+    read-only: it emits the steps a human (or another tool) may run.
+    """
+    lines = [
+        "# devin-doctor remediation plan",
+        "# read-only output — nothing below was executed",
+        "",
+    ]
+    actionable = [
+        f for f in report.findings
+        if f.status in (Status.WARN, Status.FAIL)
+    ]
+    if not actionable:
+        lines.append("# all checks passed — nothing to do")
+        return "\n".join(lines)
+    n = 0
+    for f in actionable:
+        lines.append(f"## [{f.status.value}] {f.check}: {f.message}")
+        if f.fix:
+            n += 1
+            for line in f.fix.strip().splitlines():
+                lines.append(f"{n}. {line.strip()}")
+        lines.append("")
+    return "\n".join(lines)
+
+
+def plan_steps(report: Report) -> list[dict[str, object]]:
+    """Machine-readable remediation steps for ``plan --json``."""
+    steps = []
+    for f in report.findings:
+        if f.status in (Status.WARN, Status.FAIL):
+            steps.append({
+                "check": f.check,
+                "status": f.status.value,
+                "finding": f.message,
+                "fix": f.fix,
+            })
+    return steps

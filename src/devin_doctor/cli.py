@@ -12,6 +12,7 @@ verdict.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Sequence
@@ -70,6 +71,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--md", action="store_true", help="emit markdown (for GitHub issues)"
     )
 
+    plan = sub.add_parser(
+        "plan", help="emit a remediation plan for WARN/FAIL findings — "
+        "suggestions only, nothing is executed (doctor stays read-only)")
+    _add_common(plan)
+
     cap = sub.add_parser(
         "capabilities",
         help="print the machine capability profile as JSON — read-only, "
@@ -124,6 +130,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     report = doctor.run_all(ctx)
+    if args.command == "plan":
+        if args.json:
+            print(json.dumps(
+                {"overall": report.overall.value,
+                 "steps": doctor.plan_steps(report)}, indent=2))
+        else:
+            print(doctor.render_plan(report))
+        return 0  # a plan is informational — not a verdict
     if args.json:
         print(doctor.render_json(report, ctx))
     elif args.command == "report" and args.md:

@@ -115,6 +115,16 @@ to `$XDG_CONFIG_HOME/Devin` (normally `~/.config/Devin`). Windows stores use
 `%APPDATA%\devin` and `%APPDATA%\Devin`. Use `--data-dir` and `--config-dir`
 when the stores are elsewhere. macOS paths exist but are not verified.
 
+
+### `devin-doctor plan` — remediation plan, still read-only
+
+`plan` runs the same checks but emits a numbered remediation plan for every
+WARN/FAIL finding (the check's `fix` suggestion) instead of a verdict —
+nothing is executed; execution stays a human decision or another tool's job.
+`--json` gives `{"overall", "steps": [{check, status, finding, fix}]}`.
+This replaced the original `--fix` idea so doctor can keep its
+"read-only, always" guarantee.
+
 ## Limitations
 
 - **Version-bound.** Store parsing follows `devin-internals-spec` (schema
