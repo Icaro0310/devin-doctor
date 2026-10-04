@@ -28,6 +28,9 @@ class Hit:
     ref: str
     snippet: str
     rank: float
+    # Optional: path of the devin-history export note for this session
+    # (filled by devin_search.history.attach_history_notes).
+    history_note: str | None = None
 
 
 def to_fts_query(term: str) -> str:

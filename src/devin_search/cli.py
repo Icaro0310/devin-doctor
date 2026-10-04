@@ -10,6 +10,7 @@ from pathlib import Path
 from devin_internals import SchemaError
 
 from devin_search import __version__
+from devin_search.history import attach_history_notes
 from devin_search.fmt import (
     hits_table,
     hits_to_dicts,
@@ -91,6 +92,8 @@ def _cmd_query(args: argparse.Namespace) -> int:
     except FileNotFoundError as exc:
         print(f"devin-search: {exc}", file=sys.stderr)
         return 2
+    if args.history_dir:
+        hits = attach_history_notes(hits, args.history_dir)
     if args.json:
         print(
             json.dumps(
@@ -148,6 +151,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     q.add_argument("--limit", type=int, default=20)
     q.add_argument("--index", help="index file path (default: app dir)")
+    q.add_argument(
+        "--history-dir",
+        help="devin-history export dir — hits link to their "
+        "<YYYY-MM-DD>_<session-id>.md notes when present",
+    )
     q.add_argument(
         "--json", action="store_true", help="machine-readable JSON output"
     )

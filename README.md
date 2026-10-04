@@ -72,11 +72,22 @@ devin-search query "kubectl delete pod"
 # filters: role, project, date, limit — --json on every command
 devin-search query "TypeError" --role assistant --project myrepo
 devin-search query "migration" --since 2026-09-01 --limit 5 --json
+
+# link hits to devin-history export notes
+devin-search query "kubectl" --history-dir ~/notes/devin-history
 ```
 
 Hits print as `WHEN · ROLE · PROJECT · SESSION · SNIPPET` with the match
 wrapped in `«»`; each hit carries a `ref` (e.g. `node:1234`,
 `acp:file.db:7`) pointing back to the exact source row.
+
+With `--history-dir <dir>` pointing at a
+[`devin-history`](https://github.com/Icaro0310/devin-history) export
+directory, each hit whose session has an exported note gets a `note: <path>`
+line under its row (and a `history_note` field in `--json`). Notes are
+matched by the `<YYYY-MM-DD>_<session-id>.md` filename devin-history writes
+(`.json` exports work as a fallback). A missing note produces no link and
+no error — the flag is purely additive.
 
 ## Works with Devin alone (Devin-only mode)
 

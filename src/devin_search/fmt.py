@@ -44,6 +44,10 @@ def hits_table(hits: Iterable[Hit]) -> str:
             f"{fmt_ts(h.ts):<16} {h.role:<10} {_project_label(h.project):<16}"
             f" {h.session_id[:8]:<10} {_flatten(h.snippet, 60)}"
         )
+        if h.history_note:
+            lines.append(
+                f"{'':<16} {'':<10} {'':<16} {'':<10} note: {h.history_note}"
+            )
     return "\n".join(lines)
 
 
@@ -58,6 +62,7 @@ def hit_to_dict(h: Hit) -> dict:
         "ref": h.ref,
         "snippet": h.snippet,
         "rank": h.rank,
+        "history_note": h.history_note,
     }
 
 

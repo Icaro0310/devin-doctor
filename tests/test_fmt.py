@@ -42,10 +42,23 @@ def test_hits_to_dicts_shape():
     (d,) = hits_to_dicts([_hit()])
     assert set(d) == {
         "session_id", "role", "ts", "project", "session_title",
-        "source", "ref", "snippet", "rank",
+        "source", "ref", "snippet", "rank", "history_note",
     }
     assert d["ref"] == "node:7"
     assert d["rank"] == -1.5
+    assert d["history_note"] is None
+
+
+def test_hits_table_shows_history_note():
+    note = "/exports/2026-05-28_abcdef01-2345-6789-abcd-ef0123456789.md"
+    table = hits_table([_hit(history_note=note)])
+    lines = table.splitlines()
+    assert any(f"note: {note}" in line for line in lines)
+
+
+def test_hits_table_omits_note_when_absent():
+    table = hits_table([_hit()])
+    assert "note:" not in table
 
 
 def test_fmt_ts():
