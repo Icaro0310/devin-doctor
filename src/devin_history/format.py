@@ -50,10 +50,17 @@ def _conversation_parts(messages: Iterable[ChatMessage]) -> list[str]:
     return parts
 
 
-def render_session_md(session: "Session", messages: list[ChatMessage]) -> str:
+def render_session_md(
+    session: "Session",
+    messages: list[ChatMessage],
+    prov: dict[str, str] | None = None,
+) -> str:
     """One Obsidian-ready note for a CLI session."""
     counts = Counter(m.role for m in messages)
     parts = _conversation_parts(messages)
+    prov_fm = "" if prov is None else (
+        f"\nmachine_id: {prov['machine_id']}\nprofile: {prov['profile']}"
+    )
     project = project_name(session.working_directory)
     title = (session.title or "Untitled").strip()
     created = fmt_ts(session.created_at)
@@ -66,7 +73,7 @@ last_activity: {session.last_activity_at}
 user_msgs: {counts['user']}
 assistant_msgs: {counts['assistant']}
 tool_msgs: {counts['tool']}
-tags: [session, devin, history]
+tags: [session, devin, history]{prov_fm}
 ---
 
 # {title}
@@ -90,9 +97,12 @@ def session_to_dict(
     session: "Session",
     messages: list[ChatMessage],
     tool_calls: list["ToolCallState"],
+    prov: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Searchable JSON shape for one session (full text, no clipping)."""
     return {
+        **({"machine_id": prov["machine_id"], "profile": prov["profile"]}
+           if prov else {}),
         "session_id": session.id,
         "title": (session.title or "Untitled").strip(),
         "project": project_name(session.working_directory),
@@ -150,9 +160,12 @@ def render_index_md(entries: list["IndexEntry"]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def render_index_json(entries: list["IndexEntry"]) -> str:
+def render_index_json(
+    entries: list["IndexEntry"], prov: dict[str, str] | None = None
+) -> str:
     return json.dumps(
-        {"sessions": [
+        {**({"provenance": prov} if prov else {}),
+         "sessions": [
             {"date": e.date, "file": e.filename, "title": e.title, "project": e.project}
             for e in entries
         ]},

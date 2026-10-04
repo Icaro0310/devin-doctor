@@ -13,6 +13,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from devin_history import identity
 from devin_history.format import (
     project_name,
     render_index_json,
@@ -92,6 +93,7 @@ def export_sessions(
     if not dry_run:
         out_dir.mkdir(parents=True, exist_ok=True)
 
+    prov = identity.provenance()
     sessions = sorted(store.sessions(), key=lambda s: s.created_at)
     for s in sessions:
         nodes = store.message_nodes(s.id)
@@ -109,10 +111,10 @@ def export_sessions(
             result.skipped_unchanged.append(s.id)
         else:
             if fmt == "md":
-                text = render_session_md(s, messages)
+                text = render_session_md(s, messages, prov)
             else:
                 text = json.dumps(
-                    session_to_dict(s, messages, store.tool_call_state(s.id)),
+                    session_to_dict(s, messages, store.tool_call_state(s.id), prov),
                     ensure_ascii=False,
                     indent=2,
                 ) + "\n"
@@ -133,7 +135,7 @@ def export_sessions(
         index = (
             render_index_md(result.index_entries)
             if fmt == "md"
-            else render_index_json(result.index_entries)
+            else render_index_json(result.index_entries, prov)
         )
         _write_if_changed(out_dir / f"index.{fmt}", index)
 
