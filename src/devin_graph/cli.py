@@ -10,6 +10,9 @@ from pathlib import Path
 from devin_internals import SchemaError
 from devin_internals.parsers import SessionsStore
 
+from devin_graph.paths import default_state_vscdb
+from devin_graph.vscdb import extract_vscdb
+
 from devin_graph import __version__
 from devin_graph.paths import default_sessions_db
 from devin_graph.query import (
@@ -79,6 +82,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="path to Devin's sessions.db (default: auto-detect "
         "%%APPDATA%%/devin/cli/sessions.db or the Linux/macOS equivalent)")
     _add_graph(b)
+    b.add_argument(
+        "--vscdb",
+        help="path to the GUI state.vscdb for gui_session coverage "
+        "(default: auto-detect; pass 'none' to disable)")
     b.add_argument("--json", action="store_true",
                    help="machine-readable JSON output")
     b.set_defaults(func=_cmd_build)
@@ -123,9 +130,24 @@ def build_parser() -> argparse.ArgumentParser:
 
 def _cmd_build(args: argparse.Namespace) -> int:
     graph_path = Path(args.graph).expanduser()
+    extras = []
+    vscdb = args.vscdb
+    if vscdb is None:
+        found = default_state_vscdb()
+        vscdb = str(found) if found else "none"
+    if vscdb != "none":
+        vpath = Path(vscdb).expanduser()
+        if vpath.is_file():
+            try:
+                extras.append(("vscdb", extract_vscdb(vpath)))
+            except ValueError as exc:
+                print(f"warning: {exc}", file=sys.stderr)
+        else:
+            print(f"warning: {vpath}: no such file — skipping GUI coverage",
+                  file=sys.stderr)
     with _open_sessions(args.sessions_db) as ss, \
             GraphStore(graph_path) as gs:
-        res = gs.build(ss)
+        res = gs.build(ss, extras=extras)
         nodes = len(gs.nodes())
         edges = len(gs.edges())
     if args.json:

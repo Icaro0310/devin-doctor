@@ -16,6 +16,8 @@ Edge kinds:
 - ``produced``      session → commit (SHA seen in a ``git commit``/``git
   push`` tool call — ``method="exact"``)
 - ``referenced``    session → commit (SHA seen elsewhere — ``method="seen"``)
+- ``gui_workspace`` gui_session → project (from ``state.vscdb`` — see
+  ``vscdb.py``; GUI sessions are keyed by their generated slug)
 
 ``tool_call_json`` is marked *unstable* in SCHEMA.md, so payload decoding is
 deliberately defensive: file paths are collected from any recognised path-ish
@@ -33,9 +35,10 @@ from dataclasses import dataclass, field
 from devin_internals.commits import commit_references
 from typing import Any, Iterable, Iterator
 
-NODE_KINDS = ("session", "project", "file", "tool", "tool_call", "commit")
+NODE_KINDS = ("session", "project", "file", "tool", "tool_call", "commit",
+              "gui_session")
 EDGE_KINDS = ("runs_in", "made_call", "call_used", "tool_used",
-              "file_touched", "produced", "referenced")
+              "file_touched", "produced", "referenced", "gui_workspace")
 
 # Payload keys whose string value(s) are file/dir paths.
 _PATH_KEYS = {

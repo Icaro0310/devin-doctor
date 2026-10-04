@@ -162,8 +162,15 @@ class GraphStore:
 
     # -- build ---------------------------------------------------------------
 
-    def build(self, sessions_store) -> BuildResult:
-        """Incrementally (re)extract every session in ``sessions_store``."""
+    def build(self, sessions_store,
+              extras: list[tuple[str, "Extraction"]] | None = None
+              ) -> BuildResult:
+        """Incrementally (re)extract every session in ``sessions_store``.
+
+        ``extras`` are ``(owner, Extraction)`` pairs merged under their own
+        owner key (e.g. ``"vscdb"`` for GUI coverage) so rebuilds replace
+        them atomically without touching session-owned rows.
+        """
         result = BuildResult()
         seen = {
             r["session_id"]: r["last_activity_at"]
@@ -195,6 +202,9 @@ class GraphStore:
                     (sid,))
                 result.removed.append(sid)
 
+            for owner, ex in extras or []:
+                self._delete_owned(owner)
+                self._insert(ex, owner=owner)
             self._prune_orphans()
             prov = identity.provenance()
             for key, value in (

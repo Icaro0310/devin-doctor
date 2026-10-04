@@ -44,6 +44,44 @@ def sessions_db_candidates(
     ]
 
 
+VSCDB_RELPATH = ("User", "globalStorage", "state.vscdb")
+
+
+def state_vscdb_candidates(
+    environ: dict[str, str] | None = None, platform: str | None = None
+) -> list[Path]:
+    """Candidate paths for the GUI ``state.vscdb`` (Electron storage)."""
+    env = os.environ if environ is None else environ
+    plat = sys.platform if platform is None else platform
+    if plat.startswith("win"):
+        roots = []
+        if env.get("APPDATA"):
+            roots.append(Path(env["APPDATA"]))
+        roots.append(Path.home() / "AppData" / "Roaming")
+    elif plat == "darwin":
+        roots = [Path.home() / "Library" / "Application Support"]
+    else:
+        roots = [
+            Path(env.get("XDG_CONFIG_HOME") or Path.home() / ".config"),
+            Path.home(),
+        ]
+    names = ("Devin", "devin")
+    return [
+        r.joinpath(n, *VSCDB_RELPATH)
+        for r in dict.fromkeys(roots) for n in names
+    ]
+
+
+def default_state_vscdb(
+    environ: dict[str, str] | None = None, platform: str | None = None
+) -> Path | None:
+    """First existing state.vscdb candidate, or ``None``."""
+    for candidate in state_vscdb_candidates(environ=environ, platform=platform):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 def default_sessions_db(
     environ: dict[str, str] | None = None, platform: str | None = None
 ) -> Path | None:

@@ -14,14 +14,14 @@ from conftest import ALPHA
 @pytest.fixture
 def built(sessions_db, tmp_path):
     graph = tmp_path / "graph.db"
-    assert main(["build", "--sessions-db", str(sessions_db),
+    assert main(["build", "--sessions-db", str(sessions_db), "--vscdb", "none",
                  "--graph", str(graph)]) == 0
     return sessions_db, graph
 
 
 def test_cli_build_text(sessions_db, tmp_path, capsys):
     g = tmp_path / "graph.db"
-    assert main(["build", "--sessions-db", str(sessions_db),
+    assert main(["build", "--sessions-db", str(sessions_db), "--vscdb", "none",
                  "--graph", str(g)]) == 0
     out = capsys.readouterr().out
     assert "extracted: 3" in out
@@ -31,7 +31,7 @@ def test_cli_build_text(sessions_db, tmp_path, capsys):
 
 def test_cli_build_json(sessions_db, tmp_path, capsys):
     g = tmp_path / "graph.db"
-    assert main(["build", "--sessions-db", str(sessions_db),
+    assert main(["build", "--sessions-db", str(sessions_db), "--vscdb", "none",
                  "--graph", str(g), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["extracted"] == 3
@@ -42,7 +42,7 @@ def test_cli_build_json(sessions_db, tmp_path, capsys):
 def test_cli_build_incremental(built, capsys):
     sessions_db, graph = built
     capsys.readouterr()
-    assert main(["build", "--sessions-db", str(sessions_db),
+    assert main(["build", "--sessions-db", str(sessions_db), "--vscdb", "none",
                  "--graph", str(graph), "--json"]) == 0
     data = json.loads(capsys.readouterr().out)
     assert data["extracted"] == 0 and data["skipped"] == 3
@@ -176,7 +176,7 @@ def test_cli_never_writes_source_db(built, tmp_path, capsys):
     sessions_db, graph = built
     before = hashlib.sha256(sessions_db.read_bytes()).hexdigest()
     capsys.readouterr()
-    main(["build", "--sessions-db", str(sessions_db), "--graph", str(graph)])
+    main(["build", "--sessions-db", str(sessions_db), "--vscdb", "none", "--graph", str(graph)])
     main(["query", "file", "app.py", "--graph", str(graph)])
     main(["export", "--format", "json", "--graph", str(graph)])
     capsys.readouterr()

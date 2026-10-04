@@ -93,6 +93,9 @@ is also checked. Pass `--sessions-db` to override.
 
 `commit` nodes + `produced`/`referenced` edges attribute sessions to git SHAs seen in tool calls (exact when the SHA appears in a `git commit`/`git push` call, `seen` otherwise). `devin-graph sql "SELECT ..."` runs read-only SQL over graph.db (SELECT/WITH only, `query_only` pragma).
 
+
+`--vscdb` (auto-detected on build) adds GUI coverage: `gui_session` nodes keyed by the generated session slug, `gui_workspace` edges to their workspace project, enriched with `lastAccessed` when a `resourceToSpace` editor URI links a space to the slug. Best-effort: only the observed `windsurfSpace.*` keys are read; unknown/malformed keys are skipped. Pass `--vscdb none` to disable.
+
 ## Limitations
 
 - **Schema-gated.** Only `sessions.db` schema v15–v17; newer fails loudly

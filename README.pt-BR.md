@@ -97,6 +97,9 @@ também é verificada. Usa `--sessions-db` para sobrepor.
 
 Nós `commit` + arestas `produced`/`referenced` atribuem sessões a SHAs git vistos em tool calls (exact quando o SHA aparece num call de `git commit`/`git push`, `seen` senão). `devin-graph sql "SELECT ..."` roda SQL read-only sobre graph.db.
 
+
+`--vscdb` (auto-detectado no build) adiciona cobertura da GUI: nós `gui_session` indexados pelo slug gerado da sessão, arestas `gui_workspace` para o projeto de workspace, enriquecidos com `lastAccessed` quando um URI de editor em `resourceToSpace` liga um space ao slug. Best-effort: só chaves `windsurfSpace.*` observadas são lidas; chaves desconhecidas/malformadas são ignoradas. `--vscdb none` desativa.
+
 ## Limitações
 
 - **Dependente do schema.** Apenas `sessions.db` schema v15–v17; mais recente
