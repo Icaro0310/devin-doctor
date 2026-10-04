@@ -29,6 +29,7 @@ def _project_entry(
         "name": project.name,
         "working_directory": project.working_directory,
         "sessions": project.session_count,
+        "gui_sessions": project.gui_session_count,
         "session_ids": project.session_ids,
         "last_activity": ms_to_iso(project.last_activity_at),
         "status": project.status_counts,
@@ -49,6 +50,7 @@ def build_registry(
     *,
     milestones: Mapping[str, Iterable[Milestone]] | None = None,
     sessions_db: str | Path | None = None,
+    state_vscdb: str | Path | None = None,
     schema_version: int | None = None,
     generated: str | None = None,
 ) -> dict[str, Any]:
@@ -67,6 +69,8 @@ def build_registry(
     source: dict[str, Any] = {}
     if sessions_db is not None:
         source["sessions_db"] = str(sessions_db)
+    if state_vscdb is not None:
+        source["state_vscdb"] = str(state_vscdb)
     if schema_version is not None:
         source["schema_version"] = schema_version
 

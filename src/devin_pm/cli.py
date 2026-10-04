@@ -9,6 +9,10 @@ Subcommands (all read-only against ``sessions.db``):
 - ``verify``      cross-check tracked projects against the ecosystem
   hub registry (``devin-powerups/registry.json``)
 
+Every subcommand takes ``--vscdb [PATH]`` (PM-1): GUI session→workspace
+bindings from ``state.vscdb`` are merged into the grouping, marked as
+``gui``-sourced in output.
+
 Exit codes: 0 ok · 1 read/parse error (``verify``: drift found) ·
 2 missing db / unknown project / missing inputs.
 """
@@ -50,6 +54,10 @@ from devin_pm.report import (
     render_project_report,
     render_status_table,
 )
+from devin_pm.vscdb import (
+    default_state_vscdb,
+    load_gui_sessions,
+)
 
 
 class _CliError(RuntimeError):
@@ -79,13 +87,46 @@ def _resolve_db(args: argparse.Namespace) -> Path:
     return path
 
 
+def _resolve_vscdb(args: argparse.Namespace) -> Path | None:
+    """``None`` → CLI sessions only; a Path merges GUI sessions in (PM-1).
+
+    ``--vscdb`` absent → ``None``; bare ``--vscdb`` → auto-detect (missing
+    store warns and continues CLI-only); ``--vscdb PATH`` → that file.
+    """
+    val = getattr(args, "vscdb", None)
+    if val is None:
+        return None
+    if val == "auto":
+        found = default_state_vscdb()
+        if found is None or not found.is_file():
+            print(
+                "warning: no state.vscdb found — continuing with "
+                "sessions.db only",
+                file=sys.stderr,
+            )
+            return None
+        return found
+    path = Path(val).expanduser()
+    if not path.is_file():
+        raise _CliError(
+            f"{path}: no state.vscdb there — pass --vscdb PATH or set "
+            "DEVIN_PM_STATE_VSCDB",
+            exit_code=2,
+        )
+    return path
+
+
 def _load(db_path: Path) -> tuple[list[Session], int]:
     with SessionsStore(db_path) as store:
         return store.sessions(), store.schema_info["schema_version"]
 
 
-def _projects(db_path: Path) -> tuple[list[Project], int]:
+def _projects(
+    db_path: Path, vscdb_path: Path | None = None
+) -> tuple[list[Project], int]:
     sessions, version = _load(db_path)
+    if vscdb_path is not None:
+        sessions = [*sessions, *load_gui_sessions(vscdb_path)]
     return group_sessions(sessions), version
 
 
@@ -105,6 +146,7 @@ def _project_json(project: Project) -> dict:
         "name": project.name,
         "working_directory": project.working_directory,
         "sessions": project.session_count,
+        "gui_sessions": project.gui_session_count,
         "status": project.status_counts,
         "last_activity": ms_to_iso(project.last_activity_at),
         "cost": project.cost,
@@ -117,7 +159,7 @@ def _project_json(project: Project) -> dict:
 
 
 def cmd_status(args: argparse.Namespace) -> int:
-    projects, _ = _projects(_resolve_db(args))
+    projects, _ = _projects(_resolve_db(args), _resolve_vscdb(args))
     if args.json:
         _print_json([_project_json(p) for p in projects])
     else:
@@ -126,7 +168,7 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 def cmd_report(args: argparse.Namespace) -> int:
-    projects, _ = _projects(_resolve_db(args))
+    projects, _ = _projects(_resolve_db(args), _resolve_vscdb(args))
     if args.project:
         project = _require_project(projects, args.project)
         text = render_project_report(project, collect_milestones(project))
@@ -164,7 +206,7 @@ def _milestones_json(project: Project) -> dict:
 
 
 def cmd_milestones(args: argparse.Namespace) -> int:
-    projects, _ = _projects(_resolve_db(args))
+    projects, _ = _projects(_resolve_db(args), _resolve_vscdb(args))
     project = _require_project(projects, args.project)
     if args.json:
         _print_json(_milestones_json(project))
@@ -185,11 +227,13 @@ def cmd_milestones(args: argparse.Namespace) -> int:
 
 def cmd_registry(args: argparse.Namespace) -> int:
     db_path = _resolve_db(args)
-    projects, version = _projects(db_path)
+    vscdb_path = _resolve_vscdb(args)
+    projects, version = _projects(db_path, vscdb_path)
     registry = build_registry(
         projects,
         milestones={p.name: collect_milestones(p) for p in projects},
         sessions_db=db_path,
+        state_vscdb=vscdb_path,
         schema_version=version,
     )
     if args.out:
@@ -217,7 +261,9 @@ def cmd_verify(args: argparse.Namespace) -> int:
                 Path(args.pm_registry).expanduser()
             )
         else:
-            projects, _ = _projects(_resolve_db(args))
+            projects, _ = _projects(
+                _resolve_db(args), _resolve_vscdb(args)
+            )
         report = verify(projects, registry_path)
     except FileNotFoundError as exc:
         raise _CliError(
@@ -256,6 +302,16 @@ def build_parser() -> argparse.ArgumentParser:
             metavar="PATH",
             help="path to sessions.db (default: auto-detect "
             "%%APPDATA%%/devin/cli/sessions.db, or DEVIN_PM_SESSIONS_DB)",
+        )
+        p.add_argument(
+            "--vscdb",
+            nargs="?",
+            const="auto",
+            metavar="PATH",
+            help="also group GUI sessions from state.vscdb (read-only) — "
+            "bare flag auto-detects "
+            "<config>/Devin/User/globalStorage/state.vscdb or "
+            "DEVIN_PM_STATE_VSCDB; PATH pins the file",
         )
         return p
 

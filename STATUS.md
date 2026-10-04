@@ -4,6 +4,22 @@ Updated: 2026-10-05 · Milestone: **M1 (done)** · Version: 0.1.0
 
 ## Post-M1 updates
 
+- `src/devin_pm/vscdb.py` + `--vscdb [PATH]` flag on every subcommand
+  (PM-1): GUI session→workspace bindings from `state.vscdb`
+  (`windsurfSpace.sessionWorkspace/<backend>/<slug>` → `{workspaceId,
+  label, folders[], lastUpdated}`) merge into the same grouping as
+  `sessions.db`. `GuiSession` is Session-shaped (`status`/`source` =
+  `gui`); bare flag auto-detects `<config>/Devin/User/globalStorage/
+  state.vscdb` (`DEVIN_PM_STATE_VSCDB` override), missing store warns and
+  continues CLI-only, explicit missing PATH exits 2. Output marks gui
+  sessions: `GUI` column in `status`, `source` column in reports,
+  `gui_sessions` in JSON/registry. Read-only via `StateVscdbStore`.
+- `src/devin_pm/paths.py` — `normalize_path()` grouping key (PM-3):
+  `C:\x` ⇄ `/c/x` ⇄ `/cygdrive/c/x` (+ full case-fold on drive-rooted
+  paths), `\\wsl.localhost\<distro>\…`/`\\wsl$\…` → in-distro POSIX,
+  separator collapse. Grouping key only; originals kept in output; POSIX
+  case preserved. PM-1+PM-3: 25 tests (`test_vscdb.py`, `test_paths.py`),
+  all green.
 - `src/devin_pm/verify.py` + `verify` subcommand (PM-2): cross-checks
   pm-tracked projects against `devin-powerups/registry.json`
   (`--registry`, default `../devin-powerups/registry.json` from cwd, then
@@ -62,8 +78,10 @@ Updated: 2026-10-05 · Milestone: **M1 (done)** · Version: 0.1.0
 - **Milestone state**: `milestone:`-titled session → done iff `hidden`
   (archive the session to complete the milestone). Manual
   `milestones.json` entries override on name collision.
-- **Grouping**: normalized on separators + trailing slash; no
-  case-folding (POSIX-correct, documented Windows edge).
+- **Grouping**: `normalize_path` keys (PM-3) — separators, trailing
+  slash, `C:\x` ⇄ `/c/x` ⇄ `/cygdrive/c/x` equivalence, WSL-UNC → POSIX;
+  drive-rooted paths fold case (Windows FS semantics), POSIX case kept.
+  Original spellings stay in output.
 - **Registry has its own subcommand** — `status --json` stays the rollup
   table; `registry` emits the full machine-readable document.
 

@@ -1,4 +1,5 @@
-"""Shared fixtures: a synthetic ``sessions.db`` with crafted session rows.
+"""Shared fixtures: a synthetic ``sessions.db`` with crafted session rows,
+plus a synthetic ``state.vscdb`` ItemTable for GUI sessions.
 
 The DDL + migration ledger come from ``devin_internals.fixtures``; every row
 inserted on top is synthetic and deterministic — no real session content.
@@ -6,6 +7,7 @@ inserted on top is synthetic and deterministic — no real session content.
 
 from __future__ import annotations
 
+import json
 import os
 import sqlite3
 from pathlib import Path
@@ -112,4 +114,69 @@ def sessions_db(workdir: Path) -> Path:
         title="beta: write docs",
         created_at=BASE_TS_MS + 14_400_000,
     )
+    return db
+
+
+def insert_vscdb_key(
+    db_path: str | Path, key: str, value: str | dict
+) -> None:
+    """Insert one ``ItemTable`` row; ``dict`` values are JSON-encoded."""
+    con = sqlite3.connect(str(db_path))
+    try:
+        con.execute(
+            "INSERT INTO ItemTable(key, value) VALUES (?, ?)",
+            (key, value if isinstance(value, str) else json.dumps(value)),
+        )
+        con.commit()
+    finally:
+        con.close()
+
+
+def create_state_vscdb(db_path: str | Path) -> Path:
+    """Empty Electron-style ``ItemTable`` store."""
+    db_path = Path(db_path)
+    con = sqlite3.connect(str(db_path))
+    try:
+        con.execute(
+            "CREATE TABLE ItemTable(key TEXT PRIMARY KEY, value BLOB)"
+        )
+        con.commit()
+    finally:
+        con.close()
+    return db_path
+
+
+@pytest.fixture
+def state_vscdb(workdir: Path) -> Path:
+    """Synthetic state.vscdb: two GUI session→workspace bindings.
+
+    - ``canyon-newspaper`` → alpha's real dir, so it merges into the
+      ``alpha`` project built from ``sessions.db``.
+    - ``river-fox`` → ``C:\\work\\gamma`` (Windows spelling), a gui-only
+      project.
+    - plus an unrelated key and a malformed binding, both ignored.
+    """
+    db = create_state_vscdb(workdir / "state.vscdb")
+    insert_vscdb_key(
+        db,
+        "windsurfSpace.sessionWorkspace/acp/devin-cli/canyon-newspaper",
+        {
+            "workspaceId": str(workdir / "alpha"),
+            "label": "alpha gui review",
+            "folders": [str(workdir / "alpha")],
+            "lastUpdated": BASE_TS_MS + 18_000_000,
+        },
+    )
+    insert_vscdb_key(
+        db,
+        "windsurfSpace.sessionWorkspace/acp/devin-cli/river-fox",
+        {
+            "workspaceId": "C:\\work\\gamma",
+            "label": "gamma",
+            "folders": ["C:\\work\\gamma"],
+            "lastUpdated": BASE_TS_MS + 21_600_000,
+        },
+    )
+    insert_vscdb_key(db, "windsurfSpace.metadata", {"sp1": {}})
+    insert_vscdb_key(db, "unrelated.key", "{}")
     return db

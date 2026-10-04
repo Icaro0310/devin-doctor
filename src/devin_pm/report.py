@@ -41,37 +41,51 @@ def _fmt_table(headers: list[str], rows: list[list[str]]) -> str:
 
 
 def render_status_table(projects: Iterable[Project]) -> str:
-    """Per-project rollup for ``devin-pm status``."""
+    """Per-project rollup for ``devin-pm status``.
+
+    A ``GUI`` column appears only when GUI sessions are in the mix
+    (``--vscdb``); pure-``sessions.db`` output is unchanged.
+    """
     projects = list(projects)
     if not projects:
         return "no projects"
-    rows = [
-        [
+    has_gui = any(p.gui_session_count for p in projects)
+    headers = ["PROJECT", "SESSIONS", "ACTIVE", "HIDDEN"]
+    if has_gui:
+        headers.append("GUI")
+    headers += ["LAST_ACTIVITY", "COST"]
+    rows = []
+    for p in projects:
+        row = [
             p.name,
             str(p.session_count),
             str(p.status_counts.get("active", 0)),
             str(p.status_counts.get("hidden", 0)),
-            ms_to_date(p.last_activity_at),
-            fmt_cost(p.cost),
         ]
-        for p in projects
-    ]
-    return _fmt_table(
-        ["PROJECT", "SESSIONS", "ACTIVE", "HIDDEN", "LAST_ACTIVITY", "COST"], rows
-    )
+        if has_gui:
+            row.append(str(p.gui_session_count))
+        row += [ms_to_date(p.last_activity_at), fmt_cost(p.cost)]
+        rows.append(row)
+    return _fmt_table(headers, rows)
 
 
 def _sessions_table(project: Project) -> list[str]:
-    lines = [
-        "| id | title | date | status | cost |",
-        "|---|---|---|---|---|",
-    ]
+    has_gui = project.gui_session_count > 0
+    header, sep = "| id | title | date | status |", "|---|---|---|---|"
+    if has_gui:
+        header, sep = header + " source |", sep + "---|"
+    header, sep = header + " cost |", sep + "---|"
+    lines = [header, sep]
     for s in project.sessions:
         title = (s.title or "-").replace("|", "\\|")
-        lines.append(
+        row = (
             f"| `{s.id}` | {title} | {ms_to_date(s.last_activity_at)} "
-            f"| {s.status} | {fmt_cost(extract_cost(s.cogs_json))} |"
+            f"| {s.status} |"
         )
+        if has_gui:
+            row += f" {getattr(s, 'source', 'cli')} |"
+        row += f" {fmt_cost(extract_cost(s.cogs_json))} |"
+        lines.append(row)
     return lines
 
 

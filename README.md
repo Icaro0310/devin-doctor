@@ -11,9 +11,10 @@
 
 **[Português (BR)](README.pt-BR.md)** · English
 
-A project manager over your Devin sessions — it reads `sessions.db`,
-groups work per repository/project, and generates status reports,
-milestones and a machine-readable project registry.
+A project manager over your Devin sessions — it reads `sessions.db`
+(and optionally the GUI's `state.vscdb`), groups work per
+repository/project, and generates status reports, milestones and a
+machine-readable project registry.
 
 ## The problem
 
@@ -69,6 +70,8 @@ pytest
 ```bash
 devin-pm status                          # per-project rollup table
 devin-pm status --json                   # same, machine-readable
+devin-pm status --vscdb                  # also merge GUI sessions (auto-detect)
+devin-pm status --vscdb path/state.vscdb # pin the GUI store
 devin-pm report --project my-repo        # markdown status report
 devin-pm report                          # global report, all projects
 devin-pm report --project x --out x.md   # write to file
@@ -81,6 +84,39 @@ devin-pm verify --json                   # same, machine-readable
 `--sessions-db PATH` overrides the database location on every subcommand;
 otherwise `devin-pm` auto-detects `%APPDATA%/devin/cli/sessions.db`
 (`DEVIN_PM_SESSIONS_DB` env var also works). All reads are read-only.
+
+### GUI sessions (`--vscdb`)
+
+The Desktop app stores session→workspace bindings in the Electron store
+`<config>/Devin/User/globalStorage/state.vscdb` — keys of the form
+`windsurfSpace.sessionWorkspace/<backend>/<slug>` holding JSON
+`{workspaceId, label, folders[], lastUpdated}`. Passing `--vscdb` on any
+subcommand merges them into the same project grouping (PM-1):
+
+```bash
+devin-pm status --vscdb                # bare flag: auto-detect
+devin-pm report --vscdb PATH           # pin a specific state.vscdb
+```
+
+GUI sessions have no transcript — they group by `workspaceId` (falling
+back to the first `folders[]` entry, then `label`) and are marked
+gui-sourced everywhere: status `gui` in reports, a `GUI` column in the
+`status` table, a `source` column in session tables, and `gui_sessions`
+counts in `--json`/`registry` output. A bare `--vscdb` with no store
+found warns and continues with `sessions.db` only; an explicit missing
+`PATH` exits `2`. `DEVIN_PM_STATE_VSCDB` overrides auto-detection. The
+store is opened `mode=ro` — read-only, always.
+
+### Path normalization (grouping keys)
+
+The same repo may be recorded as `C:\Users\X\repo`, `/c/Users/X/repo`
+(MSYS/Git-Bash) or `\\wsl.localhost\Ubuntu\home\u\repo` (WSL UNC). Before
+PM-3 that split one project into three groups. Grouping keys now fold:
+`C:\x` ⇄ `C:/x` ⇄ `/c/x` ⇄ `/cygdrive/c/x` (drive-rooted paths are
+case-folded — the Windows FS is case-insensitive), WSL UNC prefixes map
+to the in-distro POSIX path, and separators/trailing slashes collapse.
+Output keeps the original path; only the grouping key is normalized.
+POSIX paths keep their case (`/home/u/Foo` ≠ `/home/u/foo`).
 
 ### Verify against the ecosystem registry
 
@@ -142,7 +178,10 @@ Tested on **Windows and Linux** (`windows-latest` + `ubuntu-latest` in CI).
 Devin's `sessions.db` is auto-detected per platform — `%APPDATA%\devin\` on
 Windows, `~/.local/share/devin/` (`XDG_DATA_HOME`) on Linux,
 `~/Library/Application Support/devin/` on macOS. Override with the
-`DEVIN_PM_SESSIONS_DB` env var (see Usage).
+`DEVIN_PM_SESSIONS_DB` env var (see Usage). The GUI `state.vscdb` lives at
+`<config>/Devin/User/globalStorage/state.vscdb` (`%APPDATA%` on Windows,
+`XDG_CONFIG_HOME`/`~/.config` on Linux); override with
+`DEVIN_PM_STATE_VSCDB`.
 
 ## Limitations
 
@@ -152,13 +191,17 @@ Windows, `~/.local/share/devin/` (`XDG_DATA_HOME`) on Linux,
 - **Cost is best-effort.** The DB does not record billing in a documented
   field; `cogs_json` is unstable. Where no recognizable cost field exists,
   reports show `-` and the registry emits `null` — unknown, not zero.
-- **CLI sessions only.** GUI/Desktop sessions (`acp-messages/*.db`) are not
-  covered in M1.
+- **GUI coverage is bindings-only.** `--vscdb` reads session→workspace
+  bindings from `state.vscdb`; GUI transcripts (`acp-messages/*.db`) are
+  not covered, so gui sessions carry no cost/milestone detail beyond a
+  `milestone:` label.
 - **Read-only.** This project never writes to Devin's databases; the only
   files it writes are the ones you ask for (`--out`, `milestones.json` is
   yours to author).
-- **Grouping is string-based.** Two paths that differ only by case are
-  different projects (correct on POSIX; a documented edge on Windows).
+- **Grouping normalizes spellings, not machines.** `C:\x` ⇄ `/c/x` and
+  WSL-UNC prefixes fold into one key, but `/home/u/repo` vs
+  `c:/users/u/repo` stay distinct — nothing in the path proves they are
+  the same directory. POSIX paths keep their case.
 
 ## Development
 
@@ -185,8 +228,9 @@ contracts and [CONTRIBUTING.md](CONTRIBUTING.md) for ground rules.
 
 ## When NOT to use this
 
-- Your sessions live in the GUI/Desktop `acp-messages/*.db` stores — M1
-  covers CLI sessions only.
+- You need GUI session transcripts — `--vscdb` covers the `state.vscdb`
+  workspace bindings (which GUI session worked on which workspace), not
+  the `acp-messages/*.db` message stores.
 - You need reliable cost or billing rollups — the DB has no documented cost
   field; reports show `-`/`null` where it is unknown, never an estimate.
 - You need live session state — devin-pm reports on the `sessions.db`
@@ -202,8 +246,11 @@ only files it writes are the reports you ask for.
 
 **How are sessions grouped into projects?** By working directory: each
 session records where it ran, and sessions sharing that path become one
-project. Grouping is string-based, so paths differing only by case are
-distinct projects (correct on POSIX, a documented edge on Windows).
+project. The grouping key normalizes path spellings — `C:\x`, `/c/x` and
+`/cygdrive/c/x` fold together (case-insensitive on drive-rooted paths),
+and `\\wsl.localhost\<distro>\…` maps to the in-distro POSIX path — while
+POSIX paths keep their case. With `--vscdb`, GUI session→workspace
+bindings join the same grouping and are marked `gui`.
 
 **How do I mark a milestone?** Name a session's title `milestone: <name>` —
 that marks it in the session's project, and archiving (hiding) the session

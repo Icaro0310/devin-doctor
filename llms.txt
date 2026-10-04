@@ -18,11 +18,13 @@ devin-pm solves the problem that Devin records every CLI session in a local `ses
 - `devin-pm milestones --project my-repo`: milestone list with done percentage
 - `devin-pm registry --out registry.json`: machine-readable project registry
 - `devin-pm ... --sessions-db PATH`: override the auto-detected database on every subcommand (`DEVIN_PM_SESSIONS_DB` env var also works)
+- `devin-pm ... --vscdb [PATH]`: also merge GUI session→workspace bindings from `state.vscdb` (bare flag auto-detects, `DEVIN_PM_STATE_VSCDB` env var works); gui sessions are marked `gui` in output
+- Grouping keys normalize path spellings: `C:\x` ⇄ `/c/x` ⇄ `/cygdrive/c/x` (case-folded), `\\wsl.localhost\<distro>\…` → POSIX; original paths kept in output
 
 ## When to use / when not
 
 - Use when: you have weeks of Devin sessions and want per-repo status without scrolling the app; you want Markdown reports or a JSON registry to feed dashboards, docs or other tools; you track milestones and want them detected from session titles or a `milestones.json` file; you want read-only rollups that fail loudly on unknown schema versions.
-- Not when: you need GUI/Desktop `acp-messages/*.db` sessions (M1 covers CLI sessions only); you need reliable cost/billing rollups (the DB has no documented cost field — reports show `-`/`null`, not estimates); you need live session state rather than a snapshot of `sessions.db`; your schema is newer than v17.
+- Not when: you need GUI/Desktop transcripts (`--vscdb` covers `state.vscdb` workspace bindings only, not `acp-messages/*.db`); you need reliable cost/billing rollups (the DB has no documented cost field — reports show `-`/`null`, not estimates); you need live session state rather than a snapshot of `sessions.db`; your schema is newer than v17.
 
 ## Related
 

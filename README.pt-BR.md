@@ -11,9 +11,10 @@
 
 **[English](README.md)** · Português (BR)
 
-Um gestor de projetos sobre as tuas sessões do Devin — lê o `sessions.db`,
-agrupa o trabalho por repositório/projeto e gera relatórios de status,
-milestones e um registo de projetos em formato legível por máquina.
+Um gestor de projetos sobre as tuas sessões do Devin — lê o `sessions.db`
+(e, opcionalmente, o `state.vscdb` da GUI), agrupa o trabalho por
+repositório/projeto e gera relatórios de status, milestones e um registo
+de projetos em formato legível por máquina.
 
 ## O problema
 
@@ -69,6 +70,8 @@ pytest
 ```bash
 devin-pm status                          # tabela rollup por projeto
 devin-pm status --json                   # o mesmo, legível por máquina
+devin-pm status --vscdb                  # também funde sessões GUI (auto-detect)
+devin-pm status --vscdb path/state.vscdb # fixa o store da GUI
 devin-pm report --project my-repo        # relatório de status em markdown
 devin-pm report                          # relatório global, todos os projetos
 devin-pm report --project x --out x.md   # escreve para ficheiro
@@ -82,6 +85,40 @@ devin-pm verify --json                   # o mesmo, legível por máquina
 subcomandos; caso contrário o `devin-pm` auto-detecta
 `%APPDATA%/devin/cli/sessions.db` (a variável `DEVIN_PM_SESSIONS_DB` também
 funciona). Todas as leituras são read-only.
+
+### Sessões da GUI (`--vscdb`)
+
+A app Desktop grava as ligações sessão→workspace no store Electron
+`<config>/Devin/User/globalStorage/state.vscdb` — chaves do tipo
+`windsurfSpace.sessionWorkspace/<backend>/<slug>` com JSON
+`{workspaceId, label, folders[], lastUpdated}`. Passar `--vscdb` em
+qualquer subcomando funde-as no mesmo agrupamento por projeto (PM-1):
+
+```bash
+devin-pm status --vscdb                # flag simples: auto-detecta
+devin-pm report --vscdb PATH           # fixa um state.vscdb específico
+```
+
+Sessões GUI não têm transcript — agrupam por `workspaceId` (caindo para o
+primeiro `folders[]`, depois `label`) e são marcadas como gui-sourced em
+todo o lado: status `gui` nos relatórios, coluna `GUI` na tabela de
+`status`, coluna `source` nas tabelas de sessões e contagem
+`gui_sessions` no output `--json`/`registry`. Um `--vscdb` simples sem
+store encontrado avisa e continua só com o `sessions.db`; um `PATH`
+explícito inexistente sai com `2`. `DEVIN_PM_STATE_VSCDB` sobrepõe a
+auto-detecção. O store é aberto em `mode=ro` — read-only, sempre.
+
+### Normalização de caminhos (chaves de agrupamento)
+
+O mesmo repo pode ficar gravado como `C:\Users\X\repo`,
+`/c/Users/X/repo` (MSYS/Git-Bash) ou `\\wsl.localhost\Ubuntu\home\u\repo`
+(UNC do WSL). Antes do PM-3 isso dividia um projeto em três grupos. As
+chaves de agrupamento agora dobram: `C:\x` ⇄ `C:/x` ⇄ `/c/x` ⇄
+`/cygdrive/c/x` (caminhos com drive dobram maiúsculas — o FS do Windows é
+case-insensitive), prefixos UNC do WSL mapeiam para o caminho POSIX da
+distro, e separadores/barras finais colapsam. O output mantém o caminho
+original; só a chave de agrupamento é normalizada. Caminhos POSIX mantêm
+as maiúsculas (`/home/u/Foo` ≠ `/home/u/foo`).
 
 ### Verificar contra o registry do ecossistema
 
@@ -146,7 +183,11 @@ Testado em **Windows e Linux** (o CI corre em `windows-latest` +
 `ubuntu-latest`). A `sessions.db` do Devin é auto-detetada por
 plataforma — `%APPDATA%\devin\` no Windows, `~/.local/share/devin/`
 (`XDG_DATA_HOME`) no Linux, `~/Library/Application Support/devin/` no
-macOS. Override com a env var `DEVIN_PM_SESSIONS_DB` (ver Uso).
+macOS. Override com a env var `DEVIN_PM_SESSIONS_DB` (ver Uso). O
+`state.vscdb` da GUI fica em
+`<config>/Devin/User/globalStorage/state.vscdb` (`%APPDATA%` no Windows,
+`XDG_CONFIG_HOME`/`~/.config` no Linux); override com
+`DEVIN_PM_STATE_VSCDB`.
 
 ## Limitações
 
@@ -157,13 +198,17 @@ macOS. Override com a env var `DEVIN_PM_SESSIONS_DB` (ver Uso).
   `cogs_json` é instável. Quando não existe campo de custo reconhecível,
   os relatórios mostram `-` e o registo emite `null` — desconhecido, não
   zero.
-- **Só sessões CLI.** Sessões da GUI/Desktop (`acp-messages/*.db`) não
-  estão cobertas no M1.
+- **Cobertura GUI é só bindings.** `--vscdb` lê as ligações
+  sessão→workspace do `state.vscdb`; os transcripts da GUI
+  (`acp-messages/*.db`) não estão cobertos, por isso sessões gui não têm
+  detalhe de custo/milestone além de um label `milestone:`.
 - **Read-only.** Este projeto nunca escreve nas bases de dados do Devin;
   os únicos ficheiros que escreve são os que pedes (`--out`,
   `milestones.json` é teu para criar).
-- **Agrupamento é por string.** Dois caminhos que diferem só em maiúsculas
-  são projetos diferentes (correto em POSIX; edge documentado no Windows).
+- **Agrupamento normaliza spellings, não máquinas.** `C:\x` ⇄ `/c/x` e
+  prefixos UNC do WSL dobram numa chave, mas `/home/u/repo` vs
+  `c:/users/u/repo` ficam distintos — nada no caminho prova que são o
+  mesmo diretório. Caminhos POSIX mantêm as maiúsculas.
 
 ## Desenvolvimento
 
@@ -184,7 +229,7 @@ dados e [CONTRIBUTING.md](CONTRIBUTING.md) para as regras base.
 
 ## Quando NÃO usar
 
-- As suas sessões vivem nos stores `acp-messages/*.db` do GUI/Desktop — o M1 cobre apenas sessões CLI.
+- Você precisa dos transcripts das sessões GUI — o `--vscdb` cobre as ligações de workspace do `state.vscdb` (que sessão GUI trabalhou em que workspace), não os stores de mensagens `acp-messages/*.db`.
 - Você precisa de rollups fiáveis de custo ou billing — a DB não tem campo de custo documentado; os relatórios mostram `-`/`null` onde é desconhecido, nunca uma estimativa.
 - Você precisa de estado de sessões ao vivo — o devin-pm reporta sobre o snapshot do `sessions.db` no momento da leitura; para atividade ao vivo veja o [`devin-office`](https://github.com/Icaro0310/devin-office).
 
@@ -192,7 +237,7 @@ dados e [CONTRIBUTING.md](CONTRIBUTING.md) para as regras base.
 
 **O que é o devin-pm?** Um CLI que transforma o `sessions.db` plano do Devin numa vista de gestão de projetos: tabelas de status por repositório, relatórios Markdown, tracking de milestones e um registry legível por máquina. É read-only — os únicos ficheiros que escreve são os relatórios que pede.
 
-**Como as sessões são agrupadas em projetos?** Por diretório de trabalho: cada sessão regista onde correu, e sessões que partilham esse caminho tornam-se um projeto. O agrupamento é por string, por isso caminhos que diferem só em maiúsculas são projetos distintos (correto em POSIX, um edge documentado no Windows).
+**Como as sessões são agrupadas em projetos?** Por diretório de trabalho: cada sessão regista onde correu, e sessões que partilham esse caminho tornam-se um projeto. A chave de agrupamento normaliza spellings de caminho — `C:\x`, `/c/x` e `/cygdrive/c/x` dobram juntos (case-insensitive em caminhos com drive), e `\\wsl.localhost\<distro>\…` mapeia para o caminho POSIX da distro — enquanto caminhos POSIX mantêm as maiúsculas. Com `--vscdb`, as ligações sessão→workspace da GUI entram no mesmo agrupamento e são marcadas `gui`.
 
 **Como marco um milestone?** Dê a um título de sessão o nome `milestone: <name>` — isso marca-o no projeto da sessão, e arquivar (esconder) a sessão marca-o como feito. Em alternativa, liste milestones em `milestones.json` na raiz do projeto; entradas do ficheiro vencem em colisão de nomes.
 

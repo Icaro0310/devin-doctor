@@ -1,10 +1,16 @@
 """Group sessions into projects.
 
 A *project* is the set of sessions that share a ``working_directory`` —
-the basename of that directory is the project name. Grouping normalizes
-directory separators and a trailing slash, so ``C:\\work\\alpha`` and
-``C:\\work\\alpha\\`` land in the same project; it does **not** fold case
-(``/home/u/Foo`` and ``/home/u/foo`` are distinct on POSIX).
+the basename of that directory is the project name. Grouping keys come
+from :func:`devin_pm.paths.normalize_path` (PM-3): separators and
+trailing slashes, ``C:\\x`` ⇄ ``/c/x`` drive equivalence (drive-rooted
+paths fold case — the Windows filesystem is case-insensitive), and WSL
+UNC prefixes. POSIX case is preserved — ``/home/u/Foo`` and
+``/home/u/foo`` stay distinct. Display keeps the original path.
+
+GUI sessions loaded from ``state.vscdb`` (:class:`GuiSession`, PM-1)
+group by their workspace the same way and surface with ``status`` /
+``source`` = ``"gui"``.
 """
 
 from __future__ import annotations
@@ -18,6 +24,9 @@ from pathlib import Path
 from typing import Iterable
 
 from devin_internals.parsers import Session, SessionsStore
+
+from devin_pm.paths import normalize_path
+from devin_pm.vscdb import GuiSession
 
 ENV_SESSIONS_DB = "DEVIN_PM_SESSIONS_DB"
 
@@ -108,7 +117,7 @@ class Project:
 
     name: str
     working_directory: str
-    sessions: tuple[Session, ...]
+    sessions: tuple[Session | GuiSession, ...]
 
     @property
     def session_count(self) -> int:
@@ -130,20 +139,32 @@ class Project:
         return counts
 
     @property
+    def gui_session_count(self) -> int:
+        """How many member sessions came from ``state.vscdb`` (PM-1)."""
+        return sum(
+            1 for s in self.sessions
+            if getattr(s, "source", "cli") == "gui"
+        )
+
+    @property
     def cost(self) -> float | None:
         """Sum of extractable session costs; ``None`` if none found."""
         values = [c for c in (extract_cost(s.cogs_json) for s in self.sessions) if c is not None]
         return sum(values) if values else None
 
 
-def group_sessions(sessions: Iterable[Session]) -> list[Project]:
+def group_sessions(sessions: Iterable[Session | GuiSession]) -> list[Project]:
     """Group sessions by (normalized) ``working_directory``.
 
-    Returns projects sorted by last activity, most recent first.
+    The grouping key is :func:`normalize_path` — Windows, MSYS/Cygwin and
+    WSL-UNC spellings of one directory fold together. Returns projects
+    sorted by last activity, most recent first.
     """
-    groups: dict[str, list[Session]] = {}
+    groups: dict[str, list[Session | GuiSession]] = {}
     for session in sessions:
-        groups.setdefault(_wd_key(session.working_directory), []).append(session)
+        groups.setdefault(
+            normalize_path(session.working_directory), []
+        ).append(session)
 
     projects = [
         Project(
