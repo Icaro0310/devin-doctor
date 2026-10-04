@@ -221,3 +221,51 @@ def test_session_node_attrs(sessions_db):
     assert node.attrs["title"] == "Alpha work"
     assert node.attrs["model"] == "fixture-model"
     assert node.attrs["hidden"] is False
+
+
+# -- GR-4: commit nodes + produced/referenced edges -------------------------
+
+
+def _tc(tcid, call=None, update=None):
+    class TC:
+        tool_call_id = tcid
+        tool_call_json = call
+        tool_call_update_json = update
+        session_id = "s"
+    return TC()
+
+
+SHA = "88e41436997e9badacafa057969a2bea3a55e48c"
+
+
+def _session():
+    class S:
+        id = "s"
+        working_directory = "/w"
+        title = "t"
+        model = "m"
+        created_at = 1
+        last_activity_at = 2
+        hidden = False
+    return S()
+
+
+def test_commit_produced_on_git_commit_call():
+    from devin_graph.extract import extract_session
+    tc = _tc("t1", call='{"command": "git commit -m x"}',
+             update=f'{{"output": "[main {SHA[:7]}] x"}}'
+             .replace(SHA[:7], SHA))
+    ex = extract_session(_session(), [tc])
+    kinds = {e.kind for e in ex.edges}
+    assert "produced" in kinds
+    assert any(n.kind == "commit" and n.key == SHA for n in ex.nodes)
+
+
+def test_commit_referenced_when_no_git_commit():
+    from devin_graph.extract import extract_session
+    tc = _tc("t1", update=f'{{"output": "see commit {SHA}"}}')
+    ex = extract_session(_session(), [tc])
+    assert any(
+        e.kind == "referenced" and e.attrs["method"] == "seen"
+        for e in ex.edges)
+    assert not any(e.kind == "produced" for e in ex.edges)

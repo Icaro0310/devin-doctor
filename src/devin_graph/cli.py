@@ -111,6 +111,13 @@ def build_parser() -> argparse.ArgumentParser:
     _add_graph(e)
     e.add_argument("--out", help="write to file instead of stdout")
     e.set_defaults(func=_cmd_export)
+
+    sq2 = sub.add_parser(
+        "sql", help="read-only SQL over graph.db (SELECT/WITH only)")
+    sq2.add_argument("statement", help="a SELECT or WITH ... SELECT statement")
+    _add_graph(sq2)
+    sq2.add_argument("--json", action="store_true")
+    sq2.set_defaults(func=_cmd_sql)
     return p
 
 
@@ -201,6 +208,39 @@ def _cmd_export(args: argparse.Namespace) -> int:
               f"edges → {args.out}")
     else:
         print(text)
+    return 0
+
+
+def _cmd_sql(args: argparse.Namespace) -> int:
+    stmt = args.statement.strip().rstrip(";")
+    head = stmt.split(None, 1)[0].lower() if stmt else ""
+    if head not in ("select", "with"):
+        print("devin-graph: sql accepts SELECT/WITH only", file=sys.stderr)
+        return 2
+    import sqlite3
+
+    path = Path(args.graph).expanduser()
+    if not path.exists():
+        print(f"devin-graph: {path}: no such graph file", file=sys.stderr)
+        return 2
+    con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        con.execute("PRAGMA query_only = ON")
+        cur = con.execute(stmt)
+        cols = [d[0] for d in cur.description or []]
+        rows = cur.fetchall()
+    except sqlite3.Error as exc:
+        print(f"devin-graph: {exc}", file=sys.stderr)
+        return 2
+    finally:
+        con.close()
+    if args.json:
+        print(json.dumps(
+            [dict(zip(cols, r)) for r in rows], ensure_ascii=False, indent=2))
+    else:
+        print("  ".join(cols))
+        for r in rows:
+            print("  ".join("" if v is None else str(v) for v in r))
     return 0
 
 

@@ -1,9 +1,10 @@
 """Extract graph nodes/edges from a ``sessions.db`` (via ``SessionsStore``).
 
 Node kinds: ``session``, ``project`` (the session's ``working_directory``),
-``file`` (a path touched by a tool call), ``tool`` (tool name) and
+``file`` (a path touched by a tool call), ``tool`` (tool name),
 ``tool_call`` (one row of ``tool_call_state`` — the ground truth of what the
-agent actually invoked).
+agent actually invoked) and ``commit`` (a full git SHA referenced by a
+tool-call payload, via ``devin_internals.commits``).
 
 Edge kinds:
 
@@ -12,6 +13,9 @@ Edge kinds:
 - ``call_used``     tool_call → tool
 - ``tool_used``     session → tool
 - ``file_touched``  tool_call → file
+- ``produced``      session → commit (SHA seen in a ``git commit``/``git
+  push`` tool call — ``method="exact"``)
+- ``referenced``    session → commit (SHA seen elsewhere — ``method="seen"``)
 
 ``tool_call_json`` is marked *unstable* in SCHEMA.md, so payload decoding is
 deliberately defensive: file paths are collected from any recognised path-ish
@@ -25,10 +29,13 @@ import json
 import posixpath
 import re
 from dataclasses import dataclass, field
+
+from devin_internals.commits import commit_references
 from typing import Any, Iterable, Iterator
 
-NODE_KINDS = ("session", "project", "file", "tool", "tool_call")
-EDGE_KINDS = ("runs_in", "made_call", "call_used", "tool_used", "file_touched")
+NODE_KINDS = ("session", "project", "file", "tool", "tool_call", "commit")
+EDGE_KINDS = ("runs_in", "made_call", "call_used", "tool_used",
+              "file_touched", "produced", "referenced")
 
 # Payload keys whose string value(s) are file/dir paths.
 _PATH_KEYS = {
@@ -215,6 +222,7 @@ def extract_session(session, tool_calls: Iterable) -> Extraction:
     ``session`` is a ``devin_internals.parsers.Session``; ``tool_calls`` are
     its ``ToolCallState`` rows.
     """
+    tool_calls = list(tool_calls)
     ex = Extraction()
     sid = session.id
     cwd = normalize_path(session.working_directory)
@@ -260,6 +268,21 @@ def extract_session(session, tool_calls: Iterable) -> Extraction:
                 Node("file", resolved, {"name": posixpath.basename(resolved)}))
             ex.edges.append(Edge(
                 "file_touched", ("tool_call", call_key), ("file", resolved)))
+
+    # commit attribution: "produced" only when the SHA shows in a git
+    # commit/push tool call (exact); any other mention is "referenced".
+    for ref in commit_references(tool_calls):
+        text = " ".join(
+            p or "" for r in tool_calls if r.tool_call_id == ref.tool_call_id
+            for p in (r.tool_call_json, r.tool_call_update_json))
+        produced = "git commit" in text or "git push" in text
+        ex.nodes.append(Node("commit", ref.sha, {
+            "repo_url": ref.repo_url, "short": ref.sha[:7]}))
+        ex.edges.append(Edge(
+            "produced" if produced else "referenced",
+            ("session", sid), ("commit", ref.sha),
+            {"method": "exact" if produced else "seen",
+             "tool_call_id": ref.tool_call_id}))
 
     return ex
 

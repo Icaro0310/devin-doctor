@@ -90,6 +90,9 @@ Windows and `$XDG_DATA_HOME/devin/cli/sessions.db` on Linux (default
 `~/.local/share/devin/cli/sessions.db`). A legacy `~/.config/devin` location
 is also checked. Pass `--sessions-db` to override.
 
+
+`commit` nodes + `produced`/`referenced` edges attribute sessions to git SHAs seen in tool calls (exact when the SHA appears in a `git commit`/`git push` call, `seen` otherwise). `devin-graph sql "SELECT ..."` runs read-only SQL over graph.db (SELECT/WITH only, `query_only` pragma).
+
 ## Limitations
 
 - **Schema-gated.** Only `sessions.db` schema v15–v17; newer fails loudly

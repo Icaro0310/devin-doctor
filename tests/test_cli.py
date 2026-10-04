@@ -181,3 +181,15 @@ def test_cli_never_writes_source_db(built, tmp_path, capsys):
     main(["export", "--format", "json", "--graph", str(graph)])
     capsys.readouterr()
     assert hashlib.sha256(sessions_db.read_bytes()).hexdigest() == before
+
+
+def test_sql_select_and_rejects_writes(tmp_path, capsys):
+    import sqlite3
+    db = tmp_path / "g.db"
+    con = sqlite3.connect(db)
+    con.execute("CREATE TABLE t(a)"); con.execute("INSERT INTO t VALUES (7)")
+    con.commit(); con.close()
+    from devin_graph.cli import main
+    assert main(["sql", "SELECT a FROM t", "--graph", str(db)]) == 0
+    assert "7" in capsys.readouterr().out
+    assert main(["sql", "DROP TABLE t", "--graph", str(db)]) == 2
