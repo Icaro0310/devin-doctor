@@ -3,6 +3,7 @@ the opt-in --probe-network flag."""
 
 import json
 import os
+import sys
 
 from devin_doctor import capabilities
 from devin_doctor.cli import main
@@ -13,6 +14,18 @@ def _collect(env=None, config_dir=None, platform="linux"):
     return capabilities.collect_profile(
         config_dir=config_dir, environ=env, platform=platform
     )
+
+
+def _make_fake_exe(directory, name):
+    """Drop a fake executable for ``name`` into ``directory``.
+
+    On Windows a bare extensionless file is not executable — ``shutil.which``
+    (correctly) only matches names ending in a ``PATHEXT`` suffix — so the
+    fake gets a ``.exe`` there. POSIX keeps the bare name + chmod."""
+    p = directory / (name + ".exe" if sys.platform == "win32" else name)
+    p.write_text("#!/bin/sh\n", "utf-8")
+    p.chmod(0o755)
+    return p
 
 
 def test_default_profile_is_corporate(tmp_path):
@@ -73,8 +86,7 @@ def test_net_keys_unknown_without_probe(tmp_path):
 def test_scheduler_true_when_crontab_on_path(tmp_path):
     fake_bin = tmp_path / "bin"
     fake_bin.mkdir()
-    (fake_bin / "crontab").write_text("#!/bin/sh\n", "utf-8")
-    (fake_bin / "crontab").chmod(0o755)
+    _make_fake_exe(fake_bin, "crontab")
     env = {"PATH": str(fake_bin)}
     profile = _collect(env=env, config_dir=tmp_path)
     assert profile["capabilities"]["scheduler"] is True
@@ -92,9 +104,7 @@ def test_containers_and_llm_from_path(tmp_path):
     fake_bin = tmp_path / "bin"
     fake_bin.mkdir()
     for name in ("docker", "ollama"):
-        p = fake_bin / name
-        p.write_text("#!/bin/sh\n", "utf-8")
-        p.chmod(0o755)
+        _make_fake_exe(fake_bin, name)
     env = {"PATH": str(fake_bin)}
     profile = _collect(env=env, config_dir=tmp_path)
     assert profile["capabilities"]["containers"] is True
