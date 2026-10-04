@@ -84,6 +84,15 @@ devin-history audit --sessions-db path/to/sessions.db --json
 devin-history export-gui --vscdb path/to/state.vscdb --out gui-notes/
 ```
 
+No Devin installed? Try it on a synthetic fixture (stdlib-only, no Devin
+data involved):
+
+```bash
+pipx install "git+https://github.com/Icaro0310/devin-internals-spec"
+devin-inspect make-fixture /tmp/fx
+devin-history export --sessions-db /tmp/fx/cli/sessions.db --out /tmp/notes
+```
+
 Notes are idempotent: each file embeds the session's `last_activity`
 marker, so re-runs skip unchanged sessions (`--all` forces a rewrite,
 `--dry-run` previews). The `index.md`/`index.json` at the root carries a
