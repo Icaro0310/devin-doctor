@@ -2,6 +2,9 @@
 
 <img src="assets/banner.svg" alt="devin-search" width="100%"/>
 
+<a href="https://github.com/Icaro0310/devin-search/actions/workflows/ci.yml"><img src="https://github.com/Icaro0310/devin-search/actions/workflows/ci.yml/badge.svg" alt="ci"/></a>
+
+
 </div>
 
 # devin-search
