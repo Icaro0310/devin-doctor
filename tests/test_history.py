@@ -90,7 +90,7 @@ def test_cli_query_history_dir_text(db_path, tmp_path, capsys):
     hist = tmp_path / "history"
     hist.mkdir()
     note = _note(hist, "sess-9")
-    main(["index", "--sessions-db", str(db_path), "--index", str(idx)])
+    main(["index", "--sessions-db", str(db_path), "--no-acp", "--index", str(idx)])
     capsys.readouterr()
 
     rc = main(
@@ -109,7 +109,7 @@ def test_cli_query_history_dir_json(db_path, tmp_path, capsys):
     hist = tmp_path / "history"
     hist.mkdir()
     note = _note(hist, "sess-9")
-    main(["index", "--sessions-db", str(db_path), "--index", str(idx)])
+    main(["index", "--sessions-db", str(db_path), "--no-acp", "--index", str(idx)])
     capsys.readouterr()
 
     rc = main(
@@ -128,7 +128,7 @@ def test_cli_query_history_dir_without_flag_null(db_path, tmp_path, capsys):
         db_path, "sess-9", messages=[msg("user", "xyzzy cli marker")]
     )
     idx = tmp_path / "search.db"
-    main(["index", "--sessions-db", str(db_path), "--index", str(idx)])
+    main(["index", "--sessions-db", str(db_path), "--no-acp", "--index", str(idx)])
     capsys.readouterr()
     rc = main(["query", "xyzzy", "--index", str(idx), "--json"])
     assert rc == 0

@@ -41,7 +41,7 @@ def test_query_json_shape(db_path, tmp_path, capsys):
         db_path, "s1", messages=[msg("user", "xyzzy marker")]
     )
     idx = tmp_path / "search.db"
-    main(["index", "--sessions-db", str(db_path), "--index", str(idx)])
+    main(["index", "--sessions-db", str(db_path), "--no-acp", "--index", str(idx)])
     capsys.readouterr()
 
     rc = main(["query", "xyzzy", "--index", str(idx), "--json"])
@@ -58,7 +58,7 @@ def test_index_json_shape(db_path, tmp_path, capsys):
         [
             "index",
             "--sessions-db", str(db_path),
-            "--index", str(tmp_path / "s.db"),
+            "--no-acp", "--index", str(tmp_path / "s.db"),
             "--json",
         ]
     )
@@ -70,7 +70,8 @@ def test_index_json_shape(db_path, tmp_path, capsys):
 
 def test_query_no_hits_exit_1(db_path, tmp_path, capsys):
     idx = tmp_path / "search.db"
-    main(["index", "--sessions-db", str(db_path), "--index", str(idx)])
+    main(["index", "--sessions-db", str(db_path), "--no-acp",
+          "--index", str(idx)])
     capsys.readouterr()
     rc = main(["query", "absent-term", "--index", str(idx)])
     assert rc == 1
@@ -85,10 +86,43 @@ def test_query_missing_index_exit_2(tmp_path, capsys):
 
 def test_bad_since_exit_2(db_path, tmp_path, capsys):
     idx = tmp_path / "search.db"
-    main(["index", "--sessions-db", str(db_path), "--index", str(idx)])
+    main(["index", "--sessions-db", str(db_path), "--no-acp", "--index", str(idx)])
     capsys.readouterr()
     rc = main(["query", "x", "--since", "garbage", "--index", str(idx)])
     assert rc == 2
+
+
+def test_query_log_and_misses(db_path, tmp_path, capsys):
+    idx = tmp_path / "search.db"
+    main(["index", "--sessions-db", str(db_path), "--no-acp",
+          "--index", str(idx)])
+    capsys.readouterr()
+    main(["query", "absent-one", "--index", str(idx)])
+    main(["query", "absent-two", "--index", str(idx)])
+    main(["query", "absent-one", "--index", str(idx)])
+    capsys.readouterr()
+
+    log = tmp_path / "search.db.queries.jsonl"
+    assert log.is_file()
+    lines = [json.loads(l) for l in log.read_text().splitlines()]
+    assert len(lines) == 3
+    assert all(e["hits"] == 0 and "term" in e for e in lines)
+
+    rc = main(["misses", "--index", str(idx), "--json"])
+    assert rc == 0
+    s = json.loads(capsys.readouterr().out)
+    assert s["total_queries"] == 3 and s["zero_hit"] == 3
+    assert s["zero_hit_rate"] == 1.0
+    assert dict(s["top_missed_terms"]) == {"absent-one": 2, "absent-two": 1}
+
+
+def test_no_log_skips_query_log(db_path, tmp_path, capsys):
+    idx = tmp_path / "search.db"
+    main(["index", "--sessions-db", str(db_path), "--no-acp",
+          "--index", str(idx)])
+    capsys.readouterr()
+    main(["query", "absent", "--no-log", "--index", str(idx)])
+    assert not (tmp_path / "search.db.queries.jsonl").exists()
 
 
 def test_missing_sessions_db_exit_2(tmp_path, capsys):

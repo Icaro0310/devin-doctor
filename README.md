@@ -78,6 +78,13 @@ devin-search query "migration" --since 2026-09-01 --limit 5 --json
 
 # link hits to devin-history export notes
 devin-search query "kubectl" --history-dir ~/notes/devin-history
+
+# deterministic index: sessions.db only, never the auto-detected acp dir
+devin-search index --no-acp
+
+# zero-hit stats from the local query log (evidence for/against semantic
+# search — SE-1's trigger; log is opt-out via query --no-log)
+devin-search misses
 ```
 
 Hits print as `WHEN · ROLE · PROJECT · SESSION · SNIPPET` with the match

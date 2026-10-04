@@ -37,7 +37,9 @@ def _cmd_index(args: argparse.Namespace) -> int:
         else default_sessions_db()
     )
     acp_dir = (
-        Path(args.acp_dir).expanduser()
+        None
+        if args.no_acp
+        else Path(args.acp_dir).expanduser()
         if args.acp_dir
         else default_acp_dir()
     )
@@ -92,6 +94,10 @@ def _cmd_query(args: argparse.Namespace) -> int:
     except FileNotFoundError as exc:
         print(f"devin-search: {exc}", file=sys.stderr)
         return 2
+    if not args.no_log:
+        from devin_search.misslog import record
+        record(_resolve_index(args.index), args.term, len(hits),
+               role=args.role, project=args.project, since=args.since)
     if args.history_dir:
         hits = attach_history_notes(hits, args.history_dir)
     if args.json:
@@ -129,6 +135,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--acp-dir",
         help="path to Devin's User/acp-messages dir (default: auto-detect)",
     )
+    ix.add_argument(
+        "--no-acp",
+        action="store_true",
+        help="index sessions.db only — never auto-detect the real "
+        "acp-messages dir (also the deterministic choice for tests)",
+    )
     ix.add_argument("--index", help="index file path (default: app dir)")
     ix.add_argument(
         "--rebuild",
@@ -159,8 +171,40 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument(
         "--json", action="store_true", help="machine-readable JSON output"
     )
+    q.add_argument(
+        "--no-log", action="store_true",
+        help="skip the local query log (<index>.queries.jsonl)",
+    )
     q.set_defaults(func=_cmd_query)
+
+    m = sub.add_parser(
+        "misses",
+        help="zero-hit query stats from the local query log "
+        "(the objective trigger for semantic search)",
+    )
+    m.add_argument("--index", help="index file path (default: app dir)")
+    m.add_argument("--json", action="store_true")
+    m.set_defaults(func=_cmd_misses)
     return p
+
+
+def _cmd_misses(args: argparse.Namespace) -> int:
+    from devin_search.misslog import summarize
+    s = summarize(_resolve_index(args.index))
+    if args.json:
+        print(json.dumps(s, ensure_ascii=False, indent=2))
+        return 0
+    print(f"query log: {s['log']}")
+    print(f"  {s['total_queries']} queries · "
+          f"{s['zero_hit']} zero-hit ({s['zero_hit_rate']:.0%})")
+    for month, b in sorted(s["per_month"].items()):
+        print(f"  {month}: {b['queries']} queries, "
+              f"{b['zero_hit']} zero-hit")
+    if s["top_missed_terms"]:
+        print("  top missed terms:")
+        for term, n in s["top_missed_terms"]:
+            print(f"    {n:>3}× {term}")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
