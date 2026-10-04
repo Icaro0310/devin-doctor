@@ -96,6 +96,9 @@ is also checked. Pass `--sessions-db` to override.
 
 `--vscdb` (auto-detected on build) adds GUI coverage: `gui_session` nodes keyed by the generated session slug, `gui_workspace` edges to their workspace project, enriched with `lastAccessed` when a `resourceToSpace` editor URI links a space to the slug. Best-effort: only the observed `windsurfSpace.*` keys are read; unknown/malformed keys are skipped. Pass `--vscdb none` to disable.
 
+
+`devin-graph view --out file.html` renders the graph as a self-contained HTML page (embedded JSON + vanilla-JS force layout — zero CDN, works fully offline). `--limit` caps nodes (highest-degree kept, flagged TRUNCATED in the header).
+
 ## Limitations
 
 - **Schema-gated.** Only `sessions.db` schema v15–v17; newer fails loudly

@@ -193,3 +193,18 @@ def test_sql_select_and_rejects_writes(tmp_path, capsys):
     assert main(["sql", "SELECT a FROM t", "--graph", str(db)]) == 0
     assert "7" in capsys.readouterr().out
     assert main(["sql", "DROP TABLE t", "--graph", str(db)]) == 2
+
+
+def test_view_writes_offline_html(tmp_path, capsys, sessions_db):
+    from devin_graph.cli import main
+    gdb = tmp_path / "g.db"
+    main(["build", "--sessions-db", str(sessions_db), "--vscdb", "none",
+          "--graph", str(gdb)])
+    out = tmp_path / "v.html"
+    capsys.readouterr()
+    assert main(["view", "--graph", str(gdb), "--out", str(out)]) == 0
+    html = out.read_text()
+    assert "devin-graph" in html and "DATA" in html
+    # no external assets (the svg xmlns namespace string is fine)
+    assert 'src="http' not in html and 'href="http' not in html
+    assert "cdn" not in html.lower()

@@ -100,6 +100,9 @@ Nós `commit` + arestas `produced`/`referenced` atribuem sessões a SHAs git vis
 
 `--vscdb` (auto-detectado no build) adiciona cobertura da GUI: nós `gui_session` indexados pelo slug gerado da sessão, arestas `gui_workspace` para o projeto de workspace, enriquecidos com `lastAccessed` quando um URI de editor em `resourceToSpace` liga um space ao slug. Best-effort: só chaves `windsurfSpace.*` observadas são lidas; chaves desconhecidas/malformadas são ignoradas. `--vscdb none` desativa.
 
+
+`devin-graph view --out file.html` renderiza o grafo numa página HTML auto-contida (JSON embutido + force layout vanilla-JS — zero CDN, funciona totalmente offline). `--limit` limita os nós (mantém os de maior grau, sinalizado TRUNCATED no cabeçalho).
+
 ## Limitações
 
 - **Dependente do schema.** Apenas `sessions.db` schema v15–v17; mais recente

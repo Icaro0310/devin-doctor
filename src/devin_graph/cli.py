@@ -125,6 +125,15 @@ def build_parser() -> argparse.ArgumentParser:
     _add_graph(sq2)
     sq2.add_argument("--json", action="store_true")
     sq2.set_defaults(func=_cmd_sql)
+    v = sub.add_parser(
+        "view", help="self-contained HTML viewer (offline, no CDN)")
+    v.add_argument("--out", default="graph-view.html",
+                   help="output file (default: graph-view.html)")
+    v.add_argument("--limit", type=int, default=500,
+                   help="max nodes rendered (default 500; highest-degree "
+                   "nodes are kept when truncating)")
+    _add_graph(v)
+    v.set_defaults(func=_cmd_view)
     return p
 
 
@@ -230,6 +239,14 @@ def _cmd_export(args: argparse.Namespace) -> int:
               f"edges → {args.out}")
     else:
         print(text)
+    return 0
+
+
+def _cmd_view(args: argparse.Namespace) -> int:
+    from devin_graph.view import write_view
+    with _open_graph(args.graph) as gs:
+        out = write_view(gs.export(), args.out, limit=args.limit)
+    print(f"wrote {out} ({out.stat().st_size:,} bytes) — open it in a browser")
     return 0
 
 
