@@ -124,6 +124,18 @@ Override com `--sessions-db` (ver Uso). O `state.vscdb` do GUI é
 auto-detetado em `<config>/User/globalStorage/state.vscdb` (diretórios
 `Devin`/`devin`); override com `--vscdb`.
 
+
+### Export incremental via hook (HI-2 — sem daemon)
+
+`export --session-id ID` exporta uma única sessão (prefixo único serve) e
+mescla a entrada no índice existente em vez de reconstruí-lo.
+`export --from-hook` lê `{"session_id": ...}` do payload que um hook
+SessionEnd envia no stdin — fail-soft (sem payload → exit 0, nada escrito).
+Registre uma vez via o dispatcher de hooks:
+
+    python tools/hooks_dispatch.py register SessionEnd history-export \
+      "devin-history export --out ~/notas/devin-history --from-hook"
+
 ## Limitações
 
 - **Gated por schema.** Só `sessions.db` schema v15–v17 é aceite; qualquer

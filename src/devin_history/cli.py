@@ -95,6 +95,14 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument(
         "--dry-run", action="store_true",
         help="list what would be written, write nothing")
+    e.add_argument(
+        "--session-id", metavar="ID",
+        help="export only this session (unique prefix ok) — incremental "
+        "mode for a SessionEnd hook; the index is merged, not rebuilt")
+    e.add_argument(
+        "--from-hook", action="store_true",
+        help="read the session id from the hook payload on stdin "
+        "({\"session_id\": ...}) — implies the incremental mode")
     e.set_defaults(func=_cmd_export)
 
     a = sub.add_parser(
@@ -129,11 +137,30 @@ def build_parser() -> argparse.ArgumentParser:
     return p
 
 
+def _hook_session_id() -> str | None:
+    """Session id from a hook JSON payload piped on stdin."""
+    if sys.stdin.isatty():
+        return None
+    try:
+        data = json.loads(sys.stdin.read() or "{}")
+    except ValueError:
+        return None
+    sid = data.get("session_id") or data.get("sessionId")
+    return sid if isinstance(sid, str) else None
+
+
 def _cmd_export(args: argparse.Namespace) -> int:
+    only = args.session_id
+    if args.from_hook:
+        only = _hook_session_id() or args.session_id
+        if not only:
+            print("devin-history export --from-hook: no session_id in "
+                  "stdin payload — nothing exported", file=sys.stderr)
+            return 0  # fail-soft in a hook
     with _open_store(args.sessions_db) as store:
         res = export_sessions(
             store, args.out, fmt=args.format, force=args.all,
-            dry_run=args.dry_run)
+            dry_run=args.dry_run, only_session=only)
     if args.json:
         print(json.dumps({
             "out_dir": str(res.out_dir),

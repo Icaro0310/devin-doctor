@@ -216,7 +216,8 @@ def render_index_json(
         {**({"provenance": prov} if prov else {}),
          "stats": index_stats(entries),
          "sessions": [
-            {"date": e.date, "file": e.filename, "title": e.title, "project": e.project,
+            {"date": e.date, "file": e.filename, "title": e.title,
+             "project": e.project, "session_id": e.session_id,
              "user_msgs": e.user_msgs, "assistant_msgs": e.assistant_msgs,
              "tool_msgs": e.tool_msgs}
             for e in entries

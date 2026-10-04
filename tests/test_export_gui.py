@@ -234,3 +234,38 @@ def test_vscdb_candidates_linux(tmp_path):
     cands[0].parent.mkdir(parents=True)
     cands[0].touch()
     assert default_state_vscdb(environ=env, platform="linux") == cands[0]
+
+
+# -- HI-2: incremental export via hook --------------------------------------
+
+
+def test_export_only_session(tmp_path, store):
+    from devin_history.export import export_sessions
+    s = store.sessions()[0]
+    res = export_sessions(store, tmp_path / "out", only_session=s.id[:12])
+    assert len(res.written) <= 1
+
+
+def test_export_only_session_no_match(tmp_path, store):
+    import pytest
+    from devin_history.export import export_sessions
+    with pytest.raises(ValueError, match="no session"):
+        export_sessions(store, tmp_path / "o", only_session="nope")
+
+
+def test_from_hook_stdin(tmp_path, store, monkeypatch, capsys):
+    import io
+    import json
+    import shutil
+    import sys
+    from devin_history.cli import main
+    s = store.sessions()[0]
+    fake = io.StringIO(json.dumps({"session_id": s.id}))
+    monkeypatch.setattr(fake, "isatty", lambda: False)
+    monkeypatch.setattr(sys, "stdin", fake)
+    db = store.path
+    rc = main(["export", "--sessions-db", str(db), "--out",
+               str(tmp_path / "o"), "--from-hook", "--json"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["indexed"] >= 1

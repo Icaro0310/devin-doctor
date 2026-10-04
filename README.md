@@ -122,6 +122,21 @@ with `--sessions-db` (see Usage). The GUI `state.vscdb` is auto-detected
 under `<config>/User/globalStorage/state.vscdb` (`Devin`/`devin` dir names);
 override with `--vscdb`.
 
+
+### Incremental export from a hook (HI-2 — no daemon)
+
+`export --session-id ID` exports a single session (unique prefix ok) and
+merges its entry into the existing index instead of rebuilding it.
+`export --from-hook` reads `{"session_id": ...}` from the stdin payload a
+SessionEnd hook pipes in — fail-soft (no payload → exit 0, nothing
+written). Register once via the hooks dispatcher:
+
+    python tools/hooks_dispatch.py register SessionEnd history-export \
+      "devin-history export --out ~/notes/devin-history --from-hook"
+
+Each ended session then lands as a note automatically; a periodic full
+`export` keeps the index complete.
+
 ## Limitations
 
 - **Schema-gated.** Only `sessions.db` schema v15–v17 is accepted; anything

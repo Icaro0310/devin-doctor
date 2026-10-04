@@ -40,6 +40,7 @@ class IndexEntry:
     filename: str
     title: str
     project: str
+    session_id: str = ""
     user_msgs: int = 0
     assistant_msgs: int = 0
     tool_msgs: int = 0
@@ -108,11 +109,15 @@ def export_sessions(
     fmt: str = "md",
     force: bool = False,
     dry_run: bool = False,
+    only_session: str | None = None,
 ) -> ExportResult:
     """Export every useful session in ``store`` to ``out_dir``.
 
     ``fmt`` is ``md`` (Obsidian notes) or ``json`` (searchable dump). Sessions
     with no user messages or fewer than ``MIN_USEFUL_NODES`` nodes are skipped.
+    ``only_session`` restricts the export to one session id (or unique prefix)
+    — the SessionEnd-hook incremental mode (HI-2); the index is still rebuilt
+    from all sessions so it stays complete.
     """
     if fmt not in FORMATS:
         raise ValueError(f"unknown format {fmt!r} (expected one of {FORMATS})")
@@ -123,6 +128,16 @@ def export_sessions(
 
     prov = identity.provenance()
     sessions = sorted(store.sessions(), key=lambda s: s.created_at)
+    if only_session is not None:
+        matches = [s for s in sessions
+                   if s.id == only_session or s.id.startswith(only_session)]
+        if not matches:
+            raise ValueError(f"no session matches {only_session!r}")
+        if len(matches) > 1:
+            raise ValueError(
+                f"{only_session!r} matches {len(matches)} sessions — "
+                "pass a longer prefix")
+        sessions = matches
     for s in sessions:
         nodes = store.message_nodes(s.id)
         messages = parse_nodes(nodes)
@@ -155,6 +170,7 @@ def export_sessions(
             IndexEntry(
                 date=date,
                 filename=filename,
+                session_id=s.id,
                 title=(s.title or "Untitled").strip(),
                 project=project_name(s.working_directory),
                 user_msgs=counts["user"],
@@ -164,14 +180,58 @@ def export_sessions(
         )
 
     if not dry_run:
-        index = (
-            render_index_md(result.index_entries)
-            if fmt == "md"
-            else render_index_json(result.index_entries, prov)
-        )
-        _write_if_changed(out_dir / f"index.{fmt}", index)
+        if only_session is not None:
+            _merge_index_entry(out_dir, fmt, result.index_entries, prov)
+        else:
+            index = (
+                render_index_md(result.index_entries)
+                if fmt == "md"
+                else render_index_json(result.index_entries, prov)
+            )
+            _write_if_changed(out_dir / f"index.{fmt}", index)
 
     return result
+
+
+def _merge_index_entry(out_dir: Path, fmt: str,
+                       new_entries: list, prov) -> None:
+    """Single-session export: merge the new entry into the existing index.
+
+    ``index.json`` merges by ``session_id`` (it carries one); for markdown
+    indexes we append a line only when the index file already exists —
+    regenerating the full markdown index from one session would drop the
+    rest, so we leave a complete re-export to rebuild it.
+    """
+    if fmt == "json":
+        ipath = out_dir / "index.json"
+        existing = []
+        if ipath.is_file():
+            try:
+                existing = json.loads(
+                    ipath.read_text(encoding="utf-8")).get("sessions", [])
+            except (OSError, ValueError, AttributeError):
+                existing = []
+        seen = {e.session_id for e in new_entries}
+        merged_entries = [
+            IndexEntry(
+                date=e.get("date", ""), filename=e.get("file", ""),
+                title=e.get("title", ""), project=e.get("project", ""),
+                session_id=e.get("session_id", ""),
+                user_msgs=e.get("user_msgs", 0),
+                assistant_msgs=e.get("assistant_msgs", 0),
+                tool_msgs=e.get("tool_msgs", 0))
+            for e in existing if e.get("session_id") not in seen
+        ]
+        merged_entries.extend(new_entries)
+        merged_entries.sort(key=lambda e: (e.date, e.filename))
+        _write_if_changed(ipath, render_index_json(merged_entries, prov))
+    elif (out_dir / "index.md").is_file() and new_entries:
+        for e in new_entries:
+            line = (f"- [{e.date} — {e.title}]({e.filename}) "
+                    f"({e.project})\n")
+            with open(out_dir / "index.md", "a", encoding="utf-8") as fh:
+                fh.write(line)
+
 
 
 def _safe_name(slug: str) -> str:
