@@ -66,12 +66,13 @@ devin-doctor check --data-dir D:\devin-backup
 devin-doctor check --data-dir ~/.local/share/devin --config-dir ~/.config/Devin
 devin-doctor check --json             # saída legível por máquina
 devin-doctor report --md              # markdown, para colar em issues
+devin-doctor capabilities             # perfil de capacidades da máquina, JSON
 ```
 
 Cada verificação imprime `PASS`/`WARN`/`FAIL`, um achado de uma linha e uma
 sugestão `fix:`. O código de saída é `0` a menos que algo dê `FAIL` (aí `1`).
 
-As cinco verificações:
+As seis verificações:
 
 | verificação | reporta |
 |---|---|
@@ -79,7 +80,28 @@ As cinco verificações:
 | `schema` | versão de schema vs o intervalo suportado (15–17); reconhecimento de layout nos stores sem ledger |
 | `health-of-data` | sessões vazias, `message_nodes` órfãos, sessões inativas > `--stale-days`, locks `SQLITE_BUSY` |
 | `config` | presença + validade do `credentials.toml` (**valores mascarados**); sanidade de hooks/MCP em `.devin/` |
+| `hooks-windows` | comandos de hooks/MCP que abririam uma janela de console visível no Windows (`cmd /c` sem wrapper oculto, `powershell` sem `-WindowStyle Hidden`, `.bat`/`.ps1` direto, `python.exe` vs `pythonw.exe`) — cada um com ficheiro, evento do hook e correção sugerida |
 | `disk` | tamanho total do data dir, maiores DBs, acumulação de `acp-messages` |
+
+## Perfil de capacidades
+
+```bash
+devin-doctor capabilities             # perfil JSON, exit 0
+devin-doctor capabilities --probe-network
+```
+
+`capabilities` imprime um objeto JSON — `{"profile": ..., "capabilities":
+{...}}` — descrevendo o que a máquina consegue fazer pelo ecossistema
+(scheduler, daemon, LLM local, containers, comms, proxy, ≥24 GiB de RAM, …).
+O perfil é `corporate` por defeito (**fail-closed**); `personal` só se
+aplica quando declarado explicitamente via
+`DEVIN_ECOSYSTEM_PROFILE=corporate|personal` ou `devin-profile.json`
+(`{"profile": "personal"}`) no diretório de config do Devin — a variável de
+ambiente vence. Todas as sondagens são locais; `net.outbound`/`net.listener`
+ficam `"unknown"` a menos que `--probe-network` seja passado, que faz
+exatamente UMA conexão TCP de saída (1.1.1.1:443 ou o `HTTPS_PROXY`
+configurado, timeout de 2 s) mais um bind em loopback — a única chamada de
+rede que esta ferramenta pode fazer.
 
 ## Funciona só com o Devin (modo Devin-only)
 
@@ -123,7 +145,7 @@ manuais.
 ## Quando usar
 
 - O Devin está a comportar-se mal — histórico em falta, erros de auth, pressão de disco — e você quer um comando para localizar a causa.
-- Você quer um health check antes de depurar: cinco checks (stores, schema, saúde dos dados, config, disco), cada um com uma sugestão `fix:`.
+- Você quer um health check antes de depurar: seis checks (stores, schema, saúde dos dados, config, hooks-windows, disco), cada um com uma sugestão `fix:`.
 - Você precisa de um relatório pronto a colar num bug report: `devin-doctor report --md`.
 - Você está numa máquina restrita: é read-only e nunca contacta a rede.
 

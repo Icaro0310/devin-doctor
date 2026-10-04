@@ -16,7 +16,14 @@ def test_check_healthy_exit_0(ctx, capsys):
     out = capsys.readouterr().out
     assert rc == 0
     assert "PASS" in out
-    for check_id in ("stores", "schema", "health-of-data", "config", "disk"):
+    for check_id in (
+        "stores",
+        "schema",
+        "health-of-data",
+        "config",
+        "hooks-windows",
+        "disk",
+    ):
         assert check_id in out
 
 
@@ -63,6 +70,7 @@ def test_check_json_schema(ctx, capsys):
         "schema",
         "health-of-data",
         "config",
+        "hooks-windows",
         "disk",
     }
     assert payload["summary"]["fail"] == 0

@@ -2,8 +2,11 @@
 
 - ``devin-doctor check [--data-dir P] [--cwd P] [--stale-days N] [--json]``
 - ``devin-doctor report [--data-dir P] [--cwd P] [--stale-days N] [--md|--json]``
+- ``devin-doctor capabilities [--config-dir P] [--probe-network]``
 
 Exit code: 0 when no FAIL findings, 1 when any check FAILs.
+``capabilities`` always exits 0 — its output is a JSON profile, not a
+verdict.
 """
 
 from __future__ import annotations
@@ -13,7 +16,7 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from devin_doctor import doctor
+from devin_doctor import capabilities, doctor
 from devin_doctor.model import Context
 from devin_doctor.paths import default_config_dir, default_data_dir
 
@@ -67,6 +70,27 @@ def build_parser() -> argparse.ArgumentParser:
         "--md", action="store_true", help="emit markdown (for GitHub issues)"
     )
 
+    cap = sub.add_parser(
+        "capabilities",
+        help="print the machine capability profile as JSON — read-only, "
+        "local probing only (corporate profile is fail-closed)",
+    )
+    cap.add_argument(
+        "--config-dir",
+        type=Path,
+        default=None,
+        help="Devin UI config dir where devin-profile.json is read "
+        "(default: platform location)",
+    )
+    cap.add_argument(
+        "--probe-network",
+        action="store_true",
+        help="NETWORK ACCESS: perform exactly ONE outbound TCP connect "
+        "(1.1.1.1:443, or the configured HTTP(S)_PROXY, 2s timeout) plus a "
+        "loopback bind test. Without this flag net.* stay 'unknown' and "
+        "no network call is made.",
+    )
+
     return parser
 
 
@@ -75,6 +99,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="replace")
     args = build_parser().parse_args(argv)
+    if args.command == "capabilities":
+        if args.probe_network:
+            print(
+                "devin-doctor: --probe-network will make ONE outbound TCP "
+                "connect (2s timeout) — the only network call this tool "
+                "can perform",
+                file=sys.stderr,
+            )
+        profile = capabilities.collect_profile(
+            config_dir=args.config_dir or default_config_dir(),
+            probe_network=args.probe_network,
+        )
+        print(capabilities.render_profile(profile))
+        return 0
     ctx = Context(
         data_dir=args.data_dir or default_data_dir(),
         cwd=args.cwd,
