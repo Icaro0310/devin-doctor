@@ -62,6 +62,7 @@ devin-graph build --graph graph.db
 devin-graph query file "src/app.py"        --graph graph.db
 devin-graph query tool "execute"           --graph graph.db
 devin-graph query project "my-repo"        --graph graph.db
+devin-graph query shared-files             --graph graph.db
 devin-graph query projects-graph           --graph graph.db --json
 
 # D3-friendly dump: {"meta", "nodes", "edges"}
@@ -69,8 +70,10 @@ devin-graph export --format json --graph graph.db --out graph.json
 ```
 
 Matching is forgiving (`src/app.py` finds `/repo/alpha/src/app.py`);
-everything has `--json`. The source DB is opened `mode=ro` and never
-written — tests assert its hash is unchanged.
+everything has `--json`. `query shared-files` lists every file touched
+by two or more distinct projects, with the project and session lists —
+exportable as JSON like the other queries. The source DB is opened
+`mode=ro` and never written — tests assert its hash is unchanged.
 
 ## Works with Devin alone (Devin-only mode)
 
@@ -139,8 +142,8 @@ DDL, synthetic rows) — no binary fixtures are committed. See
 **What is devin-graph?** A local tool that turns Devin's session database
 into a knowledge graph: sessions, projects, files, and tools become nodes,
 with edges extracted from real tool-call payloads. You query it with
-`devin-graph query file|tool|project` and export it as JSON for
-visualization.
+`devin-graph query file|tool|project|shared-files` and export it as JSON
+for visualization.
 
 **How is devin-graph different from devin-search?** devin-search finds text:
 ranked full-text hits inside session content. devin-graph finds structure:

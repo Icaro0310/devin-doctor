@@ -197,3 +197,38 @@ def _project_of_session(gs, session_id: str | None) -> str | None:
         if e.kind == "runs_in":
             return e.dst.split(":", 1)[1]
     return None
+
+
+def shared_files(gs) -> dict:
+    """Files touched by two or more distinct projects.
+
+    A file counts when ``file_touched`` edges link it to tool calls owned by
+    sessions running in different projects (``working_directory``). Each
+    entry carries the sorted project list and the session ids that touched
+    the file — useful both for collision audits and D3-style highlighting.
+    """
+    projects_of_file: dict[str, set[str]] = {}
+    sessions_of_file: dict[str, set[str]] = {}
+    for e in gs.edges("file_touched"):
+        if not e.owner:
+            continue
+        project = _project_of_session(gs, e.owner)
+        if project is None:
+            continue
+        file_key = e.dst.split(":", 1)[1]
+        projects_of_file.setdefault(file_key, set()).add(project)
+        sessions_of_file.setdefault(file_key, set()).add(e.owner)
+
+    files = []
+    for file_key in sorted(projects_of_file):
+        projects = sorted(projects_of_file[file_key])
+        if len(projects) < 2:
+            continue
+        node = gs.node(f"file:{file_key}")
+        files.append({
+            "file": file_key,
+            "name": node.attrs.get("name") if node else None,
+            "projects": projects,
+            "sessions": sorted(sessions_of_file[file_key]),
+        })
+    return {"count": len(files), "files": files}

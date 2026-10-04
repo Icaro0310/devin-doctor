@@ -8,6 +8,7 @@ from devin_graph.query import (
     projects_graph,
     sessions_for_file,
     sessions_for_tool,
+    shared_files,
     tools_for_project,
 )
 from devin_graph.store import GraphStore
@@ -124,3 +125,39 @@ def test_projects_graph_empty(tmp_path, sessions_db):
             tmp_path / "empty.db") as gs:
         gs.build(ss)
         assert projects_graph(gs) == {"nodes": [], "links": []}
+
+
+# -- shared_files --------------------------------------------------------------
+
+
+def test_shared_files_cross_project(graph):
+    """src/app.py is read by sess-a (alpha) and sess-b (beta)."""
+    res = shared_files(graph)
+    assert res["count"] == 1
+    (entry,) = res["files"]
+    assert entry["file"] == f"{ALPHA}/src/app.py"
+    assert entry["name"] == "app.py"
+    assert entry["projects"] == sorted([ALPHA, BETA])
+    assert entry["sessions"] == ["sess-a", "sess-b"]
+
+
+def test_shared_files_excludes_single_project_files(graph):
+    """main.py and the docs files are touched by one project only."""
+    res = shared_files(graph)
+    files = {f["file"] for f in res["files"]}
+    assert f"{BETA}/main.py" not in files
+    assert f"{ALPHA}/docs/README.md" not in files
+    assert f"{ALPHA}/tests/test_app.py" not in files
+
+
+def test_shared_files_empty(tmp_path, sessions_db):
+    import sqlite3
+    con = sqlite3.connect(sessions_db)
+    with con:
+        con.execute("DELETE FROM tool_call_state")
+        con.execute("DELETE FROM sessions")
+    con.close()
+    with SessionsStore(sessions_db) as ss, GraphStore(
+            tmp_path / "empty.db") as gs:
+        gs.build(ss)
+        assert shared_files(gs) == {"count": 0, "files": []}

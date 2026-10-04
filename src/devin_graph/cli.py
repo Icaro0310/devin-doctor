@@ -17,6 +17,7 @@ from devin_graph.query import (
     projects_graph,
     sessions_for_file,
     sessions_for_tool,
+    shared_files,
     tools_for_project,
 )
 from devin_graph.store import GraphStore
@@ -99,6 +100,11 @@ def build_parser() -> argparse.ArgumentParser:
     _add_graph(sq)
     sq.add_argument("--json", action="store_true")
     sq.set_defaults(func=_cmd_query)
+    sq = qsub.add_parser("shared-files",
+                         help="files touched by two or more projects")
+    _add_graph(sq)
+    sq.add_argument("--json", action="store_true")
+    sq.set_defaults(func=_cmd_query)
 
     e = sub.add_parser("export", help="dump nodes+edges (D3-friendly)")
     e.add_argument("--format", choices=["json"], default="json")
@@ -140,6 +146,8 @@ def _cmd_query(args: argparse.Namespace) -> int:
             data = sessions_for_tool(gs, args.name)
         elif args.what == "project":
             data = project_detail(gs, args.name)
+        elif args.what == "shared-files":
+            data = shared_files(gs)
         else:
             data = projects_graph(gs)
     if args.json:
@@ -150,6 +158,14 @@ def _cmd_query(args: argparse.Namespace) -> int:
 
 
 def _print_query(what: str, data: dict) -> None:
+    if what == "shared-files":
+        if not data["files"]:
+            print("no files shared between projects")
+        for f in data["files"]:
+            print(f"{f['file']}  ({len(f['projects'])} projects)")
+            print(f"  projects: {', '.join(f['projects'])}")
+            print(f"  sessions: {', '.join(f['sessions'])}")
+        return
     if what == "projects-graph":
         for n in data["nodes"]:
             print(f"{n['id']}  ({len(n['sessions'])} sessions)")

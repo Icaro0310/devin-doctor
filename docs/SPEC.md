@@ -22,8 +22,10 @@ In scope (M1):
 - `store.py` — persistent `graph.db` (SQLite), incremental re-extract,
   deterministic JSON export.
 - `query.py` — canned queries: sessions-for-file, tools-for-project,
-  sessions-for-tool, project detail, projects-graph adjacency.
-- `cli.py` — `build`, `query file|tool|project|projects-graph`, `export`.
+  sessions-for-tool, project detail, projects-graph adjacency,
+  shared-files (files touched by ≥2 projects).
+- `cli.py` — `build`,
+  `query file|tool|project|shared-files|projects-graph`, `export`.
 
 Out of scope:
 
@@ -113,6 +115,7 @@ devin-graph build [--sessions-db PATH] [--graph PATH] [--json]
 devin-graph query file PATH      [--graph PATH] [--json]
 devin-graph query tool NAME      [--graph PATH] [--json]
 devin-graph query project NAME   [--graph PATH] [--json]
+devin-graph query shared-files   [--graph PATH] [--json]
 devin-graph query projects-graph [--graph PATH] [--json]
 devin-graph export --format json [--graph PATH] [--out FILE]
 ```

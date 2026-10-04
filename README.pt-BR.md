@@ -65,6 +65,7 @@ devin-graph build --graph graph.db
 devin-graph query file "src/app.py"        --graph graph.db
 devin-graph query tool "execute"           --graph graph.db
 devin-graph query project "my-repo"        --graph graph.db
+devin-graph query shared-files             --graph graph.db
 devin-graph query projects-graph           --graph graph.db --json
 
 # dump compatível com D3: {"meta", "nodes", "edges"}
@@ -72,8 +73,11 @@ devin-graph export --format json --graph graph.db --out graph.json
 ```
 
 A correspondência é tolerante (`src/app.py` encontra
-`/repo/alpha/src/app.py`); tudo tem `--json`. A DB de origem é aberta em
-`mode=ro` e nunca é escrita — os testes garantem que o hash não muda.
+`/repo/alpha/src/app.py`); tudo tem `--json`. `query shared-files` lista
+cada ficheiro tocado por dois ou mais projetos distintos, com as listas
+de projetos e sessões — exportável em JSON como as outras consultas.
+A DB de origem é aberta em `mode=ro` e nunca é escrita — os testes
+garantem que o hash não muda.
 
 ## Funciona só com o Devin (modo Devin-only)
 
@@ -132,7 +136,7 @@ real, linhas sintéticas) — nenhum fixture binário é commitado. Vê
 
 ## FAQ
 
-**O que é o devin-graph?** Uma ferramenta local que transforma a base de sessões do Devin num grafo de conhecimento: sessões, projetos, ficheiros e ferramentas tornam-se nós, com arestas extraídas de payloads reais de tool calls. Consulta-o com `devin-graph query file|tool|project` e exporta-o como JSON para visualização.
+**O que é o devin-graph?** Uma ferramenta local que transforma a base de sessões do Devin num grafo de conhecimento: sessões, projetos, ficheiros e ferramentas tornam-se nós, com arestas extraídas de payloads reais de tool calls. Consulta-o com `devin-graph query file|tool|project|shared-files` e exporta-o como JSON para visualização.
 
 **Como o devin-graph é diferente do devin-search?** O devin-search encontra texto: hits full-text rankeados dentro do conteúdo das sessões. O devin-graph encontra estrutura: que sessões tocaram que ficheiros, que ferramentas cada projeto usa, e que projetos partilham ficheiros — relações, não correspondências de texto.
 

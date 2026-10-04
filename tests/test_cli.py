@@ -97,6 +97,28 @@ def test_cli_query_projects_graph(built, capsys):
     assert data["links"][0]["weight"] == 2
 
 
+def test_cli_query_shared_files(built, capsys):
+    _, graph = built
+    capsys.readouterr()
+    assert main(["query", "shared-files", "--graph", str(graph)]) == 0
+    out = capsys.readouterr().out
+    assert f"{ALPHA}/src/app.py" in out
+    assert "2 projects" in out
+
+
+def test_cli_query_shared_files_json(built, capsys):
+    _, graph = built
+    capsys.readouterr()
+    assert main(["query", "shared-files", "--graph", str(graph),
+                 "--json"]) == 0
+    data = json.loads(capsys.readouterr().out)
+    assert data["count"] == 1
+    (entry,) = data["files"]
+    assert entry["file"] == f"{ALPHA}/src/app.py"
+    assert len(entry["projects"]) == 2
+    assert entry["sessions"] == ["sess-a", "sess-b"]
+
+
 def test_cli_export_stdout(built, capsys):
     _, graph = built
     capsys.readouterr()
