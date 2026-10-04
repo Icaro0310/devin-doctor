@@ -18,6 +18,7 @@ import sqlite3
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from devin_graph import identity
 from devin_graph.extract import Extraction, extract_session
 
 _SCHEMA = """
@@ -195,13 +196,17 @@ class GraphStore:
                 result.removed.append(sid)
 
             self._prune_orphans()
-            self._con.execute(
-                "INSERT OR REPLACE INTO meta(key, value) VALUES (?, ?)",
-                ("source_db", str(sessions_store.path)))
-            self._con.execute(
-                "INSERT OR REPLACE INTO meta(key, value) VALUES (?, ?)",
+            prov = identity.provenance()
+            for key, value in (
+                ("source_db", str(sessions_store.path)),
                 ("schema_version",
-                 str(sessions_store.schema_info["schema_version"])))
+                 str(sessions_store.schema_info["schema_version"])),
+                ("machine_id", prov["machine_id"]),
+                ("profile", prov["profile"]),
+            ):
+                self._con.execute(
+                    "INSERT OR REPLACE INTO meta(key, value) VALUES (?, ?)",
+                    (key, value))
         result.extracted.sort()
         return result
 
