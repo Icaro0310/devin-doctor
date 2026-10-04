@@ -63,6 +63,51 @@ def test_export_dry_run_writes_nothing(store, tmp_path):
     assert not out.exists() or list(out.iterdir()) == []
 
 
+def test_export_index_md_has_stats_block(store, tmp_path):
+    out = tmp_path / "out"
+    res = export_sessions(store, out)
+    index = (out / "index.md").read_text(encoding="utf-8")
+
+    assert index.startswith("---\ntags:")
+    assert "## Stats" in index
+    assert "| Project | Sessions | User | Assistant | Tool |" in index
+    assert f"| **Total** | **{len(res.index_entries)}** |" in index
+    assert "**Span:**" in index and "**Formats:** md:" in index
+
+    total_user = sum(e.user_msgs for e in res.index_entries)
+    assert total_user > 0
+    assert f"**{total_user}**" in index  # bolded in the Total row
+    for project in {e.project for e in res.index_entries}:
+        assert f"| {project} | " in index
+
+
+def test_export_index_json_has_stats(store, tmp_path):
+    out = tmp_path / "json"
+    res = export_sessions(store, out, fmt="json")
+    index = json.loads((out / "index.json").read_text(encoding="utf-8"))
+
+    stats = index["stats"]
+    assert stats["total"] == 3
+    assert stats["formats"] == {"json": 3}
+    assert stats["date_first"] <= stats["date_last"]
+    msgs = stats["messages"]
+    assert msgs["user"] == sum(e.user_msgs for e in res.index_entries)
+    assert msgs["assistant"] == sum(
+        e.assistant_msgs for e in res.index_entries)
+    assert msgs["tool"] == sum(e.tool_msgs for e in res.index_entries)
+    assert set(stats["projects"]) == {e.project for e in res.index_entries}
+
+
+def test_export_index_stats_include_unchanged_sessions(store, tmp_path):
+    out = tmp_path / "out"
+    export_sessions(store, out)
+    res = export_sessions(store, out)  # all unchanged this time
+    index = (out / "index.md").read_text(encoding="utf-8")
+    assert f"| **Total** | **{len(res.index_entries)}** |" in index
+    stats_total = sum(e.user_msgs for e in res.index_entries)
+    assert stats_total > 0
+
+
 def test_export_json_dump(store, tmp_path):
     out = tmp_path / "json"
     res = export_sessions(store, out, fmt="json")

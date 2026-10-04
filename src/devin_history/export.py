@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -36,6 +37,9 @@ class IndexEntry:
     filename: str
     title: str
     project: str
+    user_msgs: int = 0
+    assistant_msgs: int = 0
+    tool_msgs: int = 0
 
 
 @dataclass
@@ -122,12 +126,16 @@ def export_sessions(
                 _write_if_changed(fpath, text)
             result.written.append(filename)
 
+        counts = Counter(m.role for m in messages)
         result.index_entries.append(
             IndexEntry(
                 date=date,
                 filename=filename,
                 title=(s.title or "Untitled").strip(),
                 project=project_name(s.working_directory),
+                user_msgs=counts["user"],
+                assistant_msgs=counts["assistant"],
+                tool_msgs=counts["tool"],
             )
         )
 

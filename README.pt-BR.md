@@ -81,7 +81,10 @@ devin-history audit --sessions-db caminho/para/sessions.db --json
 
 As notas são idempotentes: cada ficheiro embute o marcador `last_activity`
 da sessão, por isso re-runs saltam sessões inalteradas (`--all` força
-re-escrita, `--dry-run` pré-visualiza).
+re-escrita, `--dry-run` pré-visualiza). O `index.md`/`index.json` na raiz
+traz um bloco de estatísticas — total de sessões, intervalo de datas e
+totais por projeto e por tipo de mensagem (user/assistant/tool) — junto dos
+links agrupados.
 
 ## Funciona só com o Devin (modo Devin-only)
 

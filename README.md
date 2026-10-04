@@ -80,7 +80,9 @@ devin-history audit --sessions-db path/to/sessions.db --json
 
 Notes are idempotent: each file embeds the session's `last_activity`
 marker, so re-runs skip unchanged sessions (`--all` forces a rewrite,
-`--dry-run` previews).
+`--dry-run` previews). The `index.md`/`index.json` at the root carries a
+stats block — total sessions, date span, per-project and user/assistant/tool
+message totals — alongside the grouped links.
 
 ## Works with Devin alone (Devin-only mode)
 

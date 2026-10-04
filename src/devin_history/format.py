@@ -139,11 +139,40 @@ def _json_or_none(raw: str | None) -> Any:
         return None
 
 
+def index_stats(entries: list["IndexEntry"]) -> dict[str, Any]:
+    """Aggregate totals for the index stats block (md and json)."""
+    projects = Counter(e.project for e in entries)
+    formats = Counter(
+        Path(e.filename).suffix.lstrip(".") or "?" for e in entries
+    )
+    dates = sorted(e.date for e in entries)
+    return {
+        "total": len(entries),
+        "date_first": dates[0] if dates else None,
+        "date_last": dates[-1] if dates else None,
+        "messages": {
+            "user": sum(e.user_msgs for e in entries),
+            "assistant": sum(e.assistant_msgs for e in entries),
+            "tool": sum(e.tool_msgs for e in entries),
+        },
+        "projects": dict(sorted(projects.items())),
+        "formats": dict(sorted(formats.items())),
+    }
+
+
 def render_index_md(entries: list["IndexEntry"]) -> str:
-    """`index.md` — sessions grouped by project, oldest first per group."""
+    """`index.md` — stats block plus sessions grouped by project."""
+    stats = index_stats(entries)
     by_project: dict[str, list[IndexEntry]] = {}
     for e in entries:
         by_project.setdefault(e.project, []).append(e)
+    span = (
+        f"{stats['date_first']} → {stats['date_last']}"
+        if stats["date_first"]
+        else "—"
+    )
+    formats = " · ".join(f"{k}: {v}" for k, v in stats["formats"].items()) or "—"
+    msg = stats["messages"]
     lines = [
         "---",
         "tags: [index, sessions, devin]",
@@ -152,7 +181,26 @@ def render_index_md(entries: list["IndexEntry"]) -> str:
         "# Session index",
         "",
         f"Exported from `sessions.db` — {len(entries)} sessions.",
+        "",
+        "## Stats",
+        "",
+        f"**Span:** {span} · **Formats:** {formats}",
+        "",
+        "| Project | Sessions | User | Assistant | Tool |",
+        "|---|---|---|---|---|",
     ]
+    for project in sorted(stats["projects"], key=lambda p: (-stats["projects"][p], p)):
+        sub = [e for e in entries if e.project == project]
+        lines.append(
+            f"| {project} | {stats['projects'][project]} "
+            f"| {sum(e.user_msgs for e in sub)} "
+            f"| {sum(e.assistant_msgs for e in sub)} "
+            f"| {sum(e.tool_msgs for e in sub)} |"
+        )
+    lines.append(
+        f"| **Total** | **{stats['total']}** | **{msg['user']}** "
+        f"| **{msg['assistant']}** | **{msg['tool']}** |"
+    )
     for project in sorted(by_project):
         lines.append(f"\n## {project}\n")
         for e in sorted(by_project[project], key=lambda x: x.date):
@@ -165,8 +213,11 @@ def render_index_json(
 ) -> str:
     return json.dumps(
         {**({"provenance": prov} if prov else {}),
+         "stats": index_stats(entries),
          "sessions": [
-            {"date": e.date, "file": e.filename, "title": e.title, "project": e.project}
+            {"date": e.date, "file": e.filename, "title": e.title, "project": e.project,
+             "user_msgs": e.user_msgs, "assistant_msgs": e.assistant_msgs,
+             "tool_msgs": e.tool_msgs}
             for e in entries
         ]},
         ensure_ascii=False,

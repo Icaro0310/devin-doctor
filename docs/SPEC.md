@@ -71,7 +71,9 @@ devin-history list   [--sessions-db PATH] [--limit N] [--json]
   `$XDG_CONFIG_HOME/devin/cli/sessions.db` → `~/devin/cli/sessions.db`
   (Linux). Missing store → exit 2.
 - `export` writes `{YYYY-MM-DD}_{session_id}.{fmt}` per session plus
-  `index.{fmt}` (md: grouped by project; json: entry list). Idempotency:
+  `index.{fmt}` (stats block: totals, date span, per-project/per-format
+  counts, message totals; then md: grouped by project, json: entry list).
+  Idempotency:
   the session's `last_activity` epoch-ms marker is embedded in frontmatter /
   top-level field; unchanged → skipped. Sessions with no user messages or
   `< 2` nodes are counted as empty and skipped.
