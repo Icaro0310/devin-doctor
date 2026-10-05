@@ -1,8 +1,8 @@
 # KICKOFF M1 — devin-search
 
 Dedicated session for THIS repo. Template scaffold — fill with real
-content. `docs/SPEC.md` EN, bilingual READMEs (problem/prior-art/Devin
-extra/limitations/install), logic in `src/devin_search/` + thin `cli.py`,
+content. `docs/SPEC.md` EN, shared README plus Windows/Linux guides
+(problem/prior art/Devin extra/limitations/install), logic in `src/devin_search/` + thin `cli.py`,
 small commits + Devin trailer, push, STATUS.md + CHANGELOG.md.
 
 ## One sentence
