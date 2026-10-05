@@ -12,7 +12,7 @@
 > **Unofficial community project.** Not affiliated with, endorsed by, or
 > sponsored by Cognition AI. "Devin" is a trademark of Cognition AI.
 
-**[Windows](README.windows.md)** · **[Linux](README.linux.md)** · English
+**[Linux](README.linux.md)** · **[Personal Windows](README.windows.md)** · **[Corporate Windows](README.corporate-windows.md)**
 
 Full-text search across all your Devin sessions — find that command, that
 error message, that file path or that decision from months ago in under a
