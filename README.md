@@ -14,6 +14,8 @@
 
 **[Linux](README.linux.md)** · **[Personal Windows](README.windows.md)** · **[Corporate Windows](README.corporate-windows.md)**
 
+Part of the [awesome-devin](https://github.com/Icaro0310/awesome-devin) ecosystem: the curated hub for the devin-* tools.
+
 Full-text search across all your Devin sessions — find that command, that
 error message, that file path or that decision from months ago in under a
 second.
@@ -155,7 +157,7 @@ v17 DDL, synthetic rows) — no binary fixtures are committed.
 
 - You need semantic or synonym-aware search — M1 is keyword BM25 only;
   embeddings are an opt-in M2 candidate.
-- You need session *analytics* (cost, tokens, activity) — use `devin-metrics`;
+- You need session *observability* (activity, context size, token peaks) — use `devin-metrics`;
   or relationship queries — use `devin-graph`.
 - Your `sessions.db` schema is outside v15–v17 — indexing refuses loudly
   rather than misreading it.
