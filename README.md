@@ -12,7 +12,7 @@
 > **Unofficial community project.** Not affiliated with, endorsed by, or
 > sponsored by Cognition AI. "Devin" is a trademark of Cognition AI.
 
-**[Português (BR)](README.pt-BR.md)** · English
+**[Windows](README.windows.md)** · **[Linux](README.linux.md)** · English
 
 A knowledge graph over Devin sessions: sessions, projects, files and tools
 become nodes — queryable ("which sessions touched file X?", "which tools does
