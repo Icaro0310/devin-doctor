@@ -4,9 +4,8 @@ You are the dedicated session for THIS repository. The scaffold comes from
 the ecosystem template — fill it with real content. Rules:
 
 - Read `docs/SPEC.pt-BR.md` style is NOT required — write `docs/SPEC.md` in
-  English directly (canonical), fill `README.md` + `README.pt-BR.md` with
-  real content (problem, prior art, Devin-native differentiator,
-  limitations, install).
+  English directly (canonical); keep shared content in `README.md` and
+  Windows/Linux install, path, and troubleshooting details in the OS guides.
 - Logic lives in `src/devin_history/`; `cli.py` is a thin wrapper.
 - Fixtures first (TDD), small logical commits,
   `Co-Authored-By: Devin <158243242+devin-ai-integration[bot]@users.noreply.github.com>`,

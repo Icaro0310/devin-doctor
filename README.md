@@ -12,7 +12,7 @@
 > **Unofficial community project.** Not affiliated with, endorsed by, or
 > sponsored by Cognition AI. "Devin" is a trademark of Cognition AI.
 
-**[Português (BR)](README.pt-BR.md)** · English
+**[Windows](README.windows.md)** · **[Linux](README.linux.md)** · English
 
 Export and audit Devin Desktop session history — turns the local
 `sessions.db` into Obsidian-ready Markdown notes, a searchable JSON dump,
@@ -88,7 +88,7 @@ No Devin installed? Try it on a synthetic fixture (stdlib-only, no Devin
 data involved):
 
 ```bash
-pipx install "git+https://github.com/Icaro0310/devin-internals-spec"
+pipx install "devin-internals-spec==0.3.0"
 devin-inspect make-fixture /tmp/fx
 devin-history export --sessions-db /tmp/fx/cli/sessions.db --out /tmp/notes
 ```
