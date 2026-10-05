@@ -14,6 +14,8 @@
 
 **[Linux](README.linux.md)** · **[Personal Windows](README.windows.md)** · **[Corporate Windows](README.corporate-windows.md)**
 
+Part of the [awesome-devin](https://github.com/Icaro0310/awesome-devin) ecosystem: the curated hub for the devin-* tools.
+
 A knowledge graph over Devin sessions: sessions, projects, files and tools
 become nodes — queryable ("which sessions touched file X?", "which tools does
 project Y depend on?") and exportable for visualization.
@@ -144,7 +146,7 @@ DDL, synthetic rows) — no binary fixtures are committed. See
 
 - You need a code index — nodes are files the agent *touched*, not repo
   contents; there is no symbol/AST knowledge.
-- You need message-content search (use `devin-search`) or usage/cost metrics
+- You need message-content search (use `devin-search`) or activity/context metrics
   (use `devin-metrics`).
 - You need GUI session data — M1 covers CLI `sessions.db` only;
   `acp-messages` is planned for M2.
