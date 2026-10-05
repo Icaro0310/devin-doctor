@@ -14,6 +14,8 @@
 
 **[Linux](README.linux.md)** · **[Personal Windows](README.windows.md)** · **[Corporate Windows](README.corporate-windows.md)**
 
+Part of the [awesome-devin](https://github.com/Icaro0310/awesome-devin) ecosystem: the curated hub for the devin-* tools.
+
 Export and audit Devin Desktop session history — turns the local
 `sessions.db` into Obsidian-ready Markdown notes, a searchable JSON dump,
 and an audit report. GUI session metadata (`state.vscdb`) exports as
