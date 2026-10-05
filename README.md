@@ -14,6 +14,8 @@
 
 **[Linux](README.linux.md)** · **[Personal Windows](README.windows.md)** · **[Corporate Windows](README.corporate-windows.md)**
 
+Part of the [awesome-devin](https://github.com/Icaro0310/awesome-devin) ecosystem: the curated hub for the devin-* tools.
+
 A project manager over your Devin sessions — it reads `sessions.db`
 (and optionally the GUI's `state.vscdb`), groups work per
 repository/project, and generates status reports, milestones and a
