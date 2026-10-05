@@ -15,6 +15,8 @@
 
 **[Linux](README.linux.md)** · **[Personal Windows](README.windows.md)** · **[Corporate Windows](README.corporate-windows.md)**
 
+Part of the [awesome-devin](https://github.com/Icaro0310/awesome-devin) ecosystem: the curated hub for the devin-* tools.
+
 `devin-doctor` diagnoses a Devin Desktop installation — one command that
 checks the local stores, schema versions, config files and disk usage, then
 prints a health report with concrete fix suggestions. Read-only, always.
