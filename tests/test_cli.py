@@ -72,6 +72,7 @@ def test_check_json_schema(ctx, capsys):
         "config",
         "hooks-windows",
         "disk",
+        "updates",
     }
     assert payload["summary"]["fail"] == 0
 

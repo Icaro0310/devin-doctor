@@ -3,9 +3,17 @@
 Checks are ordered the way they appear in the report.
 """
 
-from devin_doctor.checks import config, disk, health, hooks_windows, schema, stores
+from devin_doctor.checks import (
+    config,
+    disk,
+    health,
+    hooks_windows,
+    schema,
+    stores,
+    updates,
+)
 
-CHECKS = [stores, schema, health, config, hooks_windows, disk]
+CHECKS = [stores, schema, health, config, hooks_windows, disk, updates]
 
 __all__ = [
     "CHECKS",
@@ -15,4 +23,5 @@ __all__ = [
     "hooks_windows",
     "schema",
     "stores",
+    "updates",
 ]

@@ -19,6 +19,14 @@ from devin_internals.fixtures import (
 from devin_doctor.model import Context
 
 
+@pytest.fixture(autouse=True)
+def _offline_updates(monkeypatch):
+    # the updates check talks to the network and inspects real PATH installs;
+    # pin it offline so full-scan tests stay hermetic on any machine.
+    # tests for the check itself delete the variable.
+    monkeypatch.setenv("DEVIN_DOCTOR_OFFLINE", "1")
+
+
 @pytest.fixture
 def data_dir(tmp_path: Path) -> Path:
     """A healthy synthetic Devin data dir (schema v17, 3 sessions, 2 acp DBs)."""
