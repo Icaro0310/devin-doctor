@@ -9,7 +9,7 @@
 
 
 <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+"/></a>
-<a href="https://github.com/Icaro0310/devin-doctor/stargazers"><img src="https://img.shields.io/github/stars/Icaro0310/devin-doctor" alt="GitHub stars"/></a>
+<a href="https://github.com/Icaro0310/devin-doctor"><img src="https://img.shields.io/github/stars/Icaro0310/devin-doctor" alt="GitHub stars"/></a>
 <a href="https://github.com/Icaro0310/devin-doctor/commits/main"><img src="https://img.shields.io/github/last-commit/Icaro0310/devin-doctor" alt="Last commit"/></a>
 <a href="https://github.com/Icaro0310/awesome-devin"><img src="https://img.shields.io/badge/part%20of-devin--*-ecosystem-7c3aed" alt="devin-* ecosystem"/></a>
 <a href="https://github.com/Icaro0310/devin-doctor/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"/></a>
