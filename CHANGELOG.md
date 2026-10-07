@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   touched by two or more distinct projects, with the project and
   session lists; text and `--json` output like the other queries.
 
+### Changed
+
+- `llms.txt` no longer states a hard-coded ecosystem size; the registry owns the count.
+
 ## [0.1.0] - 2026-09-29
 
 ### Added
