@@ -11,7 +11,7 @@ devin-pm solves the problem that Devin records every CLI session in a local `ses
 
 ## Key commands
 
-- `pipx install "devin-pm @ git+https://github.com/Icaro0310/devin-pm.git"`: install (Python >= 3.10)
+- `uv tool install devin-pm  # or: pipx install devin-pm`: install (Python >= 3.10)
 - `devin-pm status`: per-project rollup table (`--json` for machine-readable)
 - `devin-pm report --project my-repo`: Markdown status report for one project; no flag = global report
 - `devin-pm report --project x --out x.md`: write the report to a file

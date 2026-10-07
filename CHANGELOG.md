@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Install section now recommends pypi `uv tool install devin-pm` as the primary route, with `pipx`/source installs documented as alternatives.
+
 ### Added
 
 - `vscdb` — GUI sessions from the Desktop `state.vscdb` `ItemTable`
