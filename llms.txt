@@ -28,7 +28,7 @@ devin-pm solves the problem that Devin records every CLI session in a local `ses
 
 ## Related
 
-- [devin-ecosystem](https://icaro0310.github.io/): the 20+ tool ecosystem this belongs to
+- [devin-ecosystem](https://icaro0310.github.io/): the tool ecosystem this belongs to
 - [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the schema-gated parser this builds on
 - [devin-metrics](https://github.com/Icaro0310/devin-metrics): deeper per-session analytics over the same store
 - [devin-powerups](https://github.com/Icaro0310/devin-powerups): weekly report generator over the public project registry
