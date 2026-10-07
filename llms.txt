@@ -27,6 +27,6 @@ devin-graph solves the lost-thread problem after dozens of Devin sessions: which
 
 ## Related
 
-- [devin-ecosystem](https://icaro0310.github.io/): the 20+ tool ecosystem this belongs to
+- [devin-ecosystem](https://icaro0310.github.io/): the tool ecosystem this belongs to
 - [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the schema and typed parsers this builds on
 - [devin-history](https://github.com/Icaro0310/devin-history): exports the same store without cross-session structure
