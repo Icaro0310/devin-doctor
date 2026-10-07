@@ -21,4 +21,4 @@ Devin keeps local state — a versioned `sessions.db`, one `acp-messages/*.db` p
 - Not when: you want it to fix things (read-only; `--fix` is planned); the Devin schema is newer than v17 (reports "unknown version" FAIL by design); Devin is running and stores are locked (`SQLITE_BUSY` — close Devin and re-run).
 
 ## Related
-- [devin-ecosystem](https://icaro0310.github.io/): the 19-tool ecosystem this belongs to
+- [devin-ecosystem](https://icaro0310.github.io/): the tool ecosystem this belongs to
