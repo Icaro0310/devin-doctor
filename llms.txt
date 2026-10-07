@@ -24,6 +24,6 @@ devin-search solves the problem that Devin stores your entire session history in
 
 ## Related
 
-- [devin-ecosystem](https://icaro0310.github.io/): the 20+ tool ecosystem this belongs to
+- [devin-ecosystem](https://icaro0310.github.io/): the tool ecosystem this belongs to
 - [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the schema/parsers this builds on
 - [devin-history](https://github.com/Icaro0310/devin-history): exports sessions to Markdown/JSON (static dump vs ranked search)
