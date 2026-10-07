@@ -13,7 +13,7 @@ Devin keeps local state — a versioned `sessions.db`, one `acp-messages/*.db` p
 - `devin-doctor check --data-dir <path> --config-dir <path>`: diagnose stores in non-default locations
 - `devin-doctor check --json`: machine-readable output
 - `devin-doctor report --md`: markdown report, for pasting into issues
-- `pipx install "devin-doctor @ git+https://github.com/Icaro0310/devin-doctor.git"`: install the CLI
+- `uv tool install devin-doctor  # or: pipx install devin-doctor`: install the CLI
 - `python -m pytest`: run the test suite (synthetic fixtures only)
 
 ## When to use / when not
