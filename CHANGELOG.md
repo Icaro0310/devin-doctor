@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   per-format session counts, and user/assistant/tool message totals
   (Markdown table in `index.md`, `stats` object in `index.json`).
 
+### Changed
+
+- `llms.txt` no longer states a hard-coded ecosystem size; the registry owns the count.
+
 ## [0.1.0] - 2026-09-29
 
 ### Added
