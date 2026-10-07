@@ -11,7 +11,7 @@ devin-history solves the problem that Devin Desktop keeps your session history i
 
 ## Key commands
 
-- `pipx install "devin-history @ git+https://github.com/Icaro0310/devin-history.git"`: install (Python >= 3.10)
+- `uv tool install devin-history  # or: pipx install devin-history`: install (Python >= 3.10)
 - `devin-history list`: quick session table (auto-detects `%APPDATA%/devin/cli/sessions.db` on Windows, `$XDG_DATA_HOME/devin/cli/sessions.db` on Linux)
 - `devin-history export --out ~/ObsidianVault/Sessions`: one Obsidian-style note per session + `index.md`; incremental and safe to re-run
 - `devin-history export --out dump/ --format json`: searchable JSON dump instead of Markdown

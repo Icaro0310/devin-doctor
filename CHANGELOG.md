@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Install section now recommends pypi `uv tool install devin-history` as the primary route, with `pipx`/source installs documented as alternatives.
+
 ### Added
 
 - `index.<fmt>` stats block: total sessions, date span, per-project and
