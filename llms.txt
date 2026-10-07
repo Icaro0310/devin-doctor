@@ -25,7 +25,7 @@ devin-history solves the problem that Devin Desktop keeps your session history i
 
 ## Related
 
-- [devin-ecosystem](https://icaro0310.github.io/): the 20+ tool ecosystem this belongs to
+- [devin-ecosystem](https://icaro0310.github.io/): the tool ecosystem this belongs to
 - [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the schema/parsers this builds on
 - [devin-redact](https://github.com/Icaro0310/devin-redact): scrub secrets/PII from an export before sharing it
 - [devin-janitor](https://github.com/Icaro0310/devin-janitor): pairs via `--export-cmd "devin-history export"` so sessions are archived before deletion
