@@ -17,8 +17,9 @@
 <!-- DEVIN-ECO:BEGIN -->
 > **Part of the [DEVIN ecosystem](https://github.com/Icaro0310/awesome-devin)**  
 > Track: Related · Nature: product  
-> For: operations, maintainers  
-> Interface: CLI / registry
+> For: Operations, Maintainers  
+> Interface: CLI / Registry  
+> Path: Maintainers · step 2/3 — after `devin-powerups`, before `devin-internals-spec`
 <!-- DEVIN-ECO:END -->
 
 
