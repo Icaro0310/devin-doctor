@@ -16,6 +16,14 @@
 <a href="https://github.com/Icaro0310/devin-doctor/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"/></a>
 </div>
 
+<!-- DEVIN-ECO:BEGIN -->
+> **Part of the [DEVIN ecosystem](https://github.com/Icaro0310/awesome-devin)**
+> Track: Understand · Nature: product
+> For: operations, end users
+> Interface: CLI
+<!-- DEVIN-ECO:END -->
+
+
 # devin-doctor
 
 > **Unofficial community project.** Not affiliated with, endorsed by, or
