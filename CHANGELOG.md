@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- README gains the generated `Part of the DEVIN ecosystem` block
+  (track/nature/audience/interface rendered from the registry).
+
 - `shared_files` query + `devin-graph query shared-files`: lists files
   touched by two or more distinct projects, with the project and
   session lists; text and `--json` output like the other queries.

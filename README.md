@@ -14,6 +14,14 @@
 <a href="https://github.com/Icaro0310/devin-graph/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"/></a>
 </div>
 
+<!-- DEVIN-ECO:BEGIN -->
+> **Part of the [DEVIN ecosystem](https://github.com/Icaro0310/awesome-devin)**  
+> Track: Understand · Nature: product  
+> For: developers, AI engineers  
+> Interface: CLI / Python library
+<!-- DEVIN-ECO:END -->
+
+
 # devin-graph
 
 > **Unofficial community project.** Not affiliated with, endorsed by, or
