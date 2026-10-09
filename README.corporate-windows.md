@@ -1,4 +1,4 @@
-# devin-doctor — Corporate Windows guide
+# devin-explore — Corporate Windows guide
 
 This guide covers restricted Windows setup only. For unrestricted Windows, see [README.windows.md](README.windows.md); for features, shared commands, limitations, and the safety model, see [README.md](README.md).
 
@@ -44,7 +44,7 @@ Use the tool's documented `--data-dir` or `--config-dir` flags for non-default l
 _Weekly health sweep — read-only, safe to leave on._
 
 ```powershell
-schtasks /create /tn "devin-doctor" /tr "devin-doctor check" /sc daily /st 04:00 /f
+schtasks /create /tn "devin-explore" /tr "devin-doctor check" /sc daily /st 04:00 /f
 ```
 
 User-scope `schtasks` needs no admin. If Group Policy disables Task Scheduler, run the command manually or use the tool's own `install` subcommand where available.
