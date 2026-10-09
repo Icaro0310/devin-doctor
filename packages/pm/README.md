@@ -203,7 +203,9 @@ queue or model server is involved.
 
 Tested on **Windows and Linux** (`windows-latest` + `ubuntu-latest` in CI).
 Devin's `sessions.db` is auto-detected per platform — `%APPDATA%\devin\` on
-Windows, `~/.local/share/devin/` (`XDG_DATA_HOME`) on Linux,
+Windows, `~/.local/share/devin/` (`XDG_DATA_HOME`) on Linux with
+`XDG_CONFIG_HOME` and `~` fallbacks (same multi-root order as
+`devin-history` and `state.vscdb` detection),
 `~/Library/Application Support/devin/` on macOS. Override with the
 `DEVIN_PM_SESSIONS_DB` env var (see Usage). The GUI `state.vscdb` lives at
 `<config>/Devin/User/globalStorage/state.vscdb` (`%APPDATA%` on Windows,
