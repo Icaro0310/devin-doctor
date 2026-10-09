@@ -1,0 +1,23 @@
+name: test-doctor
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/doctor/**'
+      - '.github/workflows/test-doctor.yml'
+  pull_request:
+    paths:
+      - 'packages/doctor/**'
+      - '.github/workflows/test-doctor.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    uses: Icaro0310/devin-powerups/.github/workflows/python-test.yml@v1
+    with:
+      package-dir: packages/doctor

@@ -6,6 +6,10 @@ requires-python = ">=3.10"
 members = [
     "devin-doctor",
     "devin-explore",
+    "devin-graph",
+    "devin-history",
+    "devin-pm",
+    "devin-search",
 ]
 
 [[package]]
@@ -53,6 +57,46 @@ dev = [
 dev = [{ name = "pytest", specifier = ">=8" }]
 
 [[package]]
+name = "devin-graph"
+version = "0.1.0"
+source = { editable = "packages/graph" }
+dependencies = [
+    { name = "devin-internals-spec" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "devin-internals-spec", specifier = ">=0.3.0,<0.4.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "devin-history"
+version = "0.1.0"
+source = { editable = "packages/history" }
+dependencies = [
+    { name = "devin-internals-spec" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "devin-internals-spec", specifier = ">=0.3.0,<0.4.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "devin-internals-spec"
 version = "0.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -60,6 +104,46 @@ sdist = { url = "https://files.pythonhosted.org/packages/e1/4b/1c62babfacfa2e046
 wheels = [
     { url = "https://files.pythonhosted.org/packages/41/96/ad8d979466f8fc2e85852c4e075dff14f8c36082324f0ccf76980fd9b110/devin_internals_spec-0.3.0-py3-none-any.whl", hash = "sha256:97f0835278274d8dd107746ba3ff8bb712ea145eb388f9d2b10dded38441494c", size = 30041, upload-time = "2026-10-04T17:55:47.974Z" },
 ]
+
+[[package]]
+name = "devin-pm"
+version = "0.1.0"
+source = { editable = "packages/pm" }
+dependencies = [
+    { name = "devin-internals-spec" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "devin-internals-spec", specifier = ">=0.3.0,<0.4.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "devin-search"
+version = "0.1.0"
+source = { editable = "packages/search" }
+dependencies = [
+    { name = "devin-internals-spec" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "devin-internals-spec", specifier = ">=0.3.0,<0.4.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "exceptiongroup"

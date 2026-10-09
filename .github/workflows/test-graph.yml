@@ -1,0 +1,23 @@
+name: test-graph
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/graph/**'
+      - '.github/workflows/test-graph.yml'
+  pull_request:
+    paths:
+      - 'packages/graph/**'
+      - '.github/workflows/test-graph.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    uses: Icaro0310/devin-powerups/.github/workflows/python-test.yml@v1
+    with:
+      package-dir: packages/graph
