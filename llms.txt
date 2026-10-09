@@ -5,7 +5,7 @@
 Devin keeps local state — a versioned `sessions.db`, one `acp-messages/*.db` per GUI session, a `state.vscdb` KV store, `credentials.toml`, JSONC config — and nothing warns you when it breaks or bloats. devin-doctor runs five read-only checks (stores, schema, health-of-data, config, disk), each printing `PASS`/`WARN`/`FAIL`, a one-line finding and a `fix:` suggestion. Built on devin-internals-spec, so it understands the `refinery_schema_history` ledger, per-session stores and `.devin/` hooks/MCP format.
 
 ## Docs
-- [README](https://github.com/Icaro0310/devin-doctor/blob/main/README.md): full documentation
+- [README](https://github.com/Icaro0310/devin-explore/blob/main/README.md): full documentation
 - [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the store schema/parsers this builds on
 
 ## Key commands
