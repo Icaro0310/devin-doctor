@@ -1,4 +1,4 @@
-# devin-doctor — Personal Windows guide
+# devin-explore — Personal Windows guide
 
 This guide covers unrestricted Windows setup. For restricted machines, see [README.corporate-windows.md](README.corporate-windows.md); for features, shared commands, limitations, and the safety model, see [README.md](README.md).
 
@@ -40,7 +40,7 @@ Use the tool's documented `--data-dir` or `--config-dir` flags for non-default l
 _Weekly health sweep — read-only, safe to leave on._
 
 ```powershell
-schtasks /create /tn "devin-doctor" /tr "devin-doctor check" /sc daily /st 04:00 /f
+schtasks /create /tn "devin-explore" /tr "devin-doctor check" /sc daily /st 04:00 /f
 ```
 
 Runs under your account — no admin needed. Adjust `/sc`/`/st` (or `/sc onlogon` for daemons) to taste.
