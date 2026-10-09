@@ -1,6 +1,17 @@
 # devin-explore
 
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15340/badge)](https://www.bestpractices.dev/projects/15340)
+<div align="center">
+
+<a href="https://github.com/Icaro0310/devin-explore/actions/workflows/ci.yml"><img src="https://github.com/Icaro0310/devin-explore/actions/workflows/ci.yml/badge.svg" alt="ci"/></a>
+<a href="https://www.bestpractices.dev/projects/15340"><img src="https://www.bestpractices.dev/projects/15340/badge" alt="OpenSSF Best Practices"/></a>
+<a href="https://scorecard.dev/viewer/?uri=github.com/Icaro0310/devin-explore"><img src="https://api.scorecard.dev/projects/github.com/Icaro0310/devin-explore/badge" alt="OpenSSF Scorecard"/></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"/></a>
+<a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+"/></a>
+<a href="https://github.com/Icaro0310/devin-explore"><img src="https://img.shields.io/github/stars/Icaro0310/devin-explore" alt="GitHub stars"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/commits/main"><img src="https://img.shields.io/github/last-commit/Icaro0310/devin-explore" alt="Last commit"/></a>
+<a href="https://github.com/Icaro0310/awesome-devin"><img src="https://img.shields.io/badge/part%20of-devin--*-ecosystem-7c3aed" alt="devin-* ecosystem"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"/></a>
+</div>
 
 <!-- DEVIN-ECO:BEGIN -->
 > **Part of the [DEVIN ecosystem](https://github.com/Icaro0310/awesome-devin)**  
@@ -28,11 +39,11 @@ files, tools and decisions — all local, no telemetry.
 
 | Package | PyPI | What it does |
 |---|---|---|
-| [`packages/doctor`](packages/doctor) | `devin-doctor` | Diagnose a Devin Desktop install: stores, schema versions, hooks, MCP servers, disk usage |
-| [`packages/history`](packages/history) | `devin-history` | Export, audit and search session history — Obsidian-ready markdown, JSON, SQLite-aware |
-| [`packages/search`](packages/search) | `devin-search` | Full-text search across all Devin sessions |
-| [`packages/graph`](packages/graph) | `devin-graph` | Knowledge graph over sessions: projects, files, tools, decisions as nodes |
-| [`packages/pm`](packages/pm) | `devin-pm` | Turn session history into milestones, status reports and per-repo task tracking |
+| [`packages/doctor`](packages/doctor) | [![devin-doctor](https://img.shields.io/pypi/v/devin-doctor)](https://pypi.org/project/devin-doctor/) | Diagnose a Devin Desktop install: stores, schema versions, hooks, MCP servers, disk usage |
+| [`packages/history`](packages/history) | [![devin-history](https://img.shields.io/pypi/v/devin-history)](https://pypi.org/project/devin-history/) | Export, audit and search session history — Obsidian-ready markdown, JSON, SQLite-aware |
+| [`packages/search`](packages/search) | [![devin-search](https://img.shields.io/pypi/v/devin-search)](https://pypi.org/project/devin-search/) | Full-text search across all Devin sessions |
+| [`packages/graph`](packages/graph) | [![devin-graph](https://img.shields.io/pypi/v/devin-graph)](https://pypi.org/project/devin-graph/) | Knowledge graph over sessions: projects, files, tools, decisions as nodes |
+| [`packages/pm`](packages/pm) | [![devin-pm](https://img.shields.io/pypi/v/devin-pm)](https://pypi.org/project/devin-pm/) | Turn session history into milestones, status reports and per-repo task tracking |
 
 > **Renamed (Oct 2026):** this repository moved from `Icaro0310/devin-doctor` to `Icaro0310/devin-explore` when it became the `devin-explore` product workspace. PyPI packages and console scripts keep their names; stars, issues and history are preserved by the redirect.
 
