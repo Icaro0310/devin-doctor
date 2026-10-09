@@ -1,9 +1,7 @@
 import pytest
-
+from conftest import BASE_MS, add_session, msg
 from devin_search.index import build_index
 from devin_search.query import Hit, parse_since, search, to_fts_query
-
-from conftest import BASE_MS, add_session, msg
 
 
 @pytest.fixture

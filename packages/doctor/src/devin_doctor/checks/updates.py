@@ -20,8 +20,8 @@ import shutil
 import subprocess
 import urllib.error
 import urllib.request
-from pathlib import Path
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from devin_doctor.model import Context, Finding, Status
 

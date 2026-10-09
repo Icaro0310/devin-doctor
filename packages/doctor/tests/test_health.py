@@ -3,12 +3,10 @@ sessions, locked databases."""
 
 import sqlite3
 
-from devin_internals.fixtures import _BASE_TS_MS
-
+from conftest import lock_db_exclusively
 from devin_doctor.checks import health
 from devin_doctor.model import Context, Status
-
-from conftest import lock_db_exclusively
+from devin_internals.fixtures import _BASE_TS_MS
 
 
 def _finding(findings, needle):

@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from devin_pm.projects import (
-    Project,
     default_sessions_db,
     extract_cost,
     group_sessions,
@@ -82,8 +79,8 @@ def test_load_sessions_returns_all(sessions_db):
 
 def test_load_sessions_missing_file(tmp_path):
     import pytest
-
-    with pytest.raises(Exception):
+    from devin_internals.schema import SchemaDetectionError
+    with pytest.raises(SchemaDetectionError):
         load_sessions(tmp_path / "nope.db")
 
 

@@ -23,8 +23,8 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from devin_pm.projects import Project
 
@@ -173,8 +173,7 @@ def normalize_repo_url(url: str | None) -> str | None:
     ssh = re.match(r"^(?:ssh://)?git@([^:/]+)[:/](.+)$", cleaned)
     if ssh:
         cleaned = f"https://{ssh.group(1)}/{ssh.group(2)}"
-    if cleaned.endswith(".git"):
-        cleaned = cleaned[: -len(".git")]
+    cleaned = cleaned.removesuffix(".git")
     return cleaned.lower()
 
 

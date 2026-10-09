@@ -10,6 +10,7 @@ def test_plan_emits_steps_and_nothing_executed(data_dir, tmp_path, capsys):
 
 def test_plan_json(data_dir, tmp_path, capsys):
     import json
+
     from devin_doctor.cli import main
     assert main(["plan", "--data-dir", str(data_dir),
                  "--cwd", str(tmp_path), "--json"]) == 0

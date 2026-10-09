@@ -10,17 +10,18 @@ from devin_search.query import Hit
 
 
 def _hit(**kw):
-    base = dict(
-        session_id="abcdef01-2345-6789-abcd-ef0123456789",
-        role="user",
-        ts=1_780_000_000_000,
-        project="/projects/alpha",
-        session_title="alpha",
-        source="sessions",
-        ref="node:7",
-        snippet="deploy with «kubectl»",
-        rank=-1.5,
-    )
+    base = {
+
+        "session_id": "abcdef01-2345-6789-abcd-ef0123456789",
+        "role": "user",
+        "ts": 1_780_000_000_000,
+        "project": "/projects/alpha",
+        "session_title": "alpha",
+        "source": "sessions",
+        "ref": "node:7",
+        "snippet": "deploy with «kubectl»",
+        "rank": -1.5,
+    }
     base.update(kw)
     return Hit(**base)
 

@@ -84,8 +84,8 @@ def render_markdown(report: Report, ctx: Context) -> str:
         f"- platform: {platform_name()} ({platform.python_version()})",
         f"- data dir: `{ctx.data_dir}`",
         f"- project dir: `{ctx.cwd}`",
-        f"- **overall: {report.overall.value}** "
-        f"({counts['pass']} PASS / {counts['warn']} WARN / {counts['fail']} FAIL)",
+        (f"- **overall: {report.overall.value}** "
+         f"({counts['pass']} PASS / {counts['warn']} WARN / {counts['fail']} FAIL)"),
         "",
         "| check | status | finding |",
         "|---|---|---|",

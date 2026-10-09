@@ -1,8 +1,7 @@
 """Canned queries over a built graph.db."""
 
 import pytest
-from devin_internals.parsers import SessionsStore
-
+from conftest import ALPHA, BETA
 from devin_graph.query import (
     project_detail,
     projects_graph,
@@ -12,8 +11,7 @@ from devin_graph.query import (
     tools_for_project,
 )
 from devin_graph.store import GraphStore
-
-from conftest import ALPHA, BETA
+from devin_internals.parsers import SessionsStore
 
 
 @pytest.fixture

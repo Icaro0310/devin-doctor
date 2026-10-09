@@ -4,11 +4,9 @@ import hashlib
 import json
 
 import pytest
-from devin_internals.fixtures import create_sessions_db
-
-from devin_graph.cli import main
-
 from conftest import ALPHA
+from devin_graph.cli import main
+from devin_internals.fixtures import create_sessions_db
 
 
 @pytest.fixture

@@ -30,10 +30,11 @@ from __future__ import annotations
 import json
 import posixpath
 import re
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field
+from typing import Any
 
 from devin_internals.commits import commit_references
-from typing import Any, Iterable, Iterator
 
 NODE_KINDS = ("session", "project", "file", "tool", "tool_call", "commit",
               "gui_session")
@@ -87,7 +88,7 @@ class Extraction:
     nodes: list[Node] = field(default_factory=list)
     edges: list[Edge] = field(default_factory=list)
 
-    def merged(self) -> "Extraction":
+    def merged(self) -> Extraction:
         seen_n: dict[tuple[str, str], Node] = {}
         seen_e: set[tuple] = set()
         out = Extraction()

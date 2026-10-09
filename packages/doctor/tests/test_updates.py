@@ -1,7 +1,6 @@
 """updates check: installed tools vs the published devkit manifest."""
 
 import pytest
-
 from devin_doctor.checks import updates
 from devin_doctor.model import Status
 

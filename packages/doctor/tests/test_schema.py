@@ -1,10 +1,8 @@
 """schema check: per-store version/shape detection via devin_internals."""
 
-import pytest
-from devin_internals.fixtures import create_sessions_db
-
 from devin_doctor.checks import schema
 from devin_doctor.model import Context, Status
+from devin_internals.fixtures import create_sessions_db
 
 
 def test_healthy_all_recognized(ctx):

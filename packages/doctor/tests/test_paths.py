@@ -1,4 +1,3 @@
-from pathlib import Path
 
 from devin_doctor.paths import default_config_dir, default_data_dir, locate_stores
 

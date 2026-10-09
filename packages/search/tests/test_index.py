@@ -1,11 +1,9 @@
 import hashlib
 import sqlite3
 
-from devin_internals.fixtures import create_acp_messages_db
-
-from devin_search.index import build_index, index_doc_count
-
 from conftest import add_acp_db, add_session, msg
+from devin_internals.fixtures import create_acp_messages_db
+from devin_search.index import build_index, index_doc_count
 
 
 def _sha256(path):

@@ -26,7 +26,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from devin_graph.extract import EDGE_KINDS, NODE_KINDS, Edge, Extraction, Node
+from devin_graph.extract import Edge, Extraction, Node
 
 SESSION_WS_PREFIX = "windsurfSpace.sessionWorkspace/"
 RESOURCE_TO_SPACE = "windsurfSpace.resourceToSpace"

@@ -2,11 +2,8 @@
 
 import json
 
-import pytest
-
-from devin_doctor.cli import main
-from devin_doctor.model import Context
 from devin_doctor import doctor
+from devin_doctor.cli import main
 
 
 def test_check_healthy_exit_0(ctx, capsys):

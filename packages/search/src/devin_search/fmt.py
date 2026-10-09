@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from datetime import datetime, timezone
-from typing import Iterable
 
 from devin_search.index import IndexStats
 from devin_search.query import Hit

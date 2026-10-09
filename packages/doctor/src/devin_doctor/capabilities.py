@@ -25,8 +25,8 @@ import os
 import shutil
 import socket
 import sys
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 from urllib.parse import urlparse
 
 PROFILE_ENV_VAR = "DEVIN_ECOSYSTEM_PROFILE"

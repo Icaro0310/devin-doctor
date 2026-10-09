@@ -13,7 +13,6 @@ import json
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from pathlib import Path
 
 from devin_history.format import project_name
 from devin_history.messages import first_user_text, parse_chat_message
@@ -27,7 +26,7 @@ SECRET_PAT = re.compile(
     r"xox[baprs]-[A-Za-z0-9-]{8,}|api[_-]?key\s*[:=]\s*\S+|"
     r"token\s*[:=]\s*\S+|password\s*[:=]\s*\S+|"
     r"\b[A-Za-z0-9]{20,}-[A-Za-z0-9_-]{10,}\b)",
-    re.I,
+    re.IGNORECASE,
 )
 
 TASK_RULES = [

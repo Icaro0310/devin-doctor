@@ -9,17 +9,19 @@ from __future__ import annotations
 import csv
 import json
 from collections import Counter
+from collections.abc import Iterable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Any
 
 from devin_history.messages import ChatMessage
 from devin_history.times import duration_minutes, fmt_ts
 
 if TYPE_CHECKING:
+    from devin_internals.parsers import Session, ToolCallState
+
     from devin_history.audit import AuditReport, SessionAudit
     from devin_history.export import GuiIndexEntry, IndexEntry
     from devin_history.vscdb import GuiSession
-    from devin_internals.parsers import Session, ToolCallState
 
 USER_CAP = 4000
 ASSISTANT_CAP = 1500
@@ -52,7 +54,7 @@ def _conversation_parts(messages: Iterable[ChatMessage]) -> list[str]:
 
 
 def render_session_md(
-    session: "Session",
+    session: Session,
     messages: list[ChatMessage],
     prov: dict[str, str] | None = None,
 ) -> str:
@@ -95,9 +97,9 @@ tags: [session, devin, history]{prov_fm}
 
 
 def session_to_dict(
-    session: "Session",
+    session: Session,
     messages: list[ChatMessage],
-    tool_calls: list["ToolCallState"],
+    tool_calls: list[ToolCallState],
     prov: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Searchable JSON shape for one session (full text, no clipping)."""
@@ -140,7 +142,7 @@ def _json_or_none(raw: str | None) -> Any:
         return None
 
 
-def index_stats(entries: list["IndexEntry"]) -> dict[str, Any]:
+def index_stats(entries: list[IndexEntry]) -> dict[str, Any]:
     """Aggregate totals for the index stats block (md and json)."""
     projects = Counter(e.project for e in entries)
     formats = Counter(
@@ -161,7 +163,7 @@ def index_stats(entries: list["IndexEntry"]) -> dict[str, Any]:
     }
 
 
-def render_index_md(entries: list["IndexEntry"]) -> str:
+def render_index_md(entries: list[IndexEntry]) -> str:
     """`index.md` — stats block plus sessions grouped by project."""
     stats = index_stats(entries)
     by_project: dict[str, list[IndexEntry]] = {}
@@ -210,7 +212,7 @@ def render_index_md(entries: list["IndexEntry"]) -> str:
 
 
 def render_index_json(
-    entries: list["IndexEntry"], prov: dict[str, str] | None = None
+    entries: list[IndexEntry], prov: dict[str, str] | None = None
 ) -> str:
     return json.dumps(
         {**({"provenance": prov} if prov else {}),
@@ -228,7 +230,7 @@ def render_index_json(
 
 
 def render_gui_session_md(
-    session: "GuiSession",
+    session: GuiSession,
     prov: dict[str, str] | None = None,
 ) -> str:
     """One Obsidian-ready note for a GUI session (metadata only).
@@ -289,7 +291,7 @@ so only the session/workspace binding is exportable._
 """
 
 
-def gui_index_stats(entries: list["GuiIndexEntry"]) -> dict[str, Any]:
+def gui_index_stats(entries: list[GuiIndexEntry]) -> dict[str, Any]:
     """Aggregate totals for the GUI ``index.json`` stats block."""
     projects = Counter(e.project for e in entries)
     backends = Counter(e.backend for e in entries)
@@ -304,7 +306,7 @@ def gui_index_stats(entries: list["GuiIndexEntry"]) -> dict[str, Any]:
 
 
 def render_gui_index_json(
-    entries: list["GuiIndexEntry"], prov: dict[str, str] | None = None
+    entries: list[GuiIndexEntry], prov: dict[str, str] | None = None
 ) -> str:
     """``index.json`` for the GUI export — provenance + stats + entries."""
     return json.dumps(
@@ -324,7 +326,7 @@ def render_gui_index_json(
     ) + "\n"
 
 
-def sessions_table(sessions: list["Session"]) -> str:
+def sessions_table(sessions: list[Session]) -> str:
     """Fixed-width table for `devin-history list`."""
     header = f"{'ID':<10} {'CREATED':<17} {'DUR':>7} {'MODEL':<14} {'PROJECT':<20} TITLE"
     lines = [header, "-" * len(header)]
@@ -339,7 +341,7 @@ def sessions_table(sessions: list["Session"]) -> str:
     return "\n".join(lines)
 
 
-def sessions_to_dicts(sessions: list["Session"]) -> list[dict[str, Any]]:
+def sessions_to_dicts(sessions: list[Session]) -> list[dict[str, Any]]:
     return [
         {
             "id": s.id,
@@ -371,7 +373,7 @@ AUDIT_CSV_FIELDS = [
 ]
 
 
-def audit_row_to_dict(r: "SessionAudit") -> dict[str, Any]:
+def audit_row_to_dict(r: SessionAudit) -> dict[str, Any]:
     return {
         "session_id": r.id,
         "title": r.title,
@@ -402,7 +404,7 @@ def audit_row_to_dict(r: "SessionAudit") -> dict[str, Any]:
     }
 
 
-def audit_to_dict(report: "AuditReport") -> dict[str, Any]:
+def audit_to_dict(report: AuditReport) -> dict[str, Any]:
     return {
         "schema_version": report.schema_version,
         "sessions": [audit_row_to_dict(r) for r in report.rows],
@@ -419,7 +421,7 @@ def audit_to_dict(report: "AuditReport") -> dict[str, Any]:
     }
 
 
-def write_audit_csv(report: "AuditReport", path: str | Path) -> None:
+def write_audit_csv(report: AuditReport, path: str | Path) -> None:
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(AUDIT_CSV_FIELDS)
@@ -438,7 +440,7 @@ def _fmt_dur(mins: float) -> str:
     return f"{mins:.0f}m" if mins < 60 else f"{mins / 60:.1f}h"
 
 
-def audit_to_markdown(report: "AuditReport") -> str:
+def audit_to_markdown(report: AuditReport) -> str:
     """Compact audit report: summary, grouping tables, anomaly list."""
     rows = report.rows
     L: list[str] = []

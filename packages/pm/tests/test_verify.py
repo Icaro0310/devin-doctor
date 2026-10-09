@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 
 import pytest
-
+from conftest import insert_session
 from devin_pm.cli import main
 from devin_pm.projects import group_sessions, load_sessions
 from devin_pm.verify import (
@@ -22,8 +22,6 @@ from devin_pm.verify import (
     read_pyproject,
     verify,
 )
-
-from conftest import insert_session
 
 
 def hub_entry(name, **extra):

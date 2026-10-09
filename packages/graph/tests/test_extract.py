@@ -1,8 +1,7 @@
 """Extraction tests — the fixture encodes exact expected node/edge counts."""
 
 import pytest
-from devin_internals.parsers import SessionsStore
-
+from conftest import ALPHA
 from devin_graph.extract import (
     extract_all,
     extract_paths,
@@ -11,9 +10,7 @@ from devin_graph.extract import (
     normalize_path,
     parse_payload,
 )
-
-from conftest import ALPHA, BETA
-
+from devin_internals.parsers import SessionsStore
 
 # -- path normalization ------------------------------------------------------
 
@@ -164,8 +161,8 @@ def test_extract_session_relative_paths_resolve_to_cwd(sessions_db):
 
 def test_call_payload_wins_over_update(sessions_db):
     """tool_call_json is authoritative over tool_call_update_json."""
-    import sqlite3
     import json as j
+    import sqlite3
     con = sqlite3.connect(sessions_db)
     with con:
         con.execute(

@@ -8,9 +8,10 @@ markdown or touching ``sessions.db`` themselves.
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable, Mapping
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 from devin_pm.milestones import Milestone, done_fraction
 from devin_pm.projects import Project

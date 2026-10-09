@@ -1,5 +1,4 @@
 import json
-import sqlite3
 
 import pytest
 from devin_history.cli import main

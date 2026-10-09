@@ -7,12 +7,11 @@ session has one — missing notes are simply unlinked, never an error.
 
 import json
 
+from conftest import add_session, msg
 from devin_search.cli import main
 from devin_search.history import attach_history_notes, history_note
 from devin_search.index import build_index
 from devin_search.query import search
-
-from conftest import add_session, msg
 
 
 def _note(directory, session_id, date="2026-05-28", ext="md", body="# note\n"):

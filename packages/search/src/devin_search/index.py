@@ -15,9 +15,10 @@ mid-table deletions otherwise.
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from devin_internals.parsers import AcpMessagesStore, SessionsStore
 
@@ -283,7 +284,7 @@ def _index_acp_dir(
             with AcpMessagesStore(path) as store:
                 meta = store.meta()
                 messages = store.messages()
-        except Exception:
+        except Exception:  # noqa: BLE001, S112
             # Not an acp-messages db (or unreadable) — skip it.
             continue
         if wm and not any(m.position > wm for m in messages):

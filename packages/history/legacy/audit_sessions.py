@@ -15,7 +15,6 @@ Saída: sessions_report.md + sessions_summary.csv no workspace.
 
 import csv
 import glob
-import gzip
 import json
 import os
 import re
@@ -37,7 +36,7 @@ SECRET_PAT = re.compile(
     r"(sk-[A-Za-z0-9_-]{8,}|ghp_[A-Za-z0-9]{8,}|gho_[A-Za-z0-9]{8,}|"
     r"xox[baprs]-[A-Za-z0-9-]{8,}|api[_-]?key\s*[:=]\s*\S+|"
     r"token\s*[:=]\s*\S+|password\s*[:=]\s*\S+|"
-    r"\b[A-Za-z0-9]{20,}-[A-Za-z0-9_-]{10,}\b)", re.I)
+    r"\b[A-Za-z0-9]{20,}-[A-Za-z0-9_-]{10,}\b)", re.IGNORECASE)
 
 
 def redact(t: str) -> str:

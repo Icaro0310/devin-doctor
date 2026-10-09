@@ -1,4 +1,3 @@
-from pathlib import Path
 
 from devin_search.paths import (
     acp_dir_candidates,

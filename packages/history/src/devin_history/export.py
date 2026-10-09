@@ -30,7 +30,7 @@ from devin_history.times import fmt_ts
 MIN_USEFUL_NODES = 2
 FORMATS = ("md", "json")
 
-_MARKER_MD = re.compile(r"^last_activity:\s*(\d+)", re.M)
+_MARKER_MD = re.compile(r"^last_activity:\s*(\d+)", re.MULTILINE)
 _UNSAFE_NAME = re.compile(r"[^A-Za-z0-9._-]+")
 
 
