@@ -11,6 +11,17 @@
 > Path: Operations · step 1/4 — before `devin-backup`
 <!-- DEVIN-ECO:END -->
 
+<!-- DEVIN-WHERE:BEGIN -->
+## Where this fits
+
+- **Job:** Understand
+- **Product:** [`devin-explore`](https://github.com/Icaro0310/devin-explore)
+- **Packages:** `doctor` · `graph` · `history` · `pm` · `search`
+- **Mode:** read-only
+- **Foundation:** [`devin-internals-spec`](https://github.com/Icaro0310/devin-internals-spec)
+- **Ecosystem:** [`awesome-devin`](https://github.com/Icaro0310/awesome-devin) · registry: [`devin-powerups`](https://github.com/Icaro0310/devin-powerups)
+<!-- DEVIN-WHERE:END -->
+
 Understand your Devin sessions: diagnose the local installation, export
 and search session history, and query a knowledge graph of projects,
 files, tools and decisions — all local, no telemetry.
