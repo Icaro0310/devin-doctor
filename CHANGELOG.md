@@ -1,0 +1,21 @@
+# Changelog
+
+## Unreleased
+
+- **CI** — Ruff lint job added (`astral-sh/ruff-action`, pinned); `legacy/`
+  migration scripts excluded from the shipped lint scope.
+- **Publish** — consolidated `pypi-publish.yml` builds and uploads
+  `devin-doctor`, `devin-graph`, `devin-history`, `devin-pm` and
+  `devin-search` via PyPI Trusted Publishing (OIDC), tag `*-v*` or
+  manual dispatch.
+- **Fix** — `devin-pm` resolves `sessions.db` across `XDG_DATA_HOME`,
+  `XDG_CONFIG_HOME` and `~` candidates, matching the rest of the
+  ecosystem.
+- **Fix** — `devin-history` timestamps are timezone-aware (`DTZ006`).
+
+## 2026-10 (F4 consolidation)
+
+- Packages consolidated into this repo:
+  `devin-doctor` 0.1.0, `devin-graph` 0.1.0, `devin-history` 0.1.0,
+  `devin-pm` 0.1.0, `devin-search` 0.1.0.
+- Prior per-repo history lives in each package's git history.
