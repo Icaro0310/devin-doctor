@@ -1,5 +1,7 @@
 # devin-explore
 
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15340/badge)](https://www.bestpractices.dev/projects/15340)
+
 <!-- DEVIN-ECO:BEGIN -->
 > **Part of the [DEVIN ecosystem](https://github.com/Icaro0310/awesome-devin)**  
 > Track: Understand · Nature: product  
