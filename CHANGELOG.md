@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **CI** — `open-pr-bot` fails closed without `PR_BOT_TOKEN` and its
+  existing-PR lookup is base-, owner- and case-aware; fork PRs sharing
+  the head name no longer block creating the repository's own PR.
 - **CI** — Ruff lint job added (`astral-sh/ruff-action`, pinned); `legacy/`
   migration scripts excluded from the shipped lint scope.
 - **Publish** — consolidated `pypi-publish.yml` builds and uploads
