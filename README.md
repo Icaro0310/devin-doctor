@@ -3,9 +3,10 @@
 <!-- DEVIN-ECO:BEGIN -->
 > **Part of the [DEVIN ecosystem](https://github.com/Icaro0310/awesome-devin)**  
 > Track: Understand · Nature: product  
-> For: QA engineers, Developers  
+> For: Operations, End users  
 > Interface: CLI  
-> Path: Developers · step 1/3 — before `devin-history`
+> Path: End users · step 3/3 — after `devin-devkit`  
+> Path: Operations · step 1/4 — before `devin-backup`
 <!-- DEVIN-ECO:END -->
 
 Understand your Devin sessions: diagnose the local installation, export
