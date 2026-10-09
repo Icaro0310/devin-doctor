@@ -6,8 +6,8 @@ devin-history solves the problem that Devin Desktop keeps your session history i
 
 ## Docs
 
-- [README](https://github.com/Icaro0310/devin-history/blob/main/README.md): full documentation
-- [SPEC](https://github.com/Icaro0310/devin-history/blob/main/docs/SPEC.md): canonical data contracts and export format
+- [README](https://github.com/Icaro0310/devin-explore/blob/main/packages/history/README.md): full documentation
+- [SPEC](https://github.com/Icaro0310/devin-explore/blob/main/packages/history/docs/SPEC.md): canonical data contracts and export format
 
 ## Key commands
 
@@ -28,4 +28,4 @@ devin-history solves the problem that Devin Desktop keeps your session history i
 - [devin-ecosystem](https://icaro0310.github.io/): the tool ecosystem this belongs to
 - [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the schema/parsers this builds on
 - [devin-redact](https://github.com/Icaro0310/devin-state): scrub secrets/PII from an export before sharing it
-- [devin-janitor](https://github.com/Icaro0310/devin-janitor): pairs via `--export-cmd "devin-history export"` so sessions are archived before deletion
+- [devin-janitor](https://github.com/Icaro0310/devin-state): pairs via `--export-cmd "devin-history export"` so sessions are archived before deletion

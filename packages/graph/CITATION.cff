@@ -5,8 +5,8 @@ title: devin-graph
 authors:
   - family-names: Galvao
     given-names: Icaro
-url: "https://github.com/Icaro0310/devin-graph"
-repository-code: "https://github.com/Icaro0310/devin-graph"
+url: "https://github.com/Icaro0310/devin-explore"
+repository-code: "https://github.com/Icaro0310/devin-explore"
 license: MIT
 abstract: "A knowledge graph over Devin sessions: sessions, projects, files, and tools as queryable nodes with edges extracted from tool-call payloads, plus a D3-friendly JSON export."
 keywords: [devin, knowledge-graph, sqlite, agent-sessions, cli, graph-analysis]

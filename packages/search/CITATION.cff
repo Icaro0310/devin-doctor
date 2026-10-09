@@ -5,8 +5,8 @@ title: devin-search
 authors:
   - family-names: Galvao
     given-names: Icaro
-url: "https://github.com/Icaro0310/devin-search"
-repository-code: "https://github.com/Icaro0310/devin-search"
+url: "https://github.com/Icaro0310/devin-explore"
+repository-code: "https://github.com/Icaro0310/devin-explore"
 license: MIT
 abstract: "Full-text search across Devin session history: a local FTS5/BM25 index over Devin's own SQLite stores with role-tagged, session-linked results."
 keywords: [devin, full-text-search, fts5, sqlite, session-history, cli]

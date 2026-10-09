@@ -5,8 +5,8 @@ title: devin-history
 authors:
   - family-names: Galvao
     given-names: Icaro
-url: "https://github.com/Icaro0310/devin-history"
-repository-code: "https://github.com/Icaro0310/devin-history"
+url: "https://github.com/Icaro0310/devin-explore"
+repository-code: "https://github.com/Icaro0310/devin-explore"
 license: MIT
 abstract: "Export and audit Devin Desktop session history: turns the local sessions.db into Obsidian-ready Markdown notes, a searchable JSON dump, and an audit report."
 keywords: [devin, session-history, export, obsidian, sqlite, audit]

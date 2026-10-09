@@ -102,7 +102,7 @@ Post-M1:
 
 ```json
 {
-  "$schema": "https://github.com/Icaro0310/devin-pm/registry.schema.json",
+  "$schema": "https://github.com/Icaro0310/devin-explore/registry.schema.json",
   "version": 1,
   "generated": "2026-09-29T00:00:00Z",
   "source": {"sessions_db": "...", "state_vscdb": "...",

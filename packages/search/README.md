@@ -2,16 +2,16 @@
 
 <img src="assets/banner.svg" alt="devin-search" width="100%"/>
 
-<a href="https://github.com/Icaro0310/devin-search/actions/workflows/ci.yml"><img src="https://github.com/Icaro0310/devin-search/actions/workflows/ci.yml/badge.svg" alt="ci"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/actions/workflows/test-search.yml"><img src="https://github.com/Icaro0310/devin-explore/actions/workflows/test-search.yml/badge.svg" alt="ci"/></a>
 
 
 <a href="https://scorecard.dev/viewer/?uri=github.com/Icaro0310/devin-search"><img src="https://api.scorecard.dev/projects/github.com/Icaro0310/devin-search/badge" alt="OpenSSF Scorecard"/></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"/></a>
 <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+"/></a>
-<a href="https://github.com/Icaro0310/devin-search"><img src="https://img.shields.io/github/stars/Icaro0310/devin-search" alt="GitHub stars"/></a>
-<a href="https://github.com/Icaro0310/devin-search/commits/main"><img src="https://img.shields.io/github/last-commit/Icaro0310/devin-search" alt="Last commit"/></a>
+<a href="https://github.com/Icaro0310/devin-explore"><img src="https://img.shields.io/github/stars/Icaro0310/devin-search" alt="GitHub stars"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/commits/main"><img src="https://img.shields.io/github/last-commit/Icaro0310/devin-search" alt="Last commit"/></a>
 <a href="https://github.com/Icaro0310/awesome-devin"><img src="https://img.shields.io/badge/part%20of-devin--*-ecosystem-7c3aed" alt="devin-* ecosystem"/></a>
-<a href="https://github.com/Icaro0310/devin-search/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"/></a>
 </div>
 
 <!-- DEVIN-ECO:BEGIN -->
@@ -104,7 +104,7 @@ wrapped in `«»`; each hit carries a `ref` (e.g. `node:1234`,
 `acp:file.db:7`) pointing back to the exact source row.
 
 With `--history-dir <dir>` pointing at a
-[`devin-history`](https://github.com/Icaro0310/devin-history) export
+[`devin-history`](https://github.com/Icaro0310/devin-explore) export
 directory, each hit whose session has an exported note gets a `note: <path>`
 line under its row (and a `history_note` field in `--json`). Notes are
 matched by the `<YYYY-MM-DD>_<session-id>.md` filename devin-history writes

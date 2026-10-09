@@ -6,11 +6,11 @@ devin-search solves the problem that Devin stores your entire session history in
 
 ## Docs
 
-- [README](https://github.com/Icaro0310/devin-search/blob/main/README.md): full documentation
+- [README](https://github.com/Icaro0310/devin-explore/blob/main/packages/search/README.md): full documentation
 
 ## Key commands
 
-- `pipx install "devin-search @ git+https://github.com/Icaro0310/devin-search.git"`: install (Python >= 3.10)
+- `pipx install "devin-search @ git+https://github.com/Icaro0310/devin-explore.git#subdirectory=packages/search"`: install (Python >= 3.10)
 - `devin-search index`: build or incrementally update the search index (auto-detects Devin's stores)
 - `devin-search query "kubectl delete pod"`: full-text search across all indexed sessions
 - `devin-search query "TypeError" --role assistant --project myrepo`: filter by role, project, date (`--since`), `--limit`, `--json`
@@ -26,4 +26,4 @@ devin-search solves the problem that Devin stores your entire session history in
 
 - [devin-ecosystem](https://icaro0310.github.io/): the tool ecosystem this belongs to
 - [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the schema/parsers this builds on
-- [devin-history](https://github.com/Icaro0310/devin-history): exports sessions to Markdown/JSON (static dump vs ranked search)
+- [devin-history](https://github.com/Icaro0310/devin-explore): exports sessions to Markdown/JSON (static dump vs ranked search)

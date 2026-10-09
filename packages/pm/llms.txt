@@ -6,8 +6,8 @@ devin-pm solves the problem that Devin records every CLI session in a local `ses
 
 ## Docs
 
-- [README](https://github.com/Icaro0310/devin-pm/blob/main/README.md): full documentation
-- [SPEC](https://github.com/Icaro0310/devin-pm/blob/main/docs/SPEC.md): data contracts
+- [README](https://github.com/Icaro0310/devin-explore/blob/main/packages/pm/README.md): full documentation
+- [SPEC](https://github.com/Icaro0310/devin-explore/blob/main/packages/pm/docs/SPEC.md): data contracts
 
 ## Key commands
 

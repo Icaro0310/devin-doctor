@@ -2,17 +2,17 @@
 
 <img src="assets/banner.svg" alt="devin-history" width="100%"/>
 
-<a href="https://github.com/Icaro0310/devin-history/actions/workflows/tests.yml"><img src="https://github.com/Icaro0310/devin-history/actions/workflows/tests.yml/badge.svg" alt="tests"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/actions/workflows/test-history.yml"><img src="https://github.com/Icaro0310/devin-explore/actions/workflows/test-history.yml/badge.svg" alt="tests"/></a>
 
 
-<a href="https://github.com/Icaro0310/devin-history/actions/workflows/ci.yml"><img src="https://github.com/Icaro0310/devin-history/actions/workflows/ci.yml/badge.svg" alt="ci"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/actions/workflows/test-history.yml"><img src="https://github.com/Icaro0310/devin-explore/actions/workflows/test-history.yml/badge.svg" alt="ci"/></a>
 <a href="https://scorecard.dev/viewer/?uri=github.com/Icaro0310/devin-history"><img src="https://api.scorecard.dev/projects/github.com/Icaro0310/devin-history/badge" alt="OpenSSF Scorecard"/></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"/></a>
 <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+"/></a>
-<a href="https://github.com/Icaro0310/devin-history"><img src="https://img.shields.io/github/stars/Icaro0310/devin-history" alt="GitHub stars"/></a>
-<a href="https://github.com/Icaro0310/devin-history/commits/main"><img src="https://img.shields.io/github/last-commit/Icaro0310/devin-history" alt="Last commit"/></a>
+<a href="https://github.com/Icaro0310/devin-explore"><img src="https://img.shields.io/github/stars/Icaro0310/devin-history" alt="GitHub stars"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/commits/main"><img src="https://img.shields.io/github/last-commit/Icaro0310/devin-history" alt="Last commit"/></a>
 <a href="https://github.com/Icaro0310/awesome-devin"><img src="https://img.shields.io/badge/part%20of-devin--*-ecosystem-7c3aed" alt="devin-* ecosystem"/></a>
-<a href="https://github.com/Icaro0310/devin-history/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"/></a>
 </div>
 
 <!-- DEVIN-ECO:BEGIN -->
@@ -211,7 +211,7 @@ DDL, synthetic rows) — no binary fixtures are committed.
 ## When NOT to use this
 
 - You need instant ranked search rather than a static export — use
-  [`devin-search`](https://github.com/Icaro0310/devin-search) on top of the
+  [`devin-search`](https://github.com/Icaro0310/devin-explore) on top of the
   same database.
 - You need GUI session *transcripts* — `export-gui` exports the metadata
   bindings in `state.vscdb`; the `acp-messages/*.db` transcript stores are

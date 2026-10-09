@@ -5,8 +5,8 @@ title: devin-pm
 authors:
   - family-names: Galvao
     given-names: Icaro
-url: "https://github.com/Icaro0310/devin-pm"
-repository-code: "https://github.com/Icaro0310/devin-pm"
+url: "https://github.com/Icaro0310/devin-explore"
+repository-code: "https://github.com/Icaro0310/devin-explore"
 license: MIT
 abstract: "A project manager over Devin sessions: reads sessions.db, groups work per repository, and generates status reports, milestones and a machine-readable project registry."
 keywords: [devin, project-management, reporting, milestones, sqlite, rollup]
