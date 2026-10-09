@@ -36,21 +36,34 @@ _COST_KEY_RE = re.compile(r"(cost|credit|usd|amount|spent)", re.IGNORECASE)
 def default_sessions_db() -> Path:
     """Locate Devin's ``sessions.db`` for the current platform.
 
-    Order: ``DEVIN_PM_SESSIONS_DB`` env var → platform default
-    (``%APPDATA%/devin/cli/sessions.db`` on Windows, the XDG/macOS
-    equivalents elsewhere).
+    Order: ``DEVIN_PM_SESSIONS_DB`` env var → first existing platform
+    candidate → the primary platform default (``%APPDATA%`` on Windows,
+    ``$XDG_DATA_HOME`` on Linux, Application Support on macOS). Linux
+    candidates follow the ecosystem convention — data dir, then config
+    dir, then home — the same multi-root order ``devin_history.paths``
+    and ``devin_pm.vscdb`` apply.
     """
     env = os.environ.get(ENV_SESSIONS_DB)
     if env:
         return Path(env).expanduser()
     if sys.platform == "win32":
         base = os.environ.get("APPDATA")
-        root = Path(base) if base else Path.home() / "AppData" / "Roaming"
+        roots = [Path(base) if base else Path.home() / "AppData" / "Roaming"]
     elif sys.platform == "darwin":
-        root = Path.home() / "Library" / "Application Support"
+        roots = [Path.home() / "Library" / "Application Support"]
     else:
-        root = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
-    return root / "devin" / "cli" / "sessions.db"
+        roots = [
+            Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")),
+            Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")),
+            Path.home(),
+        ]
+    candidates = [
+        root / "devin" / "cli" / "sessions.db" for root in dict.fromkeys(roots)
+    ]
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return candidates[0]
 
 
 def load_sessions(db_path: str | Path) -> list[Session]:
