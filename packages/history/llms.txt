@@ -1,0 +1,31 @@
+# devin-history
+
+> Export and audit Devin Desktop session history: turns the local `sessions.db` into Obsidian-ready Markdown notes, a searchable JSON dump, and an audit report.
+
+devin-history solves the problem that Devin Desktop keeps your session history in a local SQLite database (`sessions.db`) with no export button: once a session scrolls out of the UI, the prompts, replies and tool calls are effectively unrecoverable. It opens the database through the schema-version-gated parsers of `devin-internals-spec` (v15-v17, fails loudly on anything newer) and exports one note per session plus an index, or a JSON dump, or an audit report grouped by status, task type, project and period with anomaly detection. It is for Devin CLI/Desktop users who want their session history archived, searchable, or auditable outside the app. Fully local and read-only: it never writes to Devin's stores. Unofficial community tooling, not affiliated with Cognition AI.
+
+## Docs
+
+- [README](https://github.com/Icaro0310/devin-history/blob/main/README.md): full documentation
+- [SPEC](https://github.com/Icaro0310/devin-history/blob/main/docs/SPEC.md): canonical data contracts and export format
+
+## Key commands
+
+- `uv tool install devin-history  # or: pipx install devin-history`: install (Python >= 3.10)
+- `devin-history list`: quick session table (auto-detects `%APPDATA%/devin/cli/sessions.db` on Windows, `$XDG_DATA_HOME/devin/cli/sessions.db` on Linux)
+- `devin-history export --out ~/ObsidianVault/Sessions`: one Obsidian-style note per session + `index.md`; incremental and safe to re-run
+- `devin-history export --out dump/ --format json`: searchable JSON dump instead of Markdown
+- `devin-history audit --csv audit.csv`: audit report with status/type/project/period groupings and anomalies, optional CSV
+- `devin-history audit --sessions-db path/to/sessions.db --json`: every subcommand accepts `--sessions-db` and `--json`
+
+## When to use / when not
+
+- Use when: you want your Devin session history out of the app before it scrolls away or is pruned; you keep an Obsidian vault and want one note per session with an index; you need a lifetime audit (status, project, period groupings, anomalies like empty or orphan sessions); you want a deterministic, idempotent export you can re-run on a schedule.
+- Not when: you need instant ranked search rather than a static export (use devin-search); you need GUI/Desktop `acp-messages/*.db` sessions (M1 covers CLI `sessions.db` only); your `sessions.db` schema is newer than v17 (the tool refuses loudly; update devin-internals-spec first); you need token cost or billing data (not stored locally).
+
+## Related
+
+- [devin-ecosystem](https://icaro0310.github.io/): the tool ecosystem this belongs to
+- [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the schema/parsers this builds on
+- [devin-redact](https://github.com/Icaro0310/devin-state): scrub secrets/PII from an export before sharing it
+- [devin-janitor](https://github.com/Icaro0310/devin-janitor): pairs via `--export-cmd "devin-history export"` so sessions are archived before deletion

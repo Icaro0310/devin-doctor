@@ -1,0 +1,34 @@
+# devin-pm
+
+> A project manager over your Devin sessions: reads `sessions.db`, groups work per repository/project, and generates status reports, milestones and a machine-readable project registry.
+
+devin-pm solves the problem that Devin records every CLI session in a local `sessions.db` but gives no project-level view: after a few weeks you cannot answer which repos you actually worked on, what state project X is in, or which milestones are still open. It parses the database through `devin-internals-spec`'s schema-gated `SessionsStore` (v15-v17, fails loudly on newer), groups sessions by working directory, and emits per-project status tables, Markdown reports, milestone tracking (tag a session title `milestone: <name>` or list them in `milestones.json`), and a JSON registry other tools can consume. It is for Devin users who want PM-style rollups over their own agent activity. Fully local and read-only; cost fields are best-effort (`null`, never a fake zero). Unofficial community tooling, not affiliated with Cognition AI.
+
+## Docs
+
+- [README](https://github.com/Icaro0310/devin-pm/blob/main/README.md): full documentation
+- [SPEC](https://github.com/Icaro0310/devin-pm/blob/main/docs/SPEC.md): data contracts
+
+## Key commands
+
+- `uv tool install devin-pm  # or: pipx install devin-pm`: install (Python >= 3.10)
+- `devin-pm status`: per-project rollup table (`--json` for machine-readable)
+- `devin-pm report --project my-repo`: Markdown status report for one project; no flag = global report
+- `devin-pm report --project x --out x.md`: write the report to a file
+- `devin-pm milestones --project my-repo`: milestone list with done percentage
+- `devin-pm registry --out registry.json`: machine-readable project registry
+- `devin-pm ... --sessions-db PATH`: override the auto-detected database on every subcommand (`DEVIN_PM_SESSIONS_DB` env var also works)
+- `devin-pm ... --vscdb [PATH]`: also merge GUI session→workspace bindings from `state.vscdb` (bare flag auto-detects, `DEVIN_PM_STATE_VSCDB` env var works); gui sessions are marked `gui` in output
+- Grouping keys normalize path spellings: `C:\x` ⇄ `/c/x` ⇄ `/cygdrive/c/x` (case-folded), `\\wsl.localhost\<distro>\…` → POSIX; original paths kept in output
+
+## When to use / when not
+
+- Use when: you have weeks of Devin sessions and want per-repo status without scrolling the app; you want Markdown reports or a JSON registry to feed dashboards, docs or other tools; you track milestones and want them detected from session titles or a `milestones.json` file; you want read-only rollups that fail loudly on unknown schema versions.
+- Not when: you need GUI/Desktop transcripts (`--vscdb` covers `state.vscdb` workspace bindings only, not `acp-messages/*.db`); you need reliable cost/billing rollups (the DB has no documented cost field — reports show `-`/`null`, not estimates); you need live session state rather than a snapshot of `sessions.db`; your schema is newer than v17.
+
+## Related
+
+- [devin-ecosystem](https://icaro0310.github.io/): the tool ecosystem this belongs to
+- [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the schema-gated parser this builds on
+- [devin-metrics](https://github.com/Icaro0310/devin-assure/tree/main/packages/metrics): deeper per-session analytics over the same store
+- [devin-powerups](https://github.com/Icaro0310/devin-powerups): weekly report generator over the public project registry

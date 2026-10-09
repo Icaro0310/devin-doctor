@@ -1,0 +1,32 @@
+# devin-graph
+
+> A knowledge graph over Devin sessions: sessions, projects, files, and tools become nodes you can query and export.
+
+devin-graph solves the lost-thread problem after dozens of Devin sessions: which sessions touched a given file, which tools a project depends on, which projects share the same files. The ground truth sits in `sessions.db` (`tool_call_state` records every tool call), and devin-graph turns it into a local graph database (`graph.db`) with canned queries and a D3-friendly JSON export. Edges come from tool-call payloads, not prose: `file_touched` edges are extracted from file paths in fs/terminal calls anchored to each session's working directory. Fully local and read-only on Devin's stores. Unofficial community tooling, not affiliated with Cognition AI.
+
+## Docs
+
+- [README](https://github.com/Icaro0310/devin-graph/blob/main/README.md): full documentation
+- [docs/SPEC.md](https://github.com/Icaro0310/devin-graph/blob/main/docs/SPEC.md): the graph model
+
+## Key commands
+
+- `pipx install "devin-graph @ git+https://github.com/Icaro0310/devin-graph.git"`: install (Python >= 3.10)
+- `devin-graph build --graph graph.db`: build the graph (auto-detects sessions.db; re-runs skip unchanged sessions)
+- `devin-graph query file "src/app.py" --graph graph.db`: which sessions touched a file
+- `devin-graph query tool "execute" --graph graph.db`: sessions/projects using a tool
+- `devin-graph query project "my-repo" --graph graph.db`: everything about a project
+- `devin-graph query projects-graph --graph graph.db --json`: project-to-project edges via shared files
+- `devin-graph export --format json --graph graph.db --out graph.json`: D3-friendly {"meta", "nodes", "edges"} dump
+- `python -m pytest`: test suite
+
+## When to use / when not
+
+- Use when: you need cross-session relationship queries ("which sessions touched file X?", "which projects share files?"); you want a graph export to visualize agent activity; you need ground-truth edges from actual tool calls rather than heuristics over text.
+- Not when: you need a code index or symbol/AST knowledge (nodes are files the agent touched, not repo contents); you need message-content search (use devin-search) or usage/cost metrics (use devin-metrics); you need GUI/acp-messages sessions in the graph (M1 covers CLI sessions only); your sessions.db schema is outside v15-v17.
+
+## Related
+
+- [devin-ecosystem](https://icaro0310.github.io/): the tool ecosystem this belongs to
+- [devin-internals-spec](https://github.com/Icaro0310/devin-internals-spec): the schema and typed parsers this builds on
+- [devin-history](https://github.com/Icaro0310/devin-history): exports the same store without cross-session structure

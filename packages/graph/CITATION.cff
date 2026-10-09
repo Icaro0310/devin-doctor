@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: devin-graph
+authors:
+  - family-names: Galvao
+    given-names: Icaro
+url: "https://github.com/Icaro0310/devin-graph"
+repository-code: "https://github.com/Icaro0310/devin-graph"
+license: MIT
+abstract: "A knowledge graph over Devin sessions: sessions, projects, files, and tools as queryable nodes with edges extracted from tool-call payloads, plus a D3-friendly JSON export."
+keywords: [devin, knowledge-graph, sqlite, agent-sessions, cli, graph-analysis]

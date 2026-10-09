@@ -1,27 +1,22 @@
+# Workspace root — not itself a published package. Members live in
+# packages/* (doctor, history, search, graph, pm).
+
+[project]
+name = "devin-explore"
+version = "0.0.0"
+description = "Monorepo workspace for the devin-explore product: doctor, history, search, graph, pm."
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
-
-[project]
-name = "devin-doctor"
-version = "0.1.0"
-description = "Diagnose a Devin Desktop installation: stores, schema versions, hooks, MCP servers, disk usage — with fix suggestions."
-readme = "README.md"
-license = { text = "MIT" }
-requires-python = ">=3.10"
-authors = [{ name = "Icaro0310" }]
-dependencies = [
-  "devin-internals-spec>=0.3.0,<0.4.0",
-]
-
-[project.optional-dependencies]
-dev = ["pytest>=8"]
-
-[project.scripts]
-devin-doctor = "devin_doctor.cli:main"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
