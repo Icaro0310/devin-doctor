@@ -139,7 +139,7 @@ format, Obsidian itself is not required.
 One caution for restricted machines: exports contain raw prompts, paths and
 commands, which may include secrets. Keep the export folder private, define a
 retention rule, and run
-[`devin-redact`](https://github.com/Icaro0310/devin-redact) before sharing an
+[`devin-redact`](https://github.com/Icaro0310/devin-state) before sharing an
 export.
 
 ## Platform support
