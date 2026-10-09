@@ -25,7 +25,6 @@ import json
 import socket
 
 import pytest
-
 from conftest import add_acp_db, add_session, msg
 from devin_search.cli import main
 

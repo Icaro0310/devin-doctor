@@ -1,10 +1,9 @@
 import hashlib
 import json
 
+from conftest import add_session, msg
 from devin_history.export import export_sessions
 from devin_internals.parsers import SessionsStore
-
-from conftest import add_session, msg
 
 
 def _sha256(path):

@@ -10,13 +10,12 @@ import sqlite3
 from pathlib import Path
 
 import pytest
+from devin_doctor.model import Context
 from devin_internals.fixtures import (
     _BASE_TS_MS,
     create_devin_data_dir,
     create_sessions_db,
 )
-
-from devin_doctor.model import Context
 
 
 @pytest.fixture(autouse=True)

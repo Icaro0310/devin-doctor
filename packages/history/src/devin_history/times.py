@@ -6,12 +6,12 @@ A tolerance band keeps legacy/second-precision data renderable: any value
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 _MS_THRESHOLD = 1e11
 
 
-def to_seconds(ts: int | float | None) -> float:
+def to_seconds(ts: float | None) -> float:
     """Normalize an epoch value (s or ms) to seconds."""
     if not ts:
         return 0.0
@@ -19,14 +19,14 @@ def to_seconds(ts: int | float | None) -> float:
     return ts / 1000.0 if ts >= _MS_THRESHOLD else ts
 
 
-def fmt_ts(ts: int | float | None, fmt: str = "%Y-%m-%d %H:%M") -> str:
+def fmt_ts(ts: float | None, fmt: str = "%Y-%m-%d %H:%M") -> str:
     """Human-readable local time for an epoch s/ms value; "" when unset."""
     if not ts:
         return ""
-    return datetime.fromtimestamp(to_seconds(ts)).strftime(fmt)
+    return datetime.fromtimestamp(to_seconds(ts), tz=timezone.utc).astimezone().strftime(fmt)
 
 
-def duration_minutes(start: int | float | None, end: int | float | None) -> float:
+def duration_minutes(start: float | None, end: float | None) -> float:
     """Minutes between two epoch values in the same unit."""
     if not start or not end:
         return 0.0

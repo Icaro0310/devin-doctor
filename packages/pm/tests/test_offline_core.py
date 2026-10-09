@@ -26,7 +26,6 @@ import json
 import socket
 
 import pytest
-
 from devin_pm.cli import main
 
 

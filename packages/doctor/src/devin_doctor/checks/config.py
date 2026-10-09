@@ -10,9 +10,10 @@ cwd" case.
 from __future__ import annotations
 
 import json
-import tomllib
 from pathlib import Path
 from typing import Any
+
+import tomllib
 
 from devin_doctor.model import Context, Finding, Status
 from devin_doctor.paths import (

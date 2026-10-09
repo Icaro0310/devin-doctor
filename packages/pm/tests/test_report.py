@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timezone
 
 import pytest
-
+from conftest import BASE_TS_MS
 from devin_pm.milestones import collect_milestones
 from devin_pm.projects import group_sessions, load_sessions
 from devin_pm.report import (
@@ -14,8 +14,6 @@ from devin_pm.report import (
     render_project_report,
     render_status_table,
 )
-
-from conftest import BASE_TS_MS
 
 
 def _d(offset_ms: int = 0) -> str:

@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import html
 import json
-import random
 from pathlib import Path
 from typing import Any
 
@@ -107,7 +106,6 @@ def render_view(export: dict[str, Any], *, limit: int = 500,
         for e in edges:
             degree[e["source"]] = degree.get(e["source"], 0) + 1
             degree[e["target"]] = degree.get(e["target"], 0) + 1
-        rng = random.Random(seed)
         keep = {n["id"] for n in sorted(
             nodes, key=lambda n: -degree.get(n["id"], 0))[:limit]}
         nodes = [n for n in nodes if n["id"] in keep]

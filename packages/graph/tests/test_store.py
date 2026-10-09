@@ -3,11 +3,9 @@
 import json
 import sqlite3
 
-from devin_internals.parsers import SessionsStore
-
-from devin_graph.store import GraphStore
-
 from conftest import ALPHA, BETA, add_tool_call, bump_last_activity, delete_session
+from devin_graph.store import GraphStore
+from devin_internals.parsers import SessionsStore
 
 EXPECTED_NODE_COUNTS = {
     "session": 3, "project": 2, "tool": 4, "tool_call": 6, "file": 5}

@@ -11,11 +11,14 @@ dependencies = []
 [tool.uv]
 package = false
 
+[tool.ruff]
+extend-exclude = ["packages/history/legacy"]
+
 [tool.uv.workspace]
 members = ["packages/*"]
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "ruff>=0.6"]
 
 [build-system]
 requires = ["setuptools>=68"]

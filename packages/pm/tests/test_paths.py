@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from conftest import insert_session
-
 from devin_pm.paths import normalize_path
 from devin_pm.projects import group_sessions, load_sessions
 from devin_pm.vscdb import GuiSession

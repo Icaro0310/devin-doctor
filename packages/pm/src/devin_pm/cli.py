@@ -23,8 +23,8 @@ import argparse
 import json
 import sqlite3
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from devin_internals.parsers import Session, SessionsStore
 from devin_internals.schema import SchemaError
@@ -41,18 +41,20 @@ from devin_pm.projects import (
     group_sessions,
 )
 from devin_pm.registry import build_registry, write_registry
-from devin_pm.verify import (
-    RegistryError,
-    default_registry,
-    projects_from_pm_registry,
-    render_text as render_verify_text,
-    verify,
-)
 from devin_pm.report import (
     ms_to_iso,
     render_global_report,
     render_project_report,
     render_status_table,
+)
+from devin_pm.verify import (
+    RegistryError,
+    default_registry,
+    projects_from_pm_registry,
+    verify,
+)
+from devin_pm.verify import (
+    render_text as render_verify_text,
 )
 from devin_pm.vscdb import (
     default_state_vscdb,

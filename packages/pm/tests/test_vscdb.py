@@ -6,7 +6,6 @@ import json
 
 import pytest
 from conftest import create_state_vscdb, insert_vscdb_key
-
 from devin_pm.cli import main
 from devin_pm.projects import group_sessions, load_sessions
 from devin_pm.vscdb import (
@@ -77,14 +76,16 @@ def test_key_without_backend_skipped(tmp_path):
 
 
 def test_load_missing_file(tmp_path):
-    with pytest.raises(Exception):
+    from devin_internals.schema import SchemaDetectionError
+    with pytest.raises(SchemaDetectionError):
         load_gui_sessions(tmp_path / "nope.vscdb")
 
 
 def test_load_not_a_vscdb(tmp_path):
     junk = tmp_path / "state.vscdb"
     junk.write_bytes(b"junk")
-    with pytest.raises(Exception):
+    import sqlite3
+    with pytest.raises(sqlite3.DatabaseError):
         load_gui_sessions(junk)
 
 

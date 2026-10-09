@@ -2,7 +2,6 @@
 the opt-in --probe-network flag."""
 
 import json
-import os
 import sys
 
 from devin_doctor import capabilities

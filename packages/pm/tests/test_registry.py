@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from devin_pm.milestones import collect_milestones
 from devin_pm.projects import group_sessions, load_sessions
 from devin_pm.registry import build_registry, write_registry

@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 
 import pytest
-
 from devin_pm.milestones import (
     MilestonesError,
     collect_milestones,

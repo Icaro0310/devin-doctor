@@ -1,13 +1,11 @@
 import csv
-import json
 import sqlite3
 
 import pytest
+from conftest import BASE_MS, add_session, msg
 from devin_history.audit import audit_store, classify_task, redact
 from devin_history.format import audit_to_dict, audit_to_markdown, write_audit_csv
 from devin_internals.parsers import SessionsStore
-
-from conftest import BASE_MS, add_session, msg
 
 
 def test_audit_rows_cover_all_sessions(store):

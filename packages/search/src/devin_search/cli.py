@@ -10,13 +10,13 @@ from pathlib import Path
 from devin_internals import SchemaError
 
 from devin_search import __version__
-from devin_search.history import attach_history_notes
 from devin_search.fmt import (
     hits_table,
     hits_to_dicts,
     stats_line,
     stats_to_dict,
 )
+from devin_search.history import attach_history_notes
 from devin_search.index import build_index
 from devin_search.paths import (
     default_acp_dir,

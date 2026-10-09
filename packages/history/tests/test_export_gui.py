@@ -3,13 +3,12 @@ import json
 import sqlite3
 
 import pytest
+from conftest import BASE_MS, create_vscdb, gui_items
 from devin_history.cli import main
 from devin_history.export import export_gui_sessions
 from devin_history.paths import default_state_vscdb, state_vscdb_candidates
 from devin_history.vscdb import gui_sessions
 from devin_internals.parsers import StateVscdbStore
-
-from conftest import BASE_MS, create_vscdb, gui_items
 
 
 def _sha256(path):
@@ -259,8 +258,8 @@ def test_export_only_session_no_match(tmp_path, store):
 def test_from_hook_stdin(tmp_path, store, monkeypatch, capsys):
     import io
     import json
-    import shutil
     import sys
+
     from devin_history.cli import main
     s = store.sessions()[0]
     fake = io.StringIO(json.dumps({"session_id": s.id}))

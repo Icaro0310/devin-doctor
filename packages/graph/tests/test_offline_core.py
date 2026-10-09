@@ -25,7 +25,6 @@ import json
 import socket
 
 import pytest
-
 from devin_graph.cli import main
 
 

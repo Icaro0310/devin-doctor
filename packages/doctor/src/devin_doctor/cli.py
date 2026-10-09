@@ -14,8 +14,8 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from devin_doctor import capabilities, doctor
 from devin_doctor.model import Context

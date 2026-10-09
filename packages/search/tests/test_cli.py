@@ -1,8 +1,7 @@
 import json
 
-from devin_search.cli import main
-
 from conftest import add_acp_db, add_session, msg
+from devin_search.cli import main
 
 
 def test_index_then_query_end_to_end(db_path, acp_dir, tmp_path, capsys):

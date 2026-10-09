@@ -10,20 +10,17 @@ from pathlib import Path
 from devin_internals import SchemaError
 from devin_internals.parsers import SessionsStore
 
-from devin_graph.paths import default_state_vscdb
-from devin_graph.vscdb import extract_vscdb
-
 from devin_graph import __version__
-from devin_graph.paths import default_sessions_db
+from devin_graph.paths import default_sessions_db, default_state_vscdb
 from devin_graph.query import (
     project_detail,
     projects_graph,
     sessions_for_file,
     sessions_for_tool,
     shared_files,
-    tools_for_project,
 )
 from devin_graph.store import GraphStore
+from devin_graph.vscdb import extract_vscdb
 
 DEFAULT_GRAPH = "graph.db"
 

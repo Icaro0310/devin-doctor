@@ -97,7 +97,7 @@ class GraphStore:
     def close(self) -> None:
         self._con.close()
 
-    def __enter__(self) -> "GraphStore":
+    def __enter__(self) -> GraphStore:  # noqa: PYI034 - Self needs py3.11, floor is 3.10
         return self
 
     def __exit__(self, *exc: object) -> None:
@@ -163,7 +163,7 @@ class GraphStore:
     # -- build ---------------------------------------------------------------
 
     def build(self, sessions_store,
-              extras: list[tuple[str, "Extraction"]] | None = None
+              extras: list[tuple[str, Extraction]] | None = None
               ) -> BuildResult:
         """Incrementally (re)extract every session in ``sessions_store``.
 

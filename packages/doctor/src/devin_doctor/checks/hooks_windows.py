@@ -18,8 +18,9 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 from devin_doctor.checks.config import _load_jsonc
 from devin_doctor.model import Context, Finding, Status
@@ -64,15 +65,15 @@ def console_window_issues(command: str) -> list[tuple[str, str]]:
         issues.append(
             (
                 "cmd /c|/k without a hidden wrapper pops a console window on Windows",
-                "wrap it: 'cmd /c start /min \"\" <command>' or move the payload "
-                "behind 'powershell -WindowStyle Hidden'",
+                ("wrap it: 'cmd /c start /min \"\" <command>' or move the payload "
+                 "behind 'powershell -WindowStyle Hidden'"),
             )
         )
     if _RE_POWERSHELL.search(command) and not _RE_WINDOW_STYLE.search(command):
         issues.append(
             (
-                "powershell/pwsh without '-WindowStyle Hidden' pops a console "
-                "window on Windows",
+                ("powershell/pwsh without '-WindowStyle Hidden' pops a console "
+                 "window on Windows"),
                 "add '-NoProfile -WindowStyle Hidden' to the invocation",
             )
         )
@@ -80,16 +81,16 @@ def console_window_issues(command: str) -> list[tuple[str, str]]:
         issues.append(
             (
                 "'python*.exe' pops a console window on Windows",
-                "use 'pythonw.exe' (no console) for hooks that run without a "
-                "terminal",
+                ("use 'pythonw.exe' (no console) for hooks that run without a "
+                 "terminal"),
             )
         )
     if _RE_BATCH_FILE.search(command) and not hidden:
         issues.append(
             (
                 "direct .bat/.cmd invocation opens a console window on Windows",
-                "wrap it: 'cmd /c start /min \"\" <script>.bat' or call it from "
-                "'powershell -WindowStyle Hidden'",
+                ("wrap it: 'cmd /c start /min \"\" <script>.bat' or call it from "
+                 "'powershell -WindowStyle Hidden'"),
             )
         )
     if (
@@ -100,8 +101,8 @@ def console_window_issues(command: str) -> list[tuple[str, str]]:
         issues.append(
             (
                 "direct .ps1 invocation opens a console window on Windows",
-                "run it via 'powershell -NoProfile -WindowStyle Hidden -File "
-                "<script>.ps1'",
+                ("run it via 'powershell -NoProfile -WindowStyle Hidden -File "
+                 "<script>.ps1'"),
             )
         )
     return issues

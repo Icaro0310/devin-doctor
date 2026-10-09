@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
 from datetime import datetime, timezone
-from typing import Iterable, Mapping
 
 from devin_pm.milestones import Milestone, done_fraction
 from devin_pm.projects import Project, extract_cost
@@ -135,9 +135,9 @@ def render_global_report(
     lines = [
         "# devin-pm status report",
         "",
-        f"_{len(projects)} projects, "
-        f"{sum(p.session_count for p in projects)} sessions, generated "
-        f"{datetime.now(tz=timezone.utc).strftime('%Y-%m-%d')}_",
+        (f"_{len(projects)} projects, "
+         f"{sum(p.session_count for p in projects)} sessions, generated "
+         f"{datetime.now(tz=timezone.utc).strftime('%Y-%m-%d')}_"),
     ]
     for project in projects:
         lines += [

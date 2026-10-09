@@ -54,7 +54,7 @@ def exported_mtime(path: Path) -> int | None:
         return None
     try:
         head = path.read_text(encoding="utf-8")[:800]
-        m = re.search(r"^last_activity:\s*(\d+)", head, re.M)
+        m = re.search(r"^last_activity:\s*(\d+)", head, re.MULTILINE)
         return int(m.group(1)) if m else -1
     except OSError:
         return -1
@@ -258,7 +258,7 @@ def export_gui(dry: bool, force: bool, index: list) -> tuple:
             else:
                 fpath.write_text(body, encoding="utf-8")
             written += 1
-            title = re.search(r"^# (.+)$", body, re.M).group(1)
+            title = re.search(r"^# (.+)$", body, re.MULTILINE).group(1)
             index.append((date, fname, title, "GUI"))
         except (OSError, sqlite3.Error):
             skipped += 1
