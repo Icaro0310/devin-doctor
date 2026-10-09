@@ -103,5 +103,56 @@ def test_default_sessions_db_windows_appdata(monkeypatch, tmp_path):
     assert default_sessions_db() == expected
 
 
+def test_default_sessions_db_linux_falls_back_to_config_home(
+    monkeypatch, tmp_path
+):
+    import sys
+
+    monkeypatch.delenv("DEVIN_PM_SESSIONS_DB", raising=False)
+    monkeypatch.setattr(sys, "platform", "linux")
+    data_home = tmp_path / "data"
+    config_home = tmp_path / "config"
+    monkeypatch.setenv("XDG_DATA_HOME", str(data_home))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(config_home))
+    monkeypatch.setenv("HOME", str(tmp_path / "homeless"))
+    db = config_home / "devin" / "cli" / "sessions.db"
+    db.parent.mkdir(parents=True)
+    db.touch()
+    assert default_sessions_db() == db
+
+
+def test_default_sessions_db_linux_prefers_data_home(monkeypatch, tmp_path):
+    import sys
+
+    monkeypatch.delenv("DEVIN_PM_SESSIONS_DB", raising=False)
+    monkeypatch.setattr(sys, "platform", "linux")
+    data_home = tmp_path / "data"
+    config_home = tmp_path / "config"
+    monkeypatch.setenv("XDG_DATA_HOME", str(data_home))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(config_home))
+    monkeypatch.setenv("HOME", str(tmp_path / "homeless"))
+    for root in (data_home, config_home):
+        db = root / "devin" / "cli" / "sessions.db"
+        db.parent.mkdir(parents=True)
+        db.touch()
+    assert default_sessions_db() == data_home / "devin" / "cli" / "sessions.db"
+
+
+def test_default_sessions_db_linux_returns_primary_when_missing(
+    monkeypatch, tmp_path
+):
+    import sys
+
+    monkeypatch.delenv("DEVIN_PM_SESSIONS_DB", raising=False)
+    monkeypatch.setattr(sys, "platform", "linux")
+    data_home = tmp_path / "data"
+    monkeypatch.setenv("XDG_DATA_HOME", str(data_home))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    monkeypatch.setenv("HOME", str(tmp_path / "homeless"))
+    assert (
+        default_sessions_db() == data_home / "devin" / "cli" / "sessions.db"
+    )
+
+
 def test_group_empty():
     assert group_sessions([]) == []
