@@ -2,18 +2,18 @@
 
 <img src="assets/banner.svg" alt="devin-doctor" width="100%"/>
 
-<a href="https://github.com/Icaro0310/devin-doctor/actions/workflows/ci.yml"><img src="https://github.com/Icaro0310/devin-doctor/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
-<a href="https://github.com/Icaro0310/devin-doctor/releases"><img src="https://img.shields.io/github/v/release/Icaro0310/devin-doctor" alt="GitHub release"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/actions/workflows/ci.yml"><img src="https://github.com/Icaro0310/devin-explore/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/releases"><img src="https://img.shields.io/github/v/release/Icaro0310/devin-explore" alt="GitHub release"/></a>
 <a href="https://pypi.org/project/devin-doctor/"><img src="https://img.shields.io/pypi/v/devin-doctor" alt="PyPI"/></a>
-<a href="https://scorecard.dev/viewer/?uri=github.com/Icaro0310/devin-doctor"><img src="https://api.scorecard.dev/projects/github.com/Icaro0310/devin-doctor/badge" alt="OpenSSF Scorecard"/></a>
+<a href="https://scorecard.dev/viewer/?uri=github.com/Icaro0310/devin-explore"><img src="https://api.scorecard.dev/projects/github.com/Icaro0310/devin-explore/badge" alt="OpenSSF Scorecard"/></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"/></a>
 
 
 <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+"/></a>
-<a href="https://github.com/Icaro0310/devin-doctor"><img src="https://img.shields.io/github/stars/Icaro0310/devin-doctor" alt="GitHub stars"/></a>
-<a href="https://github.com/Icaro0310/devin-doctor/commits/main"><img src="https://img.shields.io/github/last-commit/Icaro0310/devin-doctor" alt="Last commit"/></a>
+<a href="https://github.com/Icaro0310/devin-explore"><img src="https://img.shields.io/github/stars/Icaro0310/devin-explore" alt="GitHub stars"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/commits/main"><img src="https://img.shields.io/github/last-commit/Icaro0310/devin-explore" alt="Last commit"/></a>
 <a href="https://github.com/Icaro0310/awesome-devin"><img src="https://img.shields.io/badge/part%20of-devin--*-ecosystem-7c3aed" alt="devin-* ecosystem"/></a>
-<a href="https://github.com/Icaro0310/devin-doctor/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"/></a>
+<a href="https://github.com/Icaro0310/devin-explore/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs welcome"/></a>
 </div>
 
 <!-- DEVIN-ECO:BEGIN -->
@@ -27,6 +27,8 @@
 
 
 # devin-doctor
+
+> **Renamed (Oct 2026):** this repository moved from `Icaro0310/devin-doctor` to `Icaro0310/devin-explore`. The PyPI package and console script stay `devin-doctor`; stars, issues and history are preserved by the redirect.
 
 > **Unofficial community project.** Not affiliated with, endorsed by, or
 > sponsored by Cognition AI. "Devin" is a trademark of Cognition AI.

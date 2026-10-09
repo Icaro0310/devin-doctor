@@ -5,8 +5,8 @@ title: devin-doctor
 authors:
   - family-names: Galvao
     given-names: Icaro
-url: "https://github.com/Icaro0310/devin-doctor"
-repository-code: "https://github.com/Icaro0310/devin-doctor"
+url: "https://github.com/Icaro0310/devin-explore"
+repository-code: "https://github.com/Icaro0310/devin-explore"
 license: MIT
 abstract: "Read-only diagnostics CLI for a Devin Desktop installation: checks stores, schema versions, config and disk usage, with fix suggestions."
 keywords:

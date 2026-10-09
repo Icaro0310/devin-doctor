@@ -28,7 +28,7 @@ def run_all(ctx: Context) -> Report:
                     Status.FAIL,
                     f"check crashed: {exc!r}",
                     fix="Report a bug at "
-                    "https://github.com/Icaro0310/devin-doctor/issues",
+                    "https://github.com/Icaro0310/devin-explore/issues",
                 )
             )
     return report
