@@ -4,7 +4,6 @@
 
 <a href="https://github.com/Icaro0310/devin-explore/actions/workflows/test-graph.yml"><img src="https://github.com/Icaro0310/devin-explore/actions/workflows/test-graph.yml/badge.svg" alt="ci"/></a>
 
-
 <a href="https://scorecard.dev/viewer/?uri=github.com/Icaro0310/devin-graph"><img src="https://api.scorecard.dev/projects/github.com/Icaro0310/devin-graph/badge" alt="OpenSSF Scorecard"/></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"/></a>
 <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+"/></a>
@@ -20,7 +19,6 @@
 > For: Developers, AI engineers  
 > Interface: CLI / Python library
 <!-- DEVIN-ECO:END -->
-
 
 # devin-graph
 
@@ -65,17 +63,6 @@ build. Schema drift is gated by `devin-internals-spec`'s version detector.
 
 Requires Python ≥ 3.10 and `pipx` or `uv`. Per-OS setup lives in the platform guides: [Linux](README.linux.md) · [Personal Windows](README.windows.md) · [Corporate Windows](README.corporate-windows.md).
 
-<!-- DIST-STATUS:BEGIN — generated from devin-powerups/registry.json -->
-> **Source-only distribution.** This tool is not yet published to PyPI.
-> Install from source:
->
-> ```bash
-> pipx install git+https://github.com/Icaro0310/devin-explore.git#subdirectory=packages/graph
-> # or
-> uv tool install git+https://github.com/Icaro0310/devin-explore.git#subdirectory=packages/graph
-> ```
-<!-- DIST-STATUS:END -->
-
 ## Usage
 
 ```bash
@@ -115,12 +102,9 @@ Windows and `$XDG_DATA_HOME/devin/cli/sessions.db` on Linux (default
 `~/.local/share/devin/cli/sessions.db`). A legacy `~/.config/devin` location
 is also checked. Pass `--sessions-db` to override.
 
-
 `commit` nodes + `produced`/`referenced` edges attribute sessions to git SHAs seen in tool calls (exact when the SHA appears in a `git commit`/`git push` call, `seen` otherwise). `devin-graph sql "SELECT ..."` runs read-only SQL over graph.db (SELECT/WITH only, `query_only` pragma).
 
-
 `--vscdb` (auto-detected on build) adds GUI coverage: `gui_session` nodes keyed by the generated session slug, `gui_workspace` edges to their workspace project, enriched with `lastAccessed` when a `resourceToSpace` editor URI links a space to the slug. Best-effort: only the observed `windsurfSpace.*` keys are read; unknown/malformed keys are skipped. Pass `--vscdb none` to disable.
-
 
 `devin-graph view --out file.html` renders the graph as a self-contained HTML page (embedded JSON + vanilla-JS force layout — zero CDN, works fully offline). `--limit` caps nodes (highest-degree kept, flagged TRUNCATED in the header).
 
