@@ -69,14 +69,28 @@ def test_do_capabilities_matches_cli(tmp_path, capsys):
     assert out == expected
 
 
-def test_build_server_registers_doctor_check():
+def test_build_server_registers_both_tools():
+    """Both adapters must reach the MCP surface — a silent registration
+    miss would leave the skill calling a tool that does not exist."""
     pytest.importorskip("mcp")
-    server = __import__(
-        "devin_doctor.mcp_server", fromlist=["build_server"]
-    ).build_server()
-    tools = getattr(server, "_tool_manager", None) or getattr(
-        server, "tools", None)
-    assert tools is not None
+    import asyncio
+    import inspect
+
+    from devin_doctor.mcp_server import build_server
+
+    server = build_server()
+    list_tools = getattr(server, "list_tools", None)
+    if callable(list_tools):
+        tools = list_tools()
+        if inspect.isawaitable(tools):
+            tools = asyncio.run(tools)
+        names = {getattr(t, "name", t) for t in tools}
+    else:  # tool-manager internals differ across SDK versions
+        manager = getattr(server, "_tool_manager", None) or getattr(
+            server, "tools", None)
+        assert manager is not None
+        names = set(getattr(manager, "_tools", manager))
+    assert {"doctor_check", "doctor_capabilities"} <= names
 
 
 def test_server_entrypoint_in_pyproject():

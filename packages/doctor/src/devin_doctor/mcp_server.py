@@ -35,11 +35,13 @@ def do_check(
     Mirrors the CLI's resolution order exactly: an explicit ``data_dir``
     wins, the platform default is the fallback, and ``config_dir``
     defaults to the platform location only when ``data_dir`` was not
-    overridden (same rule as the CLI). ``offline`` sets
-    ``DEVIN_DOCTOR_OFFLINE`` for the duration of the run — it skips the
-    updates check's network fetch and PATH probes, which can stall an
-    MCP call for seconds. ``now_ms`` is injectable so tests can pin
-    "today" — neither is exposed through the MCP tool.
+    overridden (same rule as the CLI). ``offline`` is scoped to this
+    call through ``Context.offline`` — it never touches
+    ``DEVIN_DOCTOR_OFFLINE``/``os.environ``, so concurrent online calls
+    are unaffected — and skips the updates check's network fetch and
+    PATH probes, which can stall an MCP call for seconds. ``now_ms``
+    is injectable so tests can pin "today"; unlike ``offline`` it is
+    not exposed through the MCP tool.
     """
     ctx = Context(
         data_dir=Path(data_dir) if data_dir else default_data_dir(),
@@ -129,21 +131,15 @@ def build_server():
             return _err(error)
 
     @server.tool()
-    def doctor_capabilities(
-        config_dir: str = "",
-        probe_network: bool = False,
-    ) -> dict:
+    def doctor_capabilities(config_dir: str = "") -> dict:
         """Report what this machine can do for the Devin ecosystem —
         scheduler/daemon/net capability profile, same JSON as
-        ``devin-doctor capabilities``. Read-only; ``probe_network=True``
-        performs exactly one outbound connect (2 s) plus a loopback bind,
-        the only network access this tool can make.
+        ``devin-doctor capabilities``. Read-only and local-only: the
+        CLI's ``--probe-network`` flag is deliberately not exposed, so
+        this tool never makes a network call.
         """
         try:
-            return do_capabilities(
-                config_dir=config_dir or None,
-                probe_network=probe_network,
-            )
+            return do_capabilities(config_dir=config_dir or None)
         except Exception as error:  # noqa: BLE001 — tool boundary must not raise
             return _err(error)
 
