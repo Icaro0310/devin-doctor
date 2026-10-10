@@ -33,9 +33,12 @@ QUERY_TYPES = ("file", "tool", "project", "projects-graph", "shared-files")
 def do_query(query_type: str, target: str = "", graph: str = "") -> dict:
     """Run one canned graph query; return its ``--json`` payload as a dict.
 
-    ``graph.db`` must already exist — :class:`GraphStore` creates the
-    file on open, so the missing-file case (the CLI's exit-2) is checked
-    *before* opening and maps to ``{"error": "no_graph"}``.
+    ``graph.db`` must already exist — the read-write
+    :class:`GraphStore` creates the file on open, so the missing-file
+    case (the CLI's exit-2) is checked *before* opening and maps to
+    ``{"error": "no_graph"}``. The store is then opened read-only
+    (``mode=ro`` + ``query_only``): no schema DDL, no repair of an
+    incomplete schema.
     """
     path = Path(graph or DEFAULT_GRAPH).expanduser()
     if not path.exists():
@@ -44,7 +47,7 @@ def do_query(query_type: str, target: str = "", graph: str = "") -> dict:
             "detail": f"{path}: no such graph file — "
             "run `devin-graph build` first",
         }
-    with GraphStore(path) as gs:
+    with GraphStore(path, readonly=True) as gs:
         if query_type == "file":
             return sessions_for_file(gs, target)
         if query_type == "tool":

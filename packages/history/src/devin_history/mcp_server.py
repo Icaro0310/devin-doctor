@@ -54,8 +54,13 @@ def _open_store(sessions_db: str | None):
         return None, _bad_store(str(exc))
 
 
-def do_list(sessions_db: str | None = None, limit: int = 20) -> dict:
-    """Return the ``devin-history list --json`` payload as a dict."""
+def do_list(
+    sessions_db: str | None = None, limit: int | None = None
+) -> dict:
+    """Return the ``devin-history list --json`` payload as a dict.
+
+    ``limit`` mirrors the CLI's ``--limit``: unset means every session,
+    not a page cap."""
     store, err = _open_store(sessions_db)
     if err is not None:
         return err
@@ -129,11 +134,14 @@ def build_server():
     server = _make_app("devin-history")
 
     @server.tool()
-    def history_list(sessions_db: str = "", limit: int = 20) -> dict:
+    def history_list(
+        sessions_db: str = "", limit: int | None = None
+    ) -> dict:
         """List Devin sessions, most recent first — the same JSON as
         ``devin-history list --json``. Read-only: the store is opened
         read-only and never modified. ``sessions_db`` overrides the
-        auto-detected path."""
+        auto-detected path; ``limit`` caps the count (default: all,
+        like the CLI)."""
         try:
             return do_list(sessions_db=sessions_db or None, limit=limit)
         except Exception as error:  # noqa: BLE001 — tool boundary must not raise

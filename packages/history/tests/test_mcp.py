@@ -13,7 +13,7 @@ from devin_internals.fixtures import create_sessions_db
 def test_do_list_matches_cli_json(db_path, capsys):
     """The adapter returns exactly what `devin-history list --json` prints."""
     assert main(
-        ["list", "--sessions-db", str(db_path), "--limit", "20", "--json"]
+        ["list", "--sessions-db", str(db_path), "--json"]
     ) == 0
     expected = json.loads(capsys.readouterr().out)
     assert do_list(sessions_db=str(db_path)) == expected

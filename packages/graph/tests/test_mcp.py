@@ -61,6 +61,31 @@ def test_do_query_unknown_type(graph):
     assert out["error"] == "bad_query"
 
 
+def test_do_query_never_mutates_existing_graph(tmp_path):
+    """An existing db with an incomplete schema is reported, not silently
+    repaired — the query path opens mode=ro and runs no schema DDL."""
+    import sqlite3
+
+    g = tmp_path / "graph.db"
+    con = sqlite3.connect(g)
+    con.execute("CREATE TABLE nodes (id TEXT PRIMARY KEY)")
+    con.commit()
+    con.close()
+
+    # missing edges table: the query fails instead of the open creating it
+    with pytest.raises(sqlite3.OperationalError):
+        do_query("projects-graph", graph=str(g))
+
+    con = sqlite3.connect(f"file:{g}?mode=ro", uri=True)
+    tables = {
+        r[0]
+        for r in con.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table'")
+    }
+    con.close()
+    assert tables == {"nodes"}
+
+
 def test_no_build_sql_view_surface():
     """The adapter never references build/export/sql/view code paths."""
     import inspect
