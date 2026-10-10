@@ -16,8 +16,9 @@
 <!-- DEVIN-ECO:BEGIN -->
 > **Part of the [DEVIN ecosystem](https://github.com/Icaro0310/awesome-devin)**  
 > Track: Understand · Nature: product  
-> For: Developers, AI engineers  
-> Interface: CLI / Python library
+> For: Developers, AI engineers, Data Scientists  
+> Interface: CLI / Python library  
+> Path: Data Scientists · step 1/4 — before `devin-search`
 <!-- DEVIN-ECO:END -->
 
 # devin-graph

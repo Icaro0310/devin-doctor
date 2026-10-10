@@ -17,8 +17,9 @@
 <!-- DEVIN-ECO:BEGIN -->
 > **Part of the [DEVIN ecosystem](https://github.com/Icaro0310/awesome-devin)**  
 > Track: Understand · Nature: product  
-> For: Operations, Maintainers  
-> Interface: CLI / Registry
+> For: Local-first ops, Maintainers  
+> Interface: CLI / Registry  
+> Path: Local-first ops · step 2/5 — after `devin-explore`, before `devin-office`
 <!-- DEVIN-ECO:END -->
 
 

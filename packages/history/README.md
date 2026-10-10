@@ -18,8 +18,9 @@
 <!-- DEVIN-ECO:BEGIN -->
 > **Part of the [DEVIN ecosystem](https://github.com/Icaro0310/awesome-devin)**  
 > Track: Understand · Nature: product  
-> For: Operations, End users  
-> Interface: CLI
+> For: Local-first ops, End users, Data Scientists  
+> Interface: CLI  
+> Path: Data Scientists · step 3/4 — after `devin-search`, before `devin-metrics`
 <!-- DEVIN-ECO:END -->
 
 
