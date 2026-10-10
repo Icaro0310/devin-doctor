@@ -24,6 +24,13 @@ def test_do_list_limit(db_path):
     assert len(out["sessions"]) == 1
 
 
+def test_do_list_default_is_uncapped(tmp_path):
+    """The uncapped default returns every session, not just twenty."""
+    many = create_sessions_db(tmp_path / "many.db", n_sessions=25)
+    out = do_list(sessions_db=str(many))
+    assert len(out["sessions"]) == 25
+
+
 def test_do_export_dry_run_matches_cli_json(db_path, tmp_path, capsys):
     """dry_run gives exact payload parity: nothing written either side."""
     out = tmp_path / "dump"
