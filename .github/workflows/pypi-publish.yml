@@ -64,6 +64,9 @@ jobs:
         run: |
           ver=$(sed -n 's/^version = "\(.*\)"/\1/p' pyproject.toml)
           test -n "$ver"
+          # --no-deps is deliberate: the gate only verifies the wheel's
+          # __version__ metadata, and staying off the index keeps the check
+          # valid even when a sibling dependency release is not published yet.
           pip install --no-cache-dir --no-deps --target /tmp/verchk dist/*.whl
           VER="$ver" python -c "import importlib, os, sys; sys.path.insert(0, '/tmp/verchk'); m = importlib.import_module('$PKG'); assert getattr(m, '__version__', None) == os.environ['VER'], f'wheel __version__ {getattr(m, \"__version__\", None)} != pyproject {os.environ[\"VER\"]}'"
       - name: Upload to PyPI
