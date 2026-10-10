@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **CI** — `auto-approve` now re-runs the shared gate on
+  `pull_request_review[submitted]` and on the `Devin Review` commit
+  `status` success, so clean analyses and late reviews no longer strand
+  PRs in REVIEW_REQUIRED.
 - **Docs** — refreshed the generated `Part of the DEVIN ecosystem` block: journey recuration v2 (six paths, zero repeats, `Local-first ops` label, `devin-bridge` in DevOps).
 - **Docs** — ecosystem journey recuration applied (six curated audiences); stale `Path:` lines removed from the devin-doctor eco-block, which is not a registry entry.
 - **CI** — Ruff lint job added (`astral-sh/ruff-action`, pinned); `legacy/`
