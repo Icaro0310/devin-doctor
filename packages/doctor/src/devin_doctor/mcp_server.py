@@ -1,9 +1,10 @@
-"""devin-doctor as an MCP server: the ``check`` diagnosis exposed as a tool.
+"""devin-doctor as an MCP server: diagnosis + capabilities as tools.
 
-One tool, ``doctor_check`` — runs every check and returns the same JSON
-payload as ``devin-doctor check --json``. Read-only by construction:
-doctor has no auto-fix surface, so there is nothing mutating to expose
-(or to withhold).
+Two tools: ``doctor_check`` runs every check and returns the same JSON
+payload as ``devin-doctor check --json``; ``doctor_capabilities`` returns
+the same profile as ``devin-doctor capabilities``. Read-only by
+construction: doctor has no auto-fix surface, so there is nothing
+mutating to expose (or to withhold).
 
 The logic lives in :func:`do_check`, unit-testable without a running
 server or the ``mcp`` package. ``build_server()`` wraps it — needs the
@@ -40,20 +41,6 @@ def do_check(
     MCP call for seconds. ``now_ms`` is injectable so tests can pin
     "today" — neither is exposed through the MCP tool.
     """
-    if offline:
-        import os
-
-        prev = os.environ.get("DEVIN_DOCTOR_OFFLINE")
-        os.environ["DEVIN_DOCTOR_OFFLINE"] = "1"
-        try:
-            return do_check(data_dir, config_dir, cwd, stale_days,
-                            now_ms=now_ms)
-        finally:
-            if prev is None:
-                os.environ.pop("DEVIN_DOCTOR_OFFLINE", None)
-            else:
-                os.environ["DEVIN_DOCTOR_OFFLINE"] = prev
-
     ctx = Context(
         data_dir=Path(data_dir) if data_dir else default_data_dir(),
         cwd=Path(cwd) if cwd else Path.cwd(),
@@ -64,9 +51,27 @@ def do_check(
             if config_dir
             else default_config_dir() if data_dir is None else None
         ),
+        offline=offline,
     )
     report = doctor.run_all(ctx)
     return json.loads(doctor.render_json(report, ctx))
+
+
+def do_capabilities(
+    config_dir: str | None = None,
+    *,
+    probe_network: bool = False,
+) -> dict:
+    """The ``capabilities`` payload: what this machine can actually run —
+    scheduler/daemon/net probing with the corporate fail-closed default.
+    ``probe_network=True`` performs the same single outbound connect the
+    CLI documents; False keeps every probe local."""
+    from devin_doctor import capabilities
+
+    return capabilities.collect_profile(
+        config_dir=Path(config_dir) if config_dir else default_config_dir(),
+        probe_network=probe_network,
+    )
 
 
 def _err(error: Exception) -> dict:
@@ -119,6 +124,25 @@ def build_server():
                 cwd=cwd or None,
                 stale_days=stale_days,
                 offline=offline,
+            )
+        except Exception as error:  # noqa: BLE001 — tool boundary must not raise
+            return _err(error)
+
+    @server.tool()
+    def doctor_capabilities(
+        config_dir: str = "",
+        probe_network: bool = False,
+    ) -> dict:
+        """Report what this machine can do for the Devin ecosystem —
+        scheduler/daemon/net capability profile, same JSON as
+        ``devin-doctor capabilities``. Read-only; ``probe_network=True``
+        performs exactly one outbound connect (2 s) plus a loopback bind,
+        the only network access this tool can make.
+        """
+        try:
+            return do_capabilities(
+                config_dir=config_dir or None,
+                probe_network=probe_network,
             )
         except Exception as error:  # noqa: BLE001 — tool boundary must not raise
             return _err(error)

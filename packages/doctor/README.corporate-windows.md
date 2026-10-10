@@ -50,6 +50,20 @@ schtasks /create /tn "devin-explore" /tr "devin-doctor check" /sc daily /st 04:0
 User-scope `schtasks` needs no admin. If Group Policy disables Task Scheduler, run the command manually or use the tool's own `install` subcommand where available.
 
 
+
+## Adapters (MCP / Devin skill / plugin)
+
+- MCP server: `pip install 'devin-doctor[mcp]'` then run
+  `devin-doctor-mcp` (stdio). Read-only tools only.
+- Devin plugin + skill: `devin plugins install
+  Icaro0310/devin-explore#packages/doctor/adapters`. The manifest
+  launches the server through `uvx --from 'devin-doctor[mcp]'
+  devin-doctor-mcp`, which resolves once the matching PyPI release
+  ships. Until then, an editable install does not change what
+  `uvx --from` resolves — either run the source-installed
+  `devin-doctor-mcp` directly, or point a local manifest copy at the
+  checkout: `uvx --from './packages/doctor[mcp]' devin-doctor-mcp`.
+
 ## Troubleshooting
 
 - If a command is not found, reopen PowerShell and run `uv tool update-shell`.

@@ -5,7 +5,7 @@ import json
 
 import pytest
 from devin_doctor import doctor
-from devin_doctor.mcp_server import do_check
+from devin_doctor.mcp_server import do_capabilities, do_check
 
 
 def test_do_check_matches_cli_json(ctx, capsys):
@@ -39,6 +39,34 @@ def test_do_check_missing_dir_is_report_not_crash(tmp_path):
     # a missing data dir is a finding (FAIL), not an exception —
     # the tool boundary only returns {error, detail} for real failures.
     assert "error" not in out or out["overall"] in {"PASS", "WARN", "FAIL"}
+
+
+def test_do_check_offline_is_per_call_not_global(ctx, monkeypatch):
+    """offline=True must not leak through the process env: a concurrent
+    online call and any later call keep full probing."""
+    import os
+
+    monkeypatch.delenv("DEVIN_DOCTOR_OFFLINE", raising=False)
+    out = do_check(
+        data_dir=str(ctx.data_dir), cwd=str(ctx.cwd),
+        config_dir=str(ctx.config_dir) if ctx.config_dir else None,
+        offline=True, now_ms=ctx.now_ms,
+    )
+    updates = next(
+        f for f in out["findings"] if f["check"] == "updates")
+    assert "offline" in updates["message"]
+    assert "DEVIN_DOCTOR_OFFLINE" not in os.environ
+
+
+def test_do_capabilities_matches_cli(tmp_path, capsys):
+    from devin_doctor.cli import main
+
+    cfg = tmp_path / "cfg"
+    rc = main(["capabilities", "--config-dir", str(cfg)])
+    expected = json.loads(capsys.readouterr().out)
+    out = do_capabilities(config_dir=str(cfg))
+    assert rc == 0
+    assert out == expected
 
 
 def test_build_server_registers_doctor_check():

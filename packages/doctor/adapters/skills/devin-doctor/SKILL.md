@@ -11,14 +11,17 @@ allowed-tools:
 
 When the user reports a Devin installation error, corrupted stores, odd
 session behavior, or asks whether the environment is healthy, diagnose
-before guessing:
+before guessing: call the `doctor_check` MCP tool — it returns the same
+JSON payload as the CLI. When only the Python package is installed
+(no plugin/MCP connection), run it directly:
 
 ```bash
 devin-doctor check --json
 ```
 
-Or, when this plugin's MCP server is connected, call the `doctor_check`
-tool — it returns the same JSON payload.
+For a machine capability profile (scheduler/daemon/net), use the
+`doctor_capabilities` tool, or `devin-doctor capabilities` on a package
+install.
 
 ## Reading the result
 
