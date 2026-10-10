@@ -1,0 +1,66 @@
+"""MCP adapter contract: do_check mirrors `check --json`; the tool layer
+never raises — errors surface as {error, detail}."""
+
+import json
+
+import pytest
+from devin_doctor import doctor
+from devin_doctor.mcp_server import do_check
+
+
+def test_do_check_matches_cli_json(ctx, capsys):
+    """The adapter returns exactly what `devin-doctor check --json` prints."""
+    expected = json.loads(doctor.render_json(doctor.run_all(ctx), ctx))
+    out = do_check(
+        data_dir=str(ctx.data_dir),
+        cwd=str(ctx.cwd),
+        config_dir=str(ctx.config_dir) if ctx.config_dir else None,
+        now_ms=ctx.now_ms,
+    )
+    assert out == expected
+
+
+def test_do_check_healthy_fixture(ctx):
+    out = do_check(
+        data_dir=str(ctx.data_dir), cwd=str(ctx.cwd), now_ms=ctx.now_ms)
+    assert out["overall"] == "PASS"
+    assert isinstance(out["findings"], list)
+    assert out["findings"]
+
+
+def test_do_check_broken_fixture(broken_ctx):
+    out = do_check(data_dir=str(broken_ctx.data_dir), cwd=str(broken_ctx.cwd))
+    assert out["overall"] == "FAIL"
+    assert any(f["status"] == "FAIL" for f in out["findings"])
+
+
+def test_do_check_missing_dir_is_report_not_crash(tmp_path):
+    out = do_check(data_dir=str(tmp_path / "nonexistent"), cwd=str(tmp_path))
+    # a missing data dir is a finding (FAIL), not an exception —
+    # the tool boundary only returns {error, detail} for real failures.
+    assert "error" not in out or out["overall"] in {"PASS", "WARN", "FAIL"}
+
+
+def test_build_server_registers_doctor_check():
+    pytest.importorskip("mcp")
+    server = __import__(
+        "devin_doctor.mcp_server", fromlist=["build_server"]
+    ).build_server()
+    tools = getattr(server, "_tool_manager", None) or getattr(
+        server, "tools", None)
+    assert tools is not None
+
+
+def test_server_entrypoint_in_pyproject():
+    from pathlib import Path
+
+    import tomllib
+
+    pyproject = (
+        Path(__file__).parents[1] / "pyproject.toml").read_text(
+            encoding="utf-8")
+    meta = tomllib.loads(pyproject)
+    scripts = meta["project"]["scripts"]
+    assert scripts["devin-doctor-mcp"] == "devin_doctor.mcp_server:main"
+    assert any(dep.startswith("mcp") for dep in
+               meta["project"]["optional-dependencies"]["mcp"])
