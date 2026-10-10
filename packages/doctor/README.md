@@ -20,9 +20,7 @@
 > **Part of the [DEVIN ecosystem](https://github.com/Icaro0310/awesome-devin)**  
 > Track: Understand · Nature: product  
 > For: Operations, End users  
-> Interface: CLI  
-> Path: End users · step 3/3 — after `devin-devkit`  
-> Path: Operations · step 1/4 — before `devin-backup`
+> Interface: CLI
 <!-- DEVIN-ECO:END -->
 
 
