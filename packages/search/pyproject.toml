@@ -16,9 +16,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+mcp = ["mcp>=1.2"]
 
 [project.scripts]
 devin-search = "devin_search.cli:main"
+devin-search-mcp = "devin_search.mcp_server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
