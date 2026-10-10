@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Fix** — `devin-doctor` updates check fetches the DevKit manifest from its
+  monorepo path (`packages/devkit/src/devin_devkit/manifest.json`); the
+  pre-monorepo URL always 404d, silently degrading the check to "registry
+  unreachable".
 - **CI** — `auto-approve` now re-runs the shared gate on
   `pull_request_review[submitted]` and on the `Devin Review` commit
   `status` success, so clean analyses and late reviews no longer strand
