@@ -98,13 +98,28 @@ def test_no_build_sql_view_surface():
 
 
 def test_build_server_registers_graph_query():
+    """The published tool name must reach the MCP surface — a named
+    decorator or helper-based registration would otherwise pass the AST
+    pin while the skill calls a tool that does not exist."""
     pytest.importorskip("mcp")
+    import asyncio
+    import inspect
+
     server = __import__(
         "devin_graph.mcp_server", fromlist=["build_server"]
     ).build_server()
-    tools = getattr(server, "_tool_manager", None) or getattr(
-        server, "tools", None)
-    assert tools is not None
+    list_tools = getattr(server, "list_tools", None)
+    if callable(list_tools):
+        tools = list_tools()
+        if inspect.isawaitable(tools):
+            tools = asyncio.run(tools)
+        names = {getattr(t, "name", t) for t in tools}
+    else:  # tool-manager internals differ across SDK versions
+        manager = getattr(server, "_tool_manager", None) or getattr(
+            server, "tools", None)
+        assert manager is not None
+        names = set(getattr(manager, "_tools", manager))
+    assert "graph_query" in names
 
 
 def test_server_entrypoint_in_pyproject():
